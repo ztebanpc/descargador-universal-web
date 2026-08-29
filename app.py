@@ -50,7 +50,8 @@ for d in [AUDIO_DIR, PINTEREST_DIR, EXCEL_DIR, ORDENES_DIR]:
     os.makedirs(d, exist_ok=True)
 
 def sanitize_filename(name):
-    return re.sub(r'[^\w\-_.]', '_', name)
+    clean = re.sub(r'[^\w\-_.]', '_', name)
+    return clean[:40].strip('_') or f"proyecto_{int(time.time())}"
 
 # ==========================================
 # 🎵 AUDIO DOWNLOADER CON ANTICOPYRIGHT & 403 BYPASS
@@ -58,7 +59,7 @@ def sanitize_filename(name):
 def process_audio_download(query, quality="192", format_type="mp3", speed="1.0", target_folder=AUDIO_DIR):
     try:
         print(f"[Audio] Buscando: {query} | Calidad: {quality}kbps | Formato: {format_type} | Velocidad: {speed}x")
-        filename_base = f"audio_{int(time.time())}_{sanitize_filename(query[:25])}"
+        filename_base = f"audio_{int(time.time())}_{sanitize_filename(query[:20])}"
         out_template = os.path.join(target_folder, f"{filename_base}.%(ext)s")
         
         postprocessors = [{
@@ -172,7 +173,7 @@ def process_bulk_audio(links, speed="1.0"):
     print(f"[Excel] [OK] Todos los enlaces de Excel fueron procesados.")
 
 # ==========================================
-# 📌 PINTEREST SCRAPER & EXTRACTOR
+# 📌 PINTEREST SCRAPER & EXTRACTOR LIMPIO
 # ==========================================
 def extract_pinterest_raw_links(query, count=20):
     headers = {
@@ -182,8 +183,11 @@ def extract_pinterest_raw_links(query, count=20):
     videos = []
     images = []
     
-    if query.startswith('http') or 'pin.it' in query or 'pinterest.com' in query:
-        url = query if query.startswith('http') else 'https://' + query
+    clean_q = re.sub(r'(\b\d+\b|\bfotos?\b|\bde\b|\bpara\b|\bvertical\b|\bhorizontal\b|\bcuadrada\b)', '', query, flags=re.IGNORECASE).strip()
+    if not clean_q: clean_q = query.strip()
+    
+    if clean_q.startswith('http') or 'pin.it' in clean_q or 'pinterest.com' in clean_q:
+        url = clean_q if clean_q.startswith('http') else 'https://' + clean_q
         try:
             res = requests.get(url, headers=headers, allow_redirects=True, timeout=12)
             if res.status_code == 200:
@@ -203,7 +207,7 @@ def extract_pinterest_raw_links(query, count=20):
     else:
         try:
             range_req = max(40, count * 3)
-            cmd = [sys.executable, "-m", "gallery_dl", "--get-urls", "--range", f"1-{range_req}", f"https://www.pinterest.com/search/pins/?q={query.replace(' ', '+')}"]
+            cmd = [sys.executable, "-m", "gallery_dl", "--get-urls", "--range", f"1-{range_req}", f"https://www.pinterest.com/search/pins/?q={clean_q.replace(' ', '+')}"]
             out = subprocess.check_output(cmd, text=True, errors="ignore")
             for line in out.splitlines():
                 u = line.strip().replace('| ', '').strip()
@@ -222,7 +226,7 @@ def extract_pinterest_raw_links(query, count=20):
 
     return {"videos": videos, "images": images}
 
-def process_pinterest_download(query, format_type='any', media_type='both', pin_tab='individual', count=1, target_folder=PINTEREST_DIR):
+def process_pinterest_download(query, format_type='any', media_type='both', pin_tab='individual', count=1, target_folder=PINTEREST_DIR, create_zip=True):
     try:
         req_count = int(count) if (str(count).isdigit() and int(count) > 0) else 1
         print(f"[Pinterest] Procesando: {query} | Modo: {pin_tab} | Formato: {format_type} | Tipo: {media_type} | Cantidad: {req_count}")
@@ -339,13 +343,15 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
         for f in saved_files:
             shutil.copy(os.path.join(batch_folder, f), os.path.join(target_folder, f))
             
-        zip_filename = f"pinterest_descarga_{batch_id}.zip"
-        zip_path = os.path.join(target_folder, zip_filename)
-        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for fname in saved_files:
-                fpath = os.path.join(batch_folder, fname)
-                if os.path.exists(fpath):
-                    zipf.write(fpath, fname)
+        zip_filename = None
+        if create_zip:
+            zip_filename = f"pinterest_descarga_{batch_id}.zip"
+            zip_path = os.path.join(target_folder, zip_filename)
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for fname in saved_files:
+                    fpath = os.path.join(batch_folder, fname)
+                    if os.path.exists(fpath):
+                        zipf.write(fpath, fname)
                     
         return saved_files, zip_filename
     except Exception as e:
@@ -741,13 +747,15 @@ def ai_order_assistant():
 @app.route('/api/execute_custom_order', methods=['POST'])
 def execute_custom_order():
     data = request.get_json(silent=True) or request.form
-    project_name = sanitize_filename(data.get('project_name', f"proyecto_{int(time.time())}"))
+    raw_name = data.get('project_name', 'Ordenes_IA')
+    project_slug = sanitize_filename(raw_name)
     items = data.get('items', [])
     
     if not items:
         return jsonify({"status": "error", "message": "No hay elementos en la orden."}), 400
         
-    project_folder = os.path.join(ORDENES_DIR, project_name)
+    project_folder_name = f"Ordenes_IA_{project_slug}_{int(time.time())}"
+    project_folder = os.path.join(ORDENES_DIR, project_folder_name)
     os.makedirs(project_folder, exist_ok=True)
     downloaded_files = []
     
@@ -767,22 +775,26 @@ def execute_custom_order():
             vids = process_video_download(term, count=cnt, format_type=fmt, target_folder=project_folder)
             if vids: downloaded_files.extend(vids)
         else: # photo
-            pins, _ = process_pinterest_download(term, format_type=fmt, media_type='photos', pin_tab='tematica', count=cnt, target_folder=project_folder)
+            pins, _ = process_pinterest_download(term, format_type=fmt, media_type='photos', pin_tab='tematica', count=cnt, target_folder=project_folder, create_zip=False)
             if pins: downloaded_files.extend(pins)
             
-    zip_name = f"{project_name}_completo.zip"
-    zip_path = os.path.join(ORDENES_DIR, zip_name)
-    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for f in os.listdir(project_folder):
-            fp = os.path.join(project_folder, f)
-            if os.path.isfile(fp):
-                zipf.write(fp, f)
-                
+    # Empaquetar todo en un único ZIP maestro limpio sin archivos anidados
+    master_zip_name = f"Ordenes_IA_{project_slug}.zip"
+    master_zip_path = os.path.join(ORDENES_DIR, master_zip_name)
+    
+    with zipfile.ZipFile(master_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(project_folder):
+            for file in files:
+                if not file.endswith('.zip'): # Nunca meter zips adentro del zip maestro
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, project_folder)
+                    zipf.write(file_path, arcname)
+                    
     return jsonify({
         "status": "success",
         "message": f"Proyecto completado con {len(downloaded_files)} archivos descargados.",
         "total": len(downloaded_files),
-        "zip_url": f"/api/files/ordenes/{zip_name}",
+        "zip_url": f"/api/files/ordenes/{master_zip_name}",
         "files": [f"/api/files/ordenes/{f}" for f in downloaded_files]
     })
 
