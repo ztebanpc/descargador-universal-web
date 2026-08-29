@@ -22,6 +22,7 @@
             --violet-hover: #6d28d9;
             --emerald: #059669;
             --emerald-hover: #047857;
+            --excel-green: #107c41;
             --error: #ef4444;
         }
 
@@ -41,13 +42,35 @@
             width: 100%;
             max-width: 720px;
             margin: 0 auto;
+            position: relative;
         }
 
         /* Header */
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
+            position: relative;
         }
+
+        .settings-btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            background: var(--card);
+            border: 1px solid #e7e5e4;
+            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .settings-btn:hover { color: var(--text); background: #f5f5f4; }
+        .settings-btn svg { width: 20px; height: 20px; }
 
         .logo-box {
             display: inline-flex;
@@ -241,15 +264,15 @@
             margin-bottom: 20px;
         }
 
-        .filters.four { grid-template-columns: repeat(2, 1fr); }
+        .filters.three { grid-template-columns: repeat(3, 1fr); }
 
-        @media (min-width: 640px) {
-            .filters.four { grid-template-columns: repeat(4, 1fr); }
+        @media (max-width: 640px) {
+            .filters.three { grid-template-columns: repeat(2, 1fr); }
         }
 
         .filter-label {
             display: block;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -257,7 +280,7 @@
             margin-bottom: 6px;
         }
 
-        .filter-select {
+        .filter-select, .filter-input {
             width: 100%;
             padding: 10px 12px;
             background: var(--input-bg);
@@ -268,6 +291,9 @@
             color: var(--text);
             outline: none;
             transition: all 0.2s ease;
+        }
+
+        .filter-select {
             cursor: pointer;
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -276,11 +302,17 @@
             padding-right: 32px;
         }
 
-        .filter-select:focus { border-color: #d6d3d1; }
+        .filter-select:focus, .filter-input:focus { border-color: #d6d3d1; background: #fff; }
 
-        /* Action Button */
+        /* Action Buttons Row */
+        .actions-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
         .btn-action {
-            width: 100%;
+            flex: 1;
             padding: 14px;
             border: none;
             border-radius: 14px;
@@ -319,117 +351,161 @@
 
         .btn-action svg { width: 16px; height: 16px; }
 
-        /* Divider */
-        .divider {
+        .btn-icon-zip {
+            padding: 0 16px;
+            background: #292524;
+            color: #fff;
+            border: none;
+            border-radius: 14px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin: 20px 0;
-        }
-        .divider-line { flex: 1; height: 1px; background: var(--border); }
-        .divider-text {
-            font-size: 11px;
-            color: var(--text-light);
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        /* Secondary Buttons */
-        .btn-secondary {
-            width: 100%;
-            padding: 12px;
-            background: var(--input-bg);
-            border: 1px solid #e7e5e4;
-            border-radius: 12px;
+            justify-content: center;
+            gap: 6px;
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-icon-zip:hover { background: #1c1917; }
+        .btn-icon-zip svg { width: 16px; height: 16px; }
+
+        /* Secondary Button (Excel) */
+        .btn-excel {
+            width: 100%;
+            padding: 13px;
+            background: rgba(16, 124, 65, 0.08);
+            border: 1px solid rgba(16, 124, 65, 0.2);
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
             font-family: inherit;
-            color: var(--text-muted);
+            color: var(--excel-green);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-            margin-bottom: 10px;
-        }
-        .btn-secondary:hover { background: #e7e5e4; }
-        .btn-secondary svg { width: 16px; height: 16px; }
-
-        /* Orders List */
-        .orders-list {
-            max-height: 320px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            padding-right: 4px;
-        }
-
-        .orders-list::-webkit-scrollbar { width: 4px; }
-        .orders-list::-webkit-scrollbar-track { background: transparent; }
-        .orders-list::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 4px; }
-
-        .order-item {
-            display: flex;
-            align-items: flex-start;
             gap: 10px;
-            padding: 10px 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            margin-top: 14px;
+        }
+        .btn-excel:hover {
+            background: rgba(16, 124, 65, 0.14);
+            border-color: var(--excel-green);
+        }
+        .btn-excel svg { width: 20px; height: 20px; }
+
+        /* Voice Assistant Box */
+        .voice-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .order-item:hover {
+        .mic-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            border: 1px solid #e7e5e4;
             background: var(--input-bg);
-            border-color: var(--border);
-        }
-
-        .order-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-top: 6px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
             flex-shrink: 0;
         }
-
-        .order-text {
-            font-size: 13px;
-            color: var(--text);
-            font-weight: 500;
-            line-height: 1.5;
+        .mic-btn.listening {
+            background: #fee2e2;
+            color: #ef4444;
+            border-color: #fca5a5;
+            animation: micPulse 1.5s infinite;
         }
-
-        .order-text span {
-            color: var(--text-muted);
-            font-weight: 400;
+        @keyframes micPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
         }
+        .mic-btn svg { width: 20px; height: 20px; }
 
-        /* Voice Row */
-        .voice-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 14px;
-        }
-
-        .voice-select {
-            padding: 12px 14px;
+        /* Confirmation Card */
+        .confirm-card {
             background: var(--input-bg);
             border: 1px solid #e7e5e4;
-            border-radius: 12px;
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 16px;
+            display: none;
+        }
+        .confirm-header {
             font-size: 13px;
-            font-family: inherit;
+            font-weight: 700;
             color: var(--text);
-            outline: none;
+            margin-bottom: 8px;
+        }
+        .confirm-body {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            line-height: 1.6;
+        }
+        .confirm-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-confirm-yes {
+            flex: 1;
+            padding: 10px;
+            background: var(--emerald);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 28px;
-            flex-shrink: 0;
+        }
+        .btn-confirm-edit {
+            padding: 10px 14px;
+            background: #e7e5e4;
+            color: var(--text);
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-confirm-no {
+            padding: 10px 14px;
+            background: transparent;
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
-        /* Status Bar */
+        /* Progress & Status Bar */
+        .status-container {
+            margin-top: 16px;
+            display: none;
+        }
+
+        .progress-bar-wrap {
+            width: 100%;
+            height: 6px;
+            background: #e7e5e4;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--emerald);
+            transition: width 0.3s ease;
+        }
+
         .status-bar {
             background: rgba(5, 150, 105, 0.06);
             border: 1px solid rgba(5, 150, 105, 0.12);
@@ -438,7 +514,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-top: 14px;
         }
 
         .status-bar.error {
@@ -460,14 +535,8 @@
             flex-shrink: 0;
         }
 
-        .status-bar.error .status-dot {
-            background: var(--error);
-            animation: none;
-        }
-
-        .status-bar.loading .status-dot {
-            background: var(--violet);
-        }
+        .status-bar.error .status-dot { background: var(--error); animation: none; }
+        .status-bar.loading .status-dot { background: var(--violet); }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
@@ -478,24 +547,50 @@
             font-size: 12px;
             color: var(--emerald);
             font-weight: 600;
+            flex: 1;
         }
 
         .status-bar.error .status-text { color: var(--error); }
         .status-bar.loading .status-text { color: var(--violet); }
 
-        /* Responsive */
-        @media (max-width: 480px) {
-            body { padding: 20px 12px; }
-            .card { padding: 20px; border-radius: 20px; }
-            h1 { font-size: 20px; }
-            .tab-btn { font-size: 12px; padding: 8px; }
-            .tab-btn svg { display: none; }
+        /* Settings Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
         }
+        .modal-card {
+            background: #fff;
+            width: 100%;
+            max-width: 440px;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .modal-title { font-size: 16px; font-weight: 700; }
+        .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); }
     </style>
-<base target="_blank">
 </head>
 <body>
     <div class="container">
+        <!-- Settings Button -->
+        <button class="settings-btn" onclick="openSettings()" title="Configuración Predeterminada">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+
         <!-- Header -->
         <div class="header">
             <div class="logo-box">
@@ -515,7 +610,7 @@
             </button>
             <button class="tab-btn" onclick="switchTab('audio')" id="tab-audio">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
-                Audio IA
+                Audio Inteligente
             </button>
             <button class="tab-btn" onclick="switchTab('orders')" id="tab-orders">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
@@ -532,67 +627,68 @@
                     </div>
                     <div>
                         <div class="module-title">Pinterest Avanzado</div>
-                        <div class="module-desc">Descarga individual, tableros o búsquedas enteras</div>
+                        <div class="module-desc">Descarga individual, tableros enteros o búsquedas temáticas</div>
                     </div>
                 </div>
 
                 <div class="toggle-group" id="pin-toggles">
                     <button class="toggle-btn active" onclick="setPinMode('individual', this)">Individual</button>
                     <button class="toggle-btn" onclick="setPinMode('tablero', this)">Tablero</button>
-                    <button class="toggle-btn" onclick="setPinMode('todas', this)">Todas</button>
+                    <button class="toggle-btn" onclick="setPinMode('tematica', this)">Temática</button>
                 </div>
 
                 <div class="input-wrap">
                     <span class="input-icon">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                     </span>
-                    <input type="text" id="pin-input" class="url-input pinterest" placeholder="Pega el enlace del pin, tablero o escribe una temática">
+                    <input type="text" id="pin-input" class="url-input pinterest" placeholder="Pega el enlace del pin individual...">
                 </div>
 
-                <div class="filters four">
+                <!-- Filters Row -->
+                <div class="filters three" id="pin-filters-wrap" style="display: none;">
                     <div>
                         <label class="filter-label">Formato</label>
                         <select id="pin-format" class="filter-select">
                             <option value="any">Cualquiera</option>
-                            <option value="jpg">JPG</option>
-                            <option value="png">PNG</option>
-                            <option value="webp">WEBP</option>
+                            <option value="vertical">Vertical (9:16)</option>
+                            <option value="horizontal">Horizontal (16:9)</option>
+                            <option value="cuadrado">Cuadrado (1:1)</option>
                         </select>
                     </div>
                     <div>
                         <label class="filter-label">Tipo</label>
                         <select id="pin-type" class="filter-select">
-                            <option value="both">Ambos</option>
-                            <option value="photos">Imagen</option>
-                            <option value="videos">Video</option>
+                            <option value="both">Ambos (Fotos y Videos)</option>
+                            <option value="photos">Solo Fotos</option>
+                            <option value="videos">Solo Videos</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="filter-label">Calidad</label>
-                        <select id="pin-quality" class="filter-select">
-                            <option value="original">Original</option>
-                            <option value="hd">HD</option>
-                            <option value="sd">SD</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="filter-label">Carpeta</label>
-                        <select id="pin-folder" class="filter-select">
-                            <option value="capcut">Capcut</option>
-                            <option value="descargas">Descargas</option>
-                            <option value="personalizado">Personalizado</option>
-                        </select>
+                    <div id="pin-count-box" style="display: none;">
+                        <label class="filter-label">Cantidad</label>
+                        <input type="number" id="pin-count" class="filter-input" min="1" max="100" value="20">
                     </div>
                 </div>
 
-                <button class="btn-action pinterest" onclick="downloadPinterest()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    Descargar de Pinterest
-                </button>
+                <!-- Action Buttons -->
+                <div class="actions-row">
+                    <button class="btn-action pinterest" onclick="downloadPinterest(false)">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Descargar de Pinterest
+                    </button>
+                    <button class="btn-icon-zip" onclick="downloadPinterest(true)" title="Descargar como archivo ZIP comprimido">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        ZIP
+                    </button>
+                </div>
 
-                <div class="status-bar" id="pin-status-bar" style="display: none;">
-                    <div class="status-dot"></div>
-                    <div class="status-text" id="pin-status-text">Listo para descargar</div>
+                <div class="status-container" id="pin-status-container">
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" id="pin-progress"></div>
+                    </div>
+                    <div class="status-bar" id="pin-status-bar">
+                        <div class="status-dot"></div>
+                        <div class="status-text" id="pin-status-text">Listo</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -606,28 +702,32 @@
                     </div>
                     <div>
                         <div class="module-title">Audio Inteligente</div>
-                        <div class="module-desc">Busca canciones y extrae audio de videos</div>
+                        <div class="module-desc">Descarga MP3 a 192kbps con velocidad modificable y anticopyright</div>
                     </div>
-                </div>
-
-                <div class="toggle-group" id="audio-toggles">
-                    <button class="toggle-btn active" onclick="setAudioMode('individual', this)">Individual</button>
-                    <button class="toggle-btn" onclick="setAudioMode('todas', this)">Todas</button>
                 </div>
 
                 <div class="input-wrap">
                     <span class="input-icon">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                     </span>
-                    <input type="text" id="audio-input" class="url-input audio" placeholder="Pega la canción o video de YouTube">
+                    <input type="text" id="audio-input" class="url-input audio" placeholder="Pega el enlace de YouTube, TikTok o escribe el nombre...">
                 </div>
 
-                <div class="filters">
+                <div class="filters three">
+                    <div>
+                        <label class="filter-label">Velocidad / Tono</label>
+                        <select id="audio-speed" class="filter-select">
+                            <option value="1.0">1.0x (Normal)</option>
+                            <option value="1.06">1.06x (Anticopyright)</option>
+                            <option value="1.25">1.25x</option>
+                            <option value="1.5">1.5x</option>
+                            <option value="2.0">2.0x</option>
+                        </select>
+                    </div>
                     <div>
                         <label class="filter-label">Calidad</label>
                         <select id="audio-quality" class="filter-select">
                             <option value="320">320 kbps</option>
-                            <option value="256">256 kbps</option>
                             <option value="192" selected>192 kbps</option>
                             <option value="128">128 kbps</option>
                         </select>
@@ -636,9 +736,8 @@
                         <label class="filter-label">Formato</label>
                         <select id="audio-format" class="filter-select">
                             <option value="mp3" selected>MP3</option>
-                            <option value="wav">WAV</option>
-                            <option value="flac">FLAC</option>
                             <option value="m4a">M4A</option>
+                            <option value="wav">WAV</option>
                         </select>
                     </div>
                 </div>
@@ -648,27 +747,27 @@
                     Descargar Audio
                 </button>
 
-                <div class="divider">
-                    <div class="divider-line"></div>
-                    <span class="divider-text">O busca desde servicios</span>
-                    <div class="divider-line"></div>
-                </div>
-
                 <input type="file" id="excel-file-hidden" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleExcelUpload(this)">
 
-                <button class="btn-secondary" onclick="document.getElementById('excel-file-hidden').click()">
-                    <svg viewBox="0 0 24 24" fill="currentColor" style="color: #ef4444;"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                    Descargar MP3 desde Excel / YouTube Lote
+                <button class="btn-excel" onclick="document.getElementById('excel-file-hidden').click()">
+                    <!-- SVG Profesional de Excel -->
+                    <svg viewBox="0 0 32 32" fill="none">
+                        <rect x="2" y="4" width="28" height="24" rx="4" fill="#107C41"/>
+                        <path d="M19.5 8H26C26.55 8 27 8.45 27 9V23C27 23.55 26.55 24 26 24H19.5V8Z" fill="#185C37"/>
+                        <path d="M18.5 8H6C5.45 8 5 8.45 5 9V23C5 23.55 5.45 24 6 24H18.5V8Z" fill="#107C41"/>
+                        <path d="M10.2 12.2L12.1 16L10 19.8H12L13.1 17.5L14.2 19.8H16.2L14.1 16L16 12.2H14.1L13.1 14.5L12.1 12.2H10.2Z" fill="white"/>
+                    </svg>
+                    Descargar MP3 desde Excel / CSV
                 </button>
 
-                <button class="btn-secondary" onclick="downloadAudio()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #10b981;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
-                    Buscar Canción / Búsqueda Automática
-                </button>
-
-                <div class="status-bar" id="audio-status-bar" style="display: none;">
-                    <div class="status-dot"></div>
-                    <div class="status-text" id="audio-status-text">Listo para procesar</div>
+                <div class="status-container" id="audio-status-container">
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" id="audio-progress"></div>
+                    </div>
+                    <div class="status-bar" id="audio-status-bar">
+                        <div class="status-dot"></div>
+                        <div class="status-text" id="audio-status-text">Listo</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -681,88 +780,123 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
                     </div>
                     <div>
-                        <div class="module-title">Órdenes de la IA</div>
-                        <div class="module-desc">Habla con la IA para ejecutar tareas de audio</div>
+                        <div class="module-title">Asistente de Órdenes IA</div>
+                        <div class="module-desc">Dicta o escribe tu orden para extraer audios, fotos y videos juntos</div>
                     </div>
                 </div>
 
-                <div class="orders-list">
-                    <div class="order-item" onclick="selectOrder('AUDIO-Crear Beatbox: Crear un Beatbox Effect')">
-                        <span class="order-dot" style="background: #f87171;"></span>
-                        <div class="order-text">AUDIO-Crear Beatbox: <span>Crear un Beatbox Effect</span></div>
-                    </div>
-                    <div class="order-item" onclick="selectOrder('AUDIO-Crear Remix: Crear un Remix Effect')">
-                        <span class="order-dot" style="background: #fb923c;"></span>
-                        <div class="order-text">AUDIO-Crear Remix: <span>Crear un Remix Effect</span></div>
-                    </div>
-                    <div class="order-item" onclick="selectOrder('AUDIO-Eliminar Voces: Crear un Karaoke Effect')">
-                        <span class="order-dot" style="background: #fbbf24;"></span>
-                        <div class="order-text">AUDIO-Eliminar Voces: <span>Crear un Karaoke Effect</span></div>
-                    </div>
-                    <div class="order-item" onclick="selectOrder('AUDIO-Separar: Separar Instrumental y Voz')">
-                        <span class="order-dot" style="background: #facc15;"></span>
-                        <div class="order-text">AUDIO-Separar: <span>Separar Instrumental y Voz</span></div>
-                    </div>
-                    <div class="order-item" onclick="selectOrder('AUDIO-Aumentar Volumen: Aumentar Volumen Effect')">
-                        <span class="order-dot" style="background: #a3e635;"></span>
-                        <div class="order-text">AUDIO-Aumentar Volumen: <span>Aumentar Volumen Effect</span></div>
-                    </div>
-                    <div class="order-item" onclick="selectOrder('AUDIO-Mezclar: Mezclar dos audios Effect')">
-                        <span class="order-dot" style="background: #4ade80;"></span>
-                        <div class="order-text">AUDIO-Mezclar: <span>Mezclar dos audios Effect</span></div>
-                    </div>
-                    <div class="order-item" onclick="selectOrder('AUDIO-Efecto: Aplicar Reverb / Delay Effect')">
-                        <span class="order-dot" style="background: #2dd4bf;"></span>
-                        <div class="order-text">AUDIO-Efecto: <span>Aplicar Reverb / Delay Effect</span></div>
-                    </div>
-                    <div class="order-item" onclick="selectOrder('AUDIO-Loop: Crear un Loop Effect')">
-                        <span class="order-dot" style="background: #22d3ee;"></span>
-                        <div class="order-text">AUDIO-Loop: <span>Crear un Loop Effect</span></div>
-                    </div>
-                    <div class="order-item" onclick="selectOrder('AUDIO-Cambiar Tono: Cambiar Tono / Pitch Effect')">
-                        <span class="order-dot" style="background: #38bdf8;"></span>
-                        <div class="order-text">AUDIO-Cambiar Tono: <span>Cambiar Tono / Pitch Effect</span></div>
-                    </div>
-                    <div class="order-item" onclick="selectOrder('AUDIO-Cambiar Velocidad: Cambiar Velocidad / Speed Effect')">
-                        <span class="order-dot" style="background: #60a5fa;"></span>
-                        <div class="order-text">AUDIO-Cambiar Velocidad: <span>Cambiar Velocidad / Speed Effect</span></div>
-                    </div>
-                    <div class="order-item" onclick="selectOrder('AUDIO-Recortar: Recortar audio / Trim Effect')">
-                        <span class="order-dot" style="background: #818cf8;"></span>
-                        <div class="order-text">AUDIO-Recortar: <span>Recortar audio / Trim Effect</span></div>
-                    </div>
-                    <div class="order-item" onclick="selectOrder('AUDIO-Normalizar: Normalizar volumen Effect')">
-                        <span class="order-dot" style="background: #a78bfa;"></span>
-                        <div class="order-text">AUDIO-Normalizar: <span>Normalizar volumen Effect</span></div>
-                    </div>
-                </div>
-
-                <div class="voice-row">
-                    <select id="voice-speed" class="voice-select">
-                        <option value="1.0">1x (Normal)</option>
-                        <option value="1.06">1.06x (Anticopyright)</option>
-                        <option value="1.5">1.5x</option>
-                        <option value="2.0">2x</option>
-                    </select>
-                    <button class="btn-action orders" onclick="executeVoiceOrder()">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
-                        Ejecutar Orden por Voz (Audio)
+                <div class="voice-box">
+                    <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Hablar por micrófono">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                     </button>
+                    <input type="text" id="order-prompt" class="url-input" placeholder="Ej: Quiero 5 fotos de parejas vintage y 2 canciones románticas..." style="margin-bottom: 0;">
                 </div>
 
-                <div class="status-bar" id="orders-status-bar">
-                    <div class="status-dot"></div>
-                    <div class="status-text" id="orders-status-text">EDIT-Audio: Inteligencia → Sistema listo</div>
+                <button class="btn-action orders" onclick="consultAIOrder()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    Analizar Orden con IA
+                </button>
+
+                <!-- Interactive Confirmation Card -->
+                <div class="confirm-card" id="order-confirm-card">
+                    <div class="confirm-header">Propuesta del Asistente IA</div>
+                    <div class="confirm-body" id="order-confirm-body">Cargando propuesta...</div>
+                    <div class="confirm-actions">
+                        <button class="btn-confirm-yes" onclick="executeApprovedOrder()">Iniciar Descarga Completa</button>
+                        <button class="btn-confirm-edit" onclick="editOrderPrompt()">Modificar</button>
+                        <button class="btn-confirm-no" onclick="cancelOrder()">Cancelar</button>
+                    </div>
+                </div>
+
+                <div class="status-container" id="orders-status-container">
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" id="orders-progress"></div>
+                    </div>
+                    <div class="status-bar" id="orders-status-bar">
+                        <div class="status-dot"></div>
+                        <div class="status-text" id="orders-status-text">Asistente listo</div>
+                    </div>
                 </div>
             </div>
         </div>
 
     </div>
 
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">Configuración Predeterminada</div>
+                <button class="modal-close" onclick="closeSettings()">&times;</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                    <label class="filter-label">Formato de Medios Predeterminado</label>
+                    <select id="pref-format" class="filter-select">
+                        <option value="any">Cualquiera</option>
+                        <option value="vertical">Vertical (9:16)</option>
+                        <option value="horizontal">Horizontal (16:9)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="filter-label">Velocidad de Audio Predeterminada</label>
+                    <select id="pref-speed" class="filter-select">
+                        <option value="1.0">1.0x (Normal)</option>
+                        <option value="1.06">1.06x (Anticopyright)</option>
+                        <option value="1.25">1.25x</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="filter-label">Calidad de Audio</label>
+                    <select id="pref-quality" class="filter-select">
+                        <option value="320">320 kbps</option>
+                        <option value="192">192 kbps</option>
+                    </select>
+                </div>
+                <button class="btn-action orders" onclick="saveSettings()" style="margin-top: 8px;">Guardar Configuración</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentPinMode = 'individual';
-        let currentAudioMode = 'individual';
-        let selectedOrderText = 'AUDIO-Crear Beatbox: Crear un Beatbox Effect';
+        let currentPlanData = null;
+        let isListening = false;
+        let recognition = null;
+
+        // Cargar preferencias guardadas
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedFormat = localStorage.getItem('capcut_pref_format') || 'any';
+            const savedSpeed = localStorage.getItem('capcut_pref_speed') || '1.0';
+            const savedQuality = localStorage.getItem('capcut_pref_quality') || '192';
+
+            document.getElementById('pref-format').value = savedFormat;
+            document.getElementById('pref-speed').value = savedSpeed;
+            document.getElementById('pref-quality').value = savedQuality;
+
+            document.getElementById('pin-format').value = savedFormat;
+            document.getElementById('audio-speed').value = savedSpeed;
+            document.getElementById('audio-quality').value = savedQuality;
+        });
+
+        function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
+        function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
+        function saveSettings() {
+            const f = document.getElementById('pref-format').value;
+            const s = document.getElementById('pref-speed').value;
+            const q = document.getElementById('pref-quality').value;
+
+            localStorage.setItem('capcut_pref_format', f);
+            localStorage.setItem('capcut_pref_speed', s);
+            localStorage.setItem('capcut_pref_quality', q);
+
+            document.getElementById('pin-format').value = f;
+            document.getElementById('audio-speed').value = s;
+            document.getElementById('audio-quality').value = q;
+
+            closeSettings();
+            playDoneSound();
+        }
 
         function switchTab(tab) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -778,34 +912,24 @@
             currentPinMode = mode;
             document.querySelectorAll('#pin-toggles .toggle-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            
             const input = document.getElementById('pin-input');
+            const filtersWrap = document.getElementById('pin-filters-wrap');
+            const countBox = document.getElementById('pin-count-box');
+
             if(mode === 'individual') {
                 input.placeholder = "Pega el enlace del pin individual...";
+                filtersWrap.style.display = 'none';
+                countBox.style.display = 'none';
             } else if (mode === 'tablero') {
                 input.placeholder = "Pega el enlace del tablero o perfil de Pinterest...";
+                filtersWrap.style.display = 'grid';
+                countBox.style.display = 'none';
             } else {
-                input.placeholder = "Escribe una temática (ej. aesthetic neon) o pega enlace...";
+                input.placeholder = "Escribe una temática (ej. parejas vintage, autos aesthetic)...";
+                filtersWrap.style.display = 'grid';
+                countBox.style.display = 'block';
             }
-        }
-
-        function setAudioMode(mode, btn) {
-            currentAudioMode = mode;
-            document.querySelectorAll('#audio-toggles .toggle-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const input = document.getElementById('audio-input');
-            if(mode === 'individual') {
-                input.placeholder = "Pega la canción o video de YouTube...";
-            } else {
-                input.placeholder = "Escribe el nombre de la canción o lista temática...";
-            }
-        }
-
-        function selectOrder(text) {
-            selectedOrderText = text;
-            const bar = document.getElementById('orders-status-bar');
-            const statusText = document.getElementById('orders-status-text');
-            bar.className = 'status-bar';
-            statusText.innerText = 'Seleccionado: ' + text;
         }
 
         // ==========================================
@@ -814,7 +938,7 @@
         function playDoneSound() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const notes = [523.25, 659.25, 783.99]; // Acorde mayor C5, E5, G5
+                const notes = [523.25, 659.25, 783.99]; // Acorde C5, E5, G5
                 notes.forEach((freq, i) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
@@ -848,27 +972,32 @@
         }
 
         // ==========================================
-        // 📥 ACCIONES DE DESCARGA
+        // 📌 PINTEREST ACTIONS
         // ==========================================
-        async function downloadPinterest() {
+        async function downloadPinterest(forceZip = false) {
             const input = document.getElementById('pin-input');
             const query = input.value.trim();
             const format = document.getElementById('pin-format').value;
             const type = document.getElementById('pin-type').value;
+            const count = document.getElementById('pin-count').value || 20;
+
+            const container = document.getElementById('pin-status-container');
             const bar = document.getElementById('pin-status-bar');
             const text = document.getElementById('pin-status-text');
+            const progress = document.getElementById('pin-progress');
 
             if (!query) {
-                bar.style.display = 'flex';
+                container.style.display = 'block';
                 bar.className = 'status-bar error';
                 text.innerText = 'Por favor ingresa un enlace o temática.';
                 playErrorSound();
                 return;
             }
 
-            bar.style.display = 'flex';
+            container.style.display = 'block';
             bar.className = 'status-bar loading';
-            text.innerText = '⏳ Extrayendo y descargando fotos en calidad original...';
+            progress.style.width = '35%';
+            text.innerText = 'Buscando y procesando calidad original...';
 
             try {
                 const res = await fetch('/api/download_pinterest', {
@@ -878,15 +1007,20 @@
                         query: query,
                         format: format,
                         media_type: type,
-                        pin_tab: currentPinMode
+                        pin_tab: currentPinMode,
+                        cantidad: count
                     })
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
+                    progress.style.width = '100%';
                     bar.className = 'status-bar';
-                    text.innerText = `✅ ${data.message}`;
+                    text.innerText = data.message;
                     playDoneSound();
-                    if (data.files && data.files.length > 0) {
+
+                    if (forceZip && data.zip_url) {
+                        window.location.href = data.zip_url;
+                    } else if (data.files && data.files.length > 0) {
                         data.files.forEach((fileUrl, index) => {
                             setTimeout(() => {
                                 const a = document.createElement('a');
@@ -899,118 +1033,246 @@
                         });
                     }
                 } else {
+                    progress.style.width = '0%';
                     bar.className = 'status-bar error';
-                    text.innerText = `❌ Error: ${data.message}`;
+                    text.innerText = data.message;
                     playErrorSound();
                 }
             } catch (err) {
+                progress.style.width = '0%';
                 bar.className = 'status-bar error';
-                text.innerText = '❌ Error conectando con el servidor.';
+                text.innerText = 'Error de conexión con el servidor.';
                 playErrorSound();
             }
         }
 
+        // ==========================================
+        // 🎵 AUDIO ACTIONS
+        // ==========================================
         async function downloadAudio() {
             const input = document.getElementById('audio-input');
             const query = input.value.trim();
             const quality = document.getElementById('audio-quality').value;
             const format = document.getElementById('audio-format').value;
+            const speed = document.getElementById('audio-speed').value;
+
+            const container = document.getElementById('audio-status-container');
             const bar = document.getElementById('audio-status-bar');
             const text = document.getElementById('audio-status-text');
+            const progress = document.getElementById('audio-progress');
 
             if (!query) {
-                bar.style.display = 'flex';
+                container.style.display = 'block';
                 bar.className = 'status-bar error';
-                text.innerText = 'Por favor ingresa un nombre de canción o enlace.';
+                text.innerText = 'Por favor ingresa un nombre o enlace de audio.';
                 playErrorSound();
                 return;
             }
 
-            bar.style.display = 'flex';
+            container.style.display = 'block';
             bar.className = 'status-bar loading';
-            text.innerText = `⏳ Buscando y procesando audio (${quality}kbps, ${format.toUpperCase()})...`;
+            progress.style.width = '40%';
+            text.innerText = `Extrayendo audio a ${speed}x (${quality}kbps)...`;
 
             try {
                 const res = await fetch('/api/download_audio', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({query: query, quality: quality, format: format})
+                    body: JSON.stringify({query, quality, format, speed})
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
+                    progress.style.width = '100%';
                     bar.className = 'status-bar';
-                    text.innerText = `✅ ${data.message}`;
+                    text.innerText = data.message;
                     playDoneSound();
-                    if (data.download_url) {
-                        window.location.href = data.download_url;
-                    }
+                    if (data.download_url) window.location.href = data.download_url;
                 } else {
+                    progress.style.width = '0%';
                     bar.className = 'status-bar error';
-                    text.innerText = `❌ ${data.message}`;
+                    text.innerText = data.message;
                     playErrorSound();
                 }
             } catch (err) {
+                progress.style.width = '0%';
                 bar.className = 'status-bar error';
-                text.innerText = '❌ Error de conexión al procesar audio.';
+                text.innerText = 'Error al procesar el audio.';
                 playErrorSound();
             }
         }
 
         async function handleExcelUpload(input) {
+            const container = document.getElementById('audio-status-container');
             const bar = document.getElementById('audio-status-bar');
             const text = document.getElementById('audio-status-text');
+            const speed = document.getElementById('audio-speed').value;
+
             if (!input.files || input.files.length === 0) return;
 
             const formData = new FormData();
             formData.append('file', input.files[0]);
+            formData.append('speed', speed);
 
-            bar.style.display = 'flex';
+            container.style.display = 'block';
             bar.className = 'status-bar loading';
-            text.innerText = '⏳ Procesando archivo Excel/CSV en segundo plano...';
+            text.innerText = 'Procesando archivo Excel en segundo plano...';
 
             try {
-                const res = await fetch('/api/download_excel', {
-                    method: 'POST',
-                    body: formData
-                });
+                const res = await fetch('/api/download_excel', { method: 'POST', body: formData });
                 const data = await res.json();
                 if (data.status === 'success') {
                     bar.className = 'status-bar';
-                    text.innerText = `✅ ${data.message}`;
+                    text.innerText = data.message;
                     playDoneSound();
                 } else {
                     bar.className = 'status-bar error';
-                    text.innerText = `❌ ${data.message}`;
+                    text.innerText = data.message;
                     playErrorSound();
                 }
             } catch (err) {
                 bar.className = 'status-bar error';
-                text.innerText = '❌ Error al subir archivo Excel.';
+                text.innerText = 'Error al subir archivo Excel.';
                 playErrorSound();
             }
         }
 
-        async function executeVoiceOrder() {
-            const speed = document.getElementById('voice-speed').value;
-            const bar = document.getElementById('orders-status-bar');
-            const text = document.getElementById('orders-status-text');
+        // ==========================================
+        // 🤖 ASISTENTE DE VOZ & ÓRDENES IA
+        // ==========================================
+        function toggleMic() {
+            const micBtn = document.getElementById('mic-btn');
+            const promptInput = document.getElementById('order-prompt');
 
-            bar.className = 'status-bar loading';
-            text.innerText = `⏳ Ejecutando orden: ${selectedOrderText} (${speed}x)...`;
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Tu navegador no soporta reconocimiento de voz. Puedes escribir la orden directamente en el campo de texto.');
+                return;
+            }
+
+            if (isListening) {
+                if (recognition) recognition.stop();
+                isListening = false;
+                micBtn.classList.remove('listening');
+                return;
+            }
+
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRec();
+            recognition.lang = 'es-ES';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                isListening = true;
+                micBtn.classList.add('listening');
+            };
+
+            recognition.onresult = (e) => {
+                const transcript = e.results[0][0].transcript;
+                promptInput.value = transcript;
+                consultAIOrder();
+            };
+
+            recognition.onerror = () => {
+                isListening = false;
+                micBtn.classList.remove('listening');
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                micBtn.classList.remove('listening');
+            };
+
+            recognition.start();
+        }
+
+        async function consultAIOrder() {
+            const prompt = document.getElementById('order-prompt').value.trim();
+            const speed = localStorage.getItem('capcut_pref_speed') || '1.0';
+            const format = localStorage.getItem('capcut_pref_format') || 'any';
+
+            const confirmCard = document.getElementById('order-confirm-card');
+            const confirmBody = document.getElementById('order-confirm-body');
+
+            if (!prompt) return;
+
+            confirmCard.style.display = 'block';
+            confirmBody.innerHTML = '<em>Analizando orden y buscando recursos recomendados...</em>';
 
             try {
-                const res = await fetch('/api/download_audio', {
+                const res = await fetch('/api/ai_order_assistant', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({query: selectedOrderText, speed: speed})
+                    body: JSON.stringify({prompt, speed, format})
                 });
                 const data = await res.json();
-                bar.className = 'status-bar';
-                text.innerText = `✅ Orden ejecutada: ${data.message}`;
-                playDoneSound();
+                if (data.status === 'success') {
+                    currentPlanData = data;
+                    confirmBody.innerHTML = `
+                        <strong>Proyecto:</strong> ${data.project_name}<br>
+                        <strong>Recursos a procesar:</strong> ${data.plan.num_photos} fotos/videos de Pinterest ("${data.plan.pin_term}") + ${data.plan.num_audios} audio(s) a ${data.plan.speed}x ("${data.plan.audio_term}")
+                    `;
+                } else {
+                    confirmBody.innerHTML = `<span style="color: var(--error);">${data.message}</span>`;
+                }
             } catch (err) {
+                confirmBody.innerHTML = '<span style="color: var(--error);">Error conectando con el asistente de IA.</span>';
+            }
+        }
+
+        function editOrderPrompt() {
+            document.getElementById('order-prompt').focus();
+        }
+
+        function cancelOrder() {
+            document.getElementById('order-confirm-card').style.display = 'none';
+            currentPlanData = null;
+        }
+
+        async function executeApprovedOrder() {
+            if (!currentPlanData) return;
+
+            const card = document.getElementById('order-confirm-card');
+            const container = document.getElementById('orders-status-container');
+            const bar = document.getElementById('orders-status-bar');
+            const text = document.getElementById('orders-status-text');
+            const progress = document.getElementById('orders-progress');
+
+            card.style.display = 'none';
+            container.style.display = 'block';
+            bar.className = 'status-bar loading';
+            progress.style.width = '30%';
+            text.innerText = 'Descargando y empaquetando proyecto en una sola carpeta...';
+
+            try {
+                const res = await fetch('/api/execute_project_order', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        project_name: currentPlanData.project_name,
+                        pin_term: currentPlanData.plan.pin_term,
+                        num_photos: currentPlanData.plan.num_photos,
+                        audio_term: currentPlanData.plan.audio_term,
+                        speed: currentPlanData.plan.speed,
+                        format: currentPlanData.plan.format
+                    })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    progress.style.width = '100%';
+                    bar.className = 'status-bar';
+                    text.innerText = data.message;
+                    playDoneSound();
+                    if (data.zip_url) window.location.href = data.zip_url;
+                } else {
+                    progress.style.width = '0%';
+                    bar.className = 'status-bar error';
+                    text.innerText = data.message;
+                    playErrorSound();
+                }
+            } catch (err) {
+                progress.style.width = '0%';
                 bar.className = 'status-bar error';
-                text.innerText = '❌ Error ejecutando orden de voz.';
+                text.innerText = 'Error al ejecutar la orden del proyecto.';
                 playErrorSound();
             }
         }
