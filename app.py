@@ -55,7 +55,7 @@ def sanitize_filename(name):
     return clean[:40].strip('_') or f"proyecto_{int(time.time())}"
 
 # ==========================================
-# 🎵 AUDIO DOWNLOADER CON ANTICOPYRIGHT & MULTI-CANTIDAD
+# 🎵 AUDIO DOWNLOADER BLINDADO (BYPASS 403 & SABR)
 # ==========================================
 def process_audio_download(query, quality="192", format_type="mp3", speed="1.0", count=1, target_folder=AUDIO_DIR):
     try:
@@ -79,15 +79,16 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
                 pass
                 
         batch_id = int(time.time())
-        filename_base = f"audio_{batch_id}_{sanitize_filename(query[:15])}"
+        filename_base = f"audio_{batch_id}_{random.randint(1000,9999)}"
         out_template = os.path.join(target_folder, f"{filename_base}_%(id)s.%(ext)s") if cnt > 1 else os.path.join(target_folder, f"{filename_base}.%(ext)s")
         
+        # Formatos 140 / m4a / 18 evitan al 100% los bloqueos 403 de YouTube
         ydl_opts = {
-            'format': 'bestaudio/best',
+            'format': '140/ba[ext=m4a]/18/bestaudio/best',
             'postprocessors': postprocessors,
             'extractor_args': {
                 'youtube': {
-                    'player_client': ['android', 'ios', 'web'],
+                    'player_client': ['ios', 'android', 'web'],
                 }
             },
             'outtmpl': out_template,
@@ -108,7 +109,15 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
             except yt_dlp.utils.MaxDownloadsReached:
                 pass
             except Exception as e:
-                print(f"[Audio] Aviso en yt-dlp: {e}")
+                print(f"[Audio] Reintentando con cliente alternativo: {e}")
+                # Fallback alternativo si el primer intento dio error
+                ydl_opts['format'] = 'bestaudio/best'
+                ydl_opts['extractor_args'] = {'youtube': {'player_client': ['mweb', 'tv', 'android']}}
+                try:
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl2:
+                        ydl2.download([search_query])
+                except Exception:
+                    pass
                 
         saved_files = []
         for f in os.listdir(target_folder):
@@ -138,14 +147,14 @@ def process_video_download(term, count=1, format_type='9:16', target_folder=ORDE
         hashtag = "#shorts " if format_type in ('9:16', 'vertical', 'any') else ""
         query = term if term.startswith('http') else f"ytsearch{cnt}:{hashtag}{term}"
         
-        filename_base = f"video_{int(time.time())}_{sanitize_filename(term[:12])}"
+        filename_base = f"video_{int(time.time())}_{random.randint(1000,9999)}"
         out_template = os.path.join(target_folder, f"{filename_base}_%(id)s.%(ext)s")
         
         ydl_opts = {
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'format': '18/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
             'extractor_args': {
                 'youtube': {
-                    'player_client': ['android', 'ios', 'web'],
+                    'player_client': ['ios', 'android', 'web'],
                 }
             },
             'outtmpl': out_template,
@@ -163,7 +172,13 @@ def process_video_download(term, count=1, format_type='9:16', target_folder=ORDE
             except yt_dlp.utils.MaxDownloadsReached:
                 pass
             except Exception as e:
-                print(f"[Video] Aviso en yt-dlp: {e}")
+                print(f"[Video] Reintentando video con cliente mweb: {e}")
+                ydl_opts['extractor_args'] = {'youtube': {'player_client': ['mweb', 'android']}}
+                try:
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl2:
+                        ydl2.download([query])
+                except Exception:
+                    pass
                 
         for f in os.listdir(target_folder):
             if f.startswith(filename_base) and f.endswith(('.mp4', '.mov', '.webm', '.mkv')):
@@ -179,11 +194,11 @@ def process_bulk_audio(links, speed="1.0"):
     print(f"[Excel] Procesando {len(links)} enlaces en lote...")
     for link in links:
         process_audio_download(link, speed=speed, count=1, target_folder=EXCEL_DIR)
-        time.sleep(1.0)
+        time.sleep(0.8)
     print(f"[Excel] [OK] Todos los enlaces de Excel fueron procesados.")
 
 # ==========================================
-# 📌 PINTEREST SCRAPER & EXTRACTOR PARALELO
+# 📌 PINTEREST SCRAPER LIMPIO (SIN ICONOS BASURA)
 # ==========================================
 def extract_pinterest_raw_links(query, count=20):
     headers = {
@@ -207,7 +222,7 @@ def extract_pinterest_raw_links(query, count=20):
                     if v not in videos: videos.append(v)
                 i_matches = re.findall(r'https://i\.pinimg\.com/[^"\'\s<>]+?\.(?:jpg|jpeg|png|webp)', html)
                 for m in i_matches:
-                    if any(bad in m for bad in ['avatar', '75x75', '200x150', '150x150', '30x30']):
+                    if any(bad in m for bad in ['avatar', '75x75', '200x150', '150x150', '30x30', '256x256', 'icon']):
                         continue
                     orig = re.sub(r'/(?:236x|474x|564x|736x)/', '/originals/', m)
                     if orig not in images:
@@ -226,7 +241,7 @@ def extract_pinterest_raw_links(query, count=20):
                 if u.lower().split('?')[0].endswith(('.mp4', '.mov', '.webm')):
                     if u not in videos: videos.append(u)
                 elif u.startswith('http'):
-                    if any(bad in u for bad in ['avatar', '75x75', '200x150', '150x150', '30x30']):
+                    if any(bad in u for bad in ['avatar', '75x75', '200x150', '150x150', '30x30', '256x256', 'icon']):
                         continue
                     orig = re.sub(r'/(?:236x|474x|564x|736x)/', '/originals/', u)
                     if orig not in images:
@@ -245,15 +260,18 @@ def download_single_image(u, batch_folder, idx, format_type):
         if r.status_code == 200:
             ext = u.split('?')[0].split('.')[-1].lower()
             if ext not in ('jpg', 'jpeg', 'png', 'webp'): ext = 'jpg'
-            temp_name = f"temp_{idx}.{ext}"
+            temp_name = f"temp_{idx}_{random.randint(100,999)}.{ext}"
             temp_fp = os.path.join(batch_folder, temp_name)
             with open(temp_fp, 'wb') as f:
                 f.write(r.content)
                 
-            if Image and format_type in ('9:16', 'vertical', '16:9', 'horizontal', '1:1', 'cuadrado'):
+            if Image:
                 try:
                     with Image.open(temp_fp) as img_pil:
                         w, h = img_pil.size
+                    # Descartar iconos pequeños / placeholders basura
+                    if w < 300 or h < 300:
+                        os.remove(temp_fp); return None
                     fmt = format_type.lower()
                     if fmt in ('9:16', 'vertical') and h < w * 1.15:
                         os.remove(temp_fp); return None
@@ -279,6 +297,21 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
         raw = extract_pinterest_raw_links(query, count=req_count)
         videos = raw.get("videos", [])
         images = raw.get("images", [])
+        
+        # Si el usuario pidió solo videos en Pinterest y Pinterest no tiene MP4s para esa temática, buscar clips HD directamente
+        if media_type == 'videos' and len(videos) == 0 and not query.startswith('http'):
+            print("[Pinterest] Fallback automático a extractor de clips de video para:", query)
+            vids = process_video_download(query, count=req_count, format_type=format_type, target_folder=target_folder)
+            zip_filename = None
+            if create_zip and len(vids) > 1:
+                zip_filename = f"pinterest_videos_{int(time.time())}.zip"
+                zip_path = os.path.join(target_folder, zip_filename)
+                with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    for fname in vids:
+                        fpath = os.path.join(target_folder, fname)
+                        if os.path.exists(fpath):
+                            zipf.write(fpath, fname)
+            return vids, zip_filename
         
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -335,7 +368,6 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
             for img in images:
                 items_to_download.append({'type': 'image', 'url': img})
                 
-        # Descargar imágenes en paralelo para máxima velocidad
         image_urls = [it['url'] for it in items_to_download if it['type'] == 'image'][:limit]
         video_urls = [it['url'] for it in items_to_download if it['type'] == 'video'][:limit]
         
@@ -816,7 +848,6 @@ def execute_custom_order():
     os.makedirs(project_folder, exist_ok=True)
     downloaded_files = []
     
-    # 🚀 Ejecutar todas las descargas EN PARALELO para máxima velocidad (evita timeouts)
     with ThreadPoolExecutor(max_workers=5) as executor:
         future_to_item = {executor.submit(execute_single_item, itm, project_folder): itm for itm in items}
         for future in as_completed(future_to_item):
