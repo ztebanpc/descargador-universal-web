@@ -232,7 +232,6 @@
         .url-input:focus { background: var(--card); }
         .url-input.pinterest:focus { border-color: rgba(230, 0, 35, 0.25); }
         .url-input.audio:focus { border-color: rgba(124, 58, 237, 0.25); }
-        .url-input.orders:focus { border-color: rgba(5, 150, 105, 0.25); padding-left: 16px; }
 
         /* Filters */
         .filters {
@@ -245,7 +244,7 @@
         .filters.four { grid-template-columns: repeat(2, 1fr); }
 
         @media (min-width: 640px) {
-            .filters.four { grid-template-columns: repeat(3, 1fr); }
+            .filters.four { grid-template-columns: repeat(4, 1fr); }
         }
 
         .filter-label {
@@ -258,7 +257,7 @@
             margin-bottom: 6px;
         }
 
-        .filter-select, .filter-input {
+        .filter-select {
             width: 100%;
             padding: 10px 12px;
             background: var(--input-bg);
@@ -269,9 +268,6 @@
             color: var(--text);
             outline: none;
             transition: all 0.2s ease;
-        }
-
-        .filter-select {
             cursor: pointer;
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -280,7 +276,7 @@
             padding-right: 32px;
         }
 
-        .filter-select:focus, .filter-input:focus { border-color: #d6d3d1; }
+        .filter-select:focus { border-color: #d6d3d1; }
 
         /* Action Button */
         .btn-action {
@@ -359,50 +355,118 @@
         }
         .btn-secondary:hover { background: #e7e5e4; }
         .btn-secondary svg { width: 16px; height: 16px; }
-        .excel-input-file { display: none; }
+
+        /* Orders List */
+        .orders-list {
+            max-height: 320px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 4px;
+        }
+
+        .orders-list::-webkit-scrollbar { width: 4px; }
+        .orders-list::-webkit-scrollbar-track { background: transparent; }
+        .orders-list::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 4px; }
+
+        .order-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 1px solid transparent;
+        }
+
+        .order-item:hover {
+            background: var(--input-bg);
+            border-color: var(--border);
+        }
+
+        .order-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .order-text {
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .order-text span {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Voice Row */
+        .voice-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .voice-select {
+            padding: 12px 14px;
+            background: var(--input-bg);
+            border: 1px solid #e7e5e4;
+            border-radius: 12px;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 28px;
+            flex-shrink: 0;
+        }
 
         /* Status Bar */
         .status-bar {
-            background: rgba(168, 162, 158, 0.1);
-            border: 1px solid rgba(168, 162, 158, 0.2);
+            background: rgba(5, 150, 105, 0.06);
+            border: 1px solid rgba(5, 150, 105, 0.12);
             border-radius: 12px;
             padding: 12px 14px;
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-top: 20px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: inherit;
+            margin-top: 14px;
         }
-
-        .status-bar.success {
-            background: rgba(5, 150, 105, 0.06);
-            border-color: rgba(5, 150, 105, 0.12);
-        }
-        .status-bar.success .status-text { color: var(--emerald); }
-        .status-bar.success .status-dot { background: var(--emerald); }
 
         .status-bar.error {
             background: rgba(239, 68, 68, 0.06);
-            border-color: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.18);
         }
-        .status-bar.error .status-text { color: var(--error); }
-        .status-bar.error .status-dot { background: var(--error); animation: none; }
 
         .status-bar.loading {
             background: rgba(124, 58, 237, 0.06);
-            border-color: rgba(124, 58, 237, 0.12);
+            border-color: rgba(124, 58, 237, 0.18);
         }
-        .status-bar.loading .status-text { color: var(--violet); }
-        .status-bar.loading .status-dot { background: var(--violet); animation: pulse 1.5s infinite; }
 
         .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--text-light);
+            background: var(--emerald);
+            animation: pulse 2s infinite;
             flex-shrink: 0;
+        }
+
+        .status-bar.error .status-dot {
+            background: var(--error);
+            animation: none;
+        }
+
+        .status-bar.loading .status-dot {
+            background: var(--violet);
         }
 
         @keyframes pulse {
@@ -412,10 +476,12 @@
 
         .status-text {
             font-size: 12px;
-            color: var(--text-muted);
-            font-weight: 500;
-            width: 100%;
+            color: var(--emerald);
+            font-weight: 600;
         }
+
+        .status-bar.error .status-text { color: var(--error); }
+        .status-bar.loading .status-text { color: var(--violet); }
 
         /* Responsive */
         @media (max-width: 480px) {
@@ -426,6 +492,7 @@
             .tab-btn svg { display: none; }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <div class="container">
@@ -442,15 +509,15 @@
 
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchAppTab('pinterest')" id="app-tab-pinterest">
+            <button class="tab-btn active" onclick="switchTab('pinterest')" id="tab-pinterest">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
                 Pinterest
             </button>
-            <button class="tab-btn" onclick="switchAppTab('audio')" id="app-tab-audio">
+            <button class="tab-btn" onclick="switchTab('audio')" id="tab-audio">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
                 Audio IA
             </button>
-            <button class="tab-btn" onclick="switchAppTab('orders')" id="app-tab-orders">
+            <button class="tab-btn" onclick="switchTab('orders')" id="tab-orders">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
                 Órdenes IA
             </button>
@@ -470,41 +537,51 @@
                 </div>
 
                 <div class="toggle-group" id="pin-toggles">
-                    <button class="toggle-btn active" onclick="setPinMode('individual')">Individual</button>
-                    <button class="toggle-btn" onclick="setPinMode('tablero')">Tablero</button>
-                    <button class="toggle-btn" onclick="setPinMode('tematica')">Temática Avanzada</button>
+                    <button class="toggle-btn active" onclick="setPinMode('individual', this)">Individual</button>
+                    <button class="toggle-btn" onclick="setPinMode('tablero', this)">Tablero</button>
+                    <button class="toggle-btn" onclick="setPinMode('todas', this)">Todas</button>
                 </div>
 
-                <div class="input-wrap" style="position: relative;">
+                <div class="input-wrap">
                     <span class="input-icon">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                     </span>
-                    <input type="text" id="pin-input" class="url-input pinterest" placeholder="Pega el enlace del pin individual..." style="padding-right: 44px;">
-                    <button id="dice-btn" onclick="toggleAzar()" title="Activar orden aleatorio" style="display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #a8a29e; transition: color 0.2s; padding: 4px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><circle cx="15.5" cy="8.5" r="1.5"></circle><circle cx="15.5" cy="15.5" r="1.5"></circle><circle cx="8.5" cy="15.5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle></svg>
-                    </button>
+                    <input type="text" id="pin-input" class="url-input pinterest" placeholder="Pega el enlace del pin, tablero o escribe una temática">
                 </div>
 
                 <div class="filters four">
                     <div>
                         <label class="filter-label">Formato</label>
                         <select id="pin-format" class="filter-select">
-                            <option value="Cualquiera">Cualquiera</option>
-                            <option value="Vertical">Vertical</option>
-                            <option value="Horizontal">Horizontal</option>
+                            <option value="any">Cualquiera</option>
+                            <option value="jpg">JPG</option>
+                            <option value="png">PNG</option>
+                            <option value="webp">WEBP</option>
                         </select>
                     </div>
                     <div>
                         <label class="filter-label">Tipo</label>
-                        <select id="pin-media" class="filter-select">
+                        <select id="pin-type" class="filter-select">
                             <option value="both">Ambos</option>
-                            <option value="fotos">Solo Imagen</option>
-                            <option value="videos">Solo Video</option>
+                            <option value="photos">Imagen</option>
+                            <option value="videos">Video</option>
                         </select>
                     </div>
                     <div>
-                        <label class="filter-label" id="pin-cantidad-label" style="opacity:0.4;">Cantidad</label>
-                        <input type="number" id="pin-cantidad" class="filter-input" value="1" min="1" max="500" disabled style="opacity:0.4;">
+                        <label class="filter-label">Calidad</label>
+                        <select id="pin-quality" class="filter-select">
+                            <option value="original">Original</option>
+                            <option value="hd">HD</option>
+                            <option value="sd">SD</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="filter-label">Carpeta</label>
+                        <select id="pin-folder" class="filter-select">
+                            <option value="capcut">Capcut</option>
+                            <option value="descargas">Descargas</option>
+                            <option value="personalizado">Personalizado</option>
+                        </select>
                     </div>
                 </div>
 
@@ -512,10 +589,10 @@
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                     Descargar de Pinterest
                 </button>
-                
-                <div class="status-bar" id="status-pin">
+
+                <div class="status-bar" id="pin-status-bar" style="display: none;">
                     <div class="status-dot"></div>
-                    <div class="status-text">Esperando orden...</div>
+                    <div class="status-text" id="pin-status-text">Listo para descargar</div>
                 </div>
             </div>
         </div>
@@ -534,30 +611,35 @@
                 </div>
 
                 <div class="toggle-group" id="audio-toggles">
-                    <button class="toggle-btn active" onclick="setAudioMode('individual')">Individual</button>
-                    <button class="toggle-btn" onclick="setAudioMode('tematica')">Temática / Búsqueda</button>
+                    <button class="toggle-btn active" onclick="setAudioMode('individual', this)">Individual</button>
+                    <button class="toggle-btn" onclick="setAudioMode('todas', this)">Todas</button>
                 </div>
 
                 <div class="input-wrap">
                     <span class="input-icon">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                     </span>
-                    <input type="text" id="audio-input" class="url-input audio" placeholder="Pega el enlace de la canción o video...">
+                    <input type="text" id="audio-input" class="url-input audio" placeholder="Pega la canción o video de YouTube">
                 </div>
 
                 <div class="filters">
                     <div>
-                        <label class="filter-label">Velocidad</label>
-                        <select id="audio-speed" class="filter-select">
-                            <option value="1.0">1.0x (Normal)</option>
-                            <option value="1.06">1.06x (Anticopyright)</option>
-                            <option value="0.9">0.9x (Slowed)</option>
-                            <option value="0.8">0.8x (Reverb style)</option>
+                        <label class="filter-label">Calidad</label>
+                        <select id="audio-quality" class="filter-select">
+                            <option value="320">320 kbps</option>
+                            <option value="256">256 kbps</option>
+                            <option value="192" selected>192 kbps</option>
+                            <option value="128">128 kbps</option>
                         </select>
                     </div>
                     <div>
-                        <label class="filter-label" id="audio-cantidad-label" style="opacity:0.4;">Cantidad (Temática)</label>
-                        <input type="number" id="audio-cantidad" class="filter-input" value="5" min="1" max="100" disabled style="opacity:0.4;">
+                        <label class="filter-label">Formato</label>
+                        <select id="audio-format" class="filter-select">
+                            <option value="mp3" selected>MP3</option>
+                            <option value="wav">WAV</option>
+                            <option value="flac">FLAC</option>
+                            <option value="m4a">M4A</option>
+                        </select>
                     </div>
                 </div>
 
@@ -568,19 +650,25 @@
 
                 <div class="divider">
                     <div class="divider-line"></div>
-                    <span class="divider-text">O carga desde Excel</span>
+                    <span class="divider-text">O busca desde servicios</span>
                     <div class="divider-line"></div>
                 </div>
 
-                <input type="file" id="excel-input" class="excel-input-file" accept=".xlsx,.xls,.csv" onchange="downloadExcel()">
-                <button class="btn-secondary" onclick="document.getElementById('excel-input').click()">
-                    <svg viewBox="0 0 24 24" fill="currentColor" style="color: #10b981;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                    Subir y Descargar Excel
+                <input type="file" id="excel-file-hidden" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleExcelUpload(this)">
+
+                <button class="btn-secondary" onclick="document.getElementById('excel-file-hidden').click()">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="color: #ef4444;"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    Descargar MP3 desde Excel / YouTube Lote
                 </button>
-                
-                <div class="status-bar" id="status-audio">
+
+                <button class="btn-secondary" onclick="downloadAudio()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #10b981;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
+                    Buscar Canción / Búsqueda Automática
+                </button>
+
+                <div class="status-bar" id="audio-status-bar" style="display: none;">
                     <div class="status-dot"></div>
-                    <div class="status-text">Esperando orden...</div>
+                    <div class="status-text" id="audio-status-text">Listo para procesar</div>
                 </div>
             </div>
         </div>
@@ -593,35 +681,78 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
                     </div>
                     <div>
-                        <div class="module-title">Órdenes Masivas IA</div>
-                        <div class="module-desc">Pega las órdenes de trabajo exactas de Gemini</div>
+                        <div class="module-title">Órdenes de la IA</div>
+                        <div class="module-desc">Habla con la IA para ejecutar tareas de audio</div>
                     </div>
                 </div>
 
-                <div class="input-wrap">
-                    <textarea id="workorder-input" class="url-input orders" rows="10" style="height: auto; resize: vertical; padding-left: 16px;" placeholder="[ORDEN DE TRABAJO]&#10;EVENTO=música semillero dia de la novia&#10;AUDIO:1:Lover - Taylor Swift&#10;AUDIO:1:Until I Found You - Stephen Sanchez&#10;FOTOS:10:aesthetic wedding"></textarea>
-                </div>
-                
-                <div class="filters">
-                    <div>
-                        <label class="filter-label">Modificador de Velocidad (Audios)</label>
-                        <select id="workorder-speed" class="filter-select">
-                            <option value="1.0">1.0x (Original)</option>
-                            <option value="1.06">1.06x (Anticopyright)</option>
-                            <option value="0.9">0.9x (Slowed)</option>
-                            <option value="0.8">0.8x (Vaporwave)</option>
-                        </select>
+                <div class="orders-list">
+                    <div class="order-item" onclick="selectOrder('AUDIO-Crear Beatbox: Crear un Beatbox Effect')">
+                        <span class="order-dot" style="background: #f87171;"></span>
+                        <div class="order-text">AUDIO-Crear Beatbox: <span>Crear un Beatbox Effect</span></div>
+                    </div>
+                    <div class="order-item" onclick="selectOrder('AUDIO-Crear Remix: Crear un Remix Effect')">
+                        <span class="order-dot" style="background: #fb923c;"></span>
+                        <div class="order-text">AUDIO-Crear Remix: <span>Crear un Remix Effect</span></div>
+                    </div>
+                    <div class="order-item" onclick="selectOrder('AUDIO-Eliminar Voces: Crear un Karaoke Effect')">
+                        <span class="order-dot" style="background: #fbbf24;"></span>
+                        <div class="order-text">AUDIO-Eliminar Voces: <span>Crear un Karaoke Effect</span></div>
+                    </div>
+                    <div class="order-item" onclick="selectOrder('AUDIO-Separar: Separar Instrumental y Voz')">
+                        <span class="order-dot" style="background: #facc15;"></span>
+                        <div class="order-text">AUDIO-Separar: <span>Separar Instrumental y Voz</span></div>
+                    </div>
+                    <div class="order-item" onclick="selectOrder('AUDIO-Aumentar Volumen: Aumentar Volumen Effect')">
+                        <span class="order-dot" style="background: #a3e635;"></span>
+                        <div class="order-text">AUDIO-Aumentar Volumen: <span>Aumentar Volumen Effect</span></div>
+                    </div>
+                    <div class="order-item" onclick="selectOrder('AUDIO-Mezclar: Mezclar dos audios Effect')">
+                        <span class="order-dot" style="background: #4ade80;"></span>
+                        <div class="order-text">AUDIO-Mezclar: <span>Mezclar dos audios Effect</span></div>
+                    </div>
+                    <div class="order-item" onclick="selectOrder('AUDIO-Efecto: Aplicar Reverb / Delay Effect')">
+                        <span class="order-dot" style="background: #2dd4bf;"></span>
+                        <div class="order-text">AUDIO-Efecto: <span>Aplicar Reverb / Delay Effect</span></div>
+                    </div>
+                    <div class="order-item" onclick="selectOrder('AUDIO-Loop: Crear un Loop Effect')">
+                        <span class="order-dot" style="background: #22d3ee;"></span>
+                        <div class="order-text">AUDIO-Loop: <span>Crear un Loop Effect</span></div>
+                    </div>
+                    <div class="order-item" onclick="selectOrder('AUDIO-Cambiar Tono: Cambiar Tono / Pitch Effect')">
+                        <span class="order-dot" style="background: #38bdf8;"></span>
+                        <div class="order-text">AUDIO-Cambiar Tono: <span>Cambiar Tono / Pitch Effect</span></div>
+                    </div>
+                    <div class="order-item" onclick="selectOrder('AUDIO-Cambiar Velocidad: Cambiar Velocidad / Speed Effect')">
+                        <span class="order-dot" style="background: #60a5fa;"></span>
+                        <div class="order-text">AUDIO-Cambiar Velocidad: <span>Cambiar Velocidad / Speed Effect</span></div>
+                    </div>
+                    <div class="order-item" onclick="selectOrder('AUDIO-Recortar: Recortar audio / Trim Effect')">
+                        <span class="order-dot" style="background: #818cf8;"></span>
+                        <div class="order-text">AUDIO-Recortar: <span>Recortar audio / Trim Effect</span></div>
+                    </div>
+                    <div class="order-item" onclick="selectOrder('AUDIO-Normalizar: Normalizar volumen Effect')">
+                        <span class="order-dot" style="background: #a78bfa;"></span>
+                        <div class="order-text">AUDIO-Normalizar: <span>Normalizar volumen Effect</span></div>
                     </div>
                 </div>
 
-                <button class="btn-action orders" onclick="processWorkOrder()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
-                    Ejecutar Orden Industrial
-                </button>
-                
-                <div class="status-bar" id="status-orders">
+                <div class="voice-row">
+                    <select id="voice-speed" class="voice-select">
+                        <option value="1.0">1x (Normal)</option>
+                        <option value="1.06">1.06x (Anticopyright)</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2.0">2x</option>
+                    </select>
+                    <button class="btn-action orders" onclick="executeVoiceOrder()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                        Ejecutar Orden por Voz (Audio)
+                    </button>
+                </div>
+
+                <div class="status-bar" id="orders-status-bar">
                     <div class="status-dot"></div>
-                    <div class="status-text">Esperando orden de trabajo...</div>
+                    <div class="status-text" id="orders-status-text">EDIT-Audio: Inteligencia → Sistema listo</div>
                 </div>
             </div>
         </div>
@@ -629,266 +760,260 @@
     </div>
 
     <script>
-        // === APP STATE ===
         let currentPinMode = 'individual';
         let currentAudioMode = 'individual';
+        let selectedOrderText = 'AUDIO-Crear Beatbox: Crear un Beatbox Effect';
 
-        // === STATE ===
-        let isAzarActive = false;
-        
-        function toggleAzar() {
-            isAzarActive = !isAzarActive;
-            const btn = document.getElementById('dice-btn');
-            if (isAzarActive) {
-                btn.style.color = 'var(--pinterest)';
-            } else {
-                btn.style.color = '#a8a29e';
-            }
-        }
-
-        // === TAB SWITCHING ===
-        function switchAppTab(tab) {
+        function switchTab(tab) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.getElementById('panel-' + tab).classList.add('active');
+            const activePanel = document.getElementById('panel-' + tab);
+            if(activePanel) activePanel.classList.add('active');
 
-            document.querySelectorAll('.tabs .tab-btn').forEach(t => t.classList.remove('active'));
-            document.getElementById('app-tab-' + tab).classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+            const activeBtn = document.getElementById('tab-' + tab);
+            if(activeBtn) activeBtn.classList.add('active');
         }
 
-        function setPinMode(mode) {
+        function setPinMode(mode, btn) {
             currentPinMode = mode;
-            const group = document.getElementById('pin-toggles');
-            group.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
-            
+            document.querySelectorAll('#pin-toggles .toggle-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
             const input = document.getElementById('pin-input');
-            const cantInput = document.getElementById('pin-cantidad');
-            const cantLabel = document.getElementById('pin-cantidad-label');
-            const diceBtn = document.getElementById('dice-btn');
-
             if(mode === 'individual') {
-                group.children[0].classList.add('active');
                 input.placeholder = "Pega el enlace del pin individual...";
-                cantInput.disabled = true;
-                cantInput.value = "1";
-                cantInput.style.opacity = '0.4';
-                cantLabel.style.opacity = '0.4';
-                if(diceBtn) diceBtn.style.display = 'none';
             } else if (mode === 'tablero') {
-                group.children[1].classList.add('active');
-                input.placeholder = "Pega el enlace del tablero o perfil...";
-                cantInput.disabled = false;
-                cantInput.value = "";
-                cantInput.style.opacity = '1';
-                cantLabel.style.opacity = '1';
-                if(diceBtn) diceBtn.style.display = 'none';
-            } else if (mode === 'tematica') {
-                group.children[2].classList.add('active');
-                input.placeholder = "Escribe una temática O pega un enlace de referencia...";
-                cantInput.disabled = false;
-                if (cantInput.value === "" || cantInput.value === "1") {
-                    cantInput.value = "20";
-                }
-                cantInput.style.opacity = '1';
-                cantLabel.style.opacity = '1';
-                if(diceBtn) diceBtn.style.display = 'block';
+                input.placeholder = "Pega el enlace del tablero o perfil de Pinterest...";
+            } else {
+                input.placeholder = "Escribe una temática (ej. aesthetic neon) o pega enlace...";
             }
         }
 
-        function setAudioMode(mode) {
+        function setAudioMode(mode, btn) {
             currentAudioMode = mode;
-            const group = document.getElementById('audio-toggles');
-            group.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
-            
+            document.querySelectorAll('#audio-toggles .toggle-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
             const input = document.getElementById('audio-input');
-            const cantInput = document.getElementById('audio-cantidad');
-            const cantLabel = document.getElementById('audio-cantidad-label');
-
             if(mode === 'individual') {
-                group.children[0].classList.add('active');
-                input.placeholder = "Pega el enlace de la canción o video...";
-                cantInput.disabled = true;
-                cantInput.style.opacity = '0.4';
-                cantLabel.style.opacity = '0.4';
+                input.placeholder = "Pega la canción o video de YouTube...";
             } else {
-                group.children[1].classList.add('active');
-                input.placeholder = "Escribe el nombre de la canción o artista...";
-                cantInput.disabled = false;
-                cantInput.style.opacity = '1';
-                cantLabel.style.opacity = '1';
+                input.placeholder = "Escribe el nombre de la canción o lista temática...";
             }
         }
 
-        // === NOTIFICATIONS & STATUS ===
-        let lastSoundMessage = '';
-
-        function setStatus(panel, text, state='loading') {
-            const el = document.getElementById('status-' + panel);
-            el.className = 'status-bar ' + state;
-            const cleanText = text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
-            el.querySelector('.status-text').innerText = cleanText;
-            
-            const dot = el.querySelector('.status-dot');
-            if (state === 'success') {
-                dot.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
-                dot.style.width = 'auto';
-                dot.style.height = 'auto';
-                dot.style.background = 'none';
-                dot.style.color = 'var(--emerald)';
-                dot.style.display = 'flex';
-                dot.style.alignItems = 'center';
-            } else {
-                dot.innerHTML = '';
-                dot.style.width = '8px';
-                dot.style.height = '8px';
-                dot.style.borderRadius = '50%';
-                dot.style.background = '';
-                dot.style.color = '';
-                dot.style.display = 'block';
-            }
-
-            if((state === 'success' || state === 'error') && lastSoundMessage !== text) {
-                lastSoundMessage = text;
-                playDoneSound();
-            }
+        function selectOrder(text) {
+            selectedOrderText = text;
+            const bar = document.getElementById('orders-status-bar');
+            const statusText = document.getElementById('orders-status-text');
+            bar.className = 'status-bar';
+            statusText.innerText = 'Seleccionado: ' + text;
         }
 
+        // ==========================================
+        // 🔊 SINTETIZADOR DE SONIDOS (Web Audio API)
+        // ==========================================
         function playDoneSound() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const notes = [523.25, 659.25, 783.99];
+                const notes = [523.25, 659.25, 783.99]; // Acorde mayor C5, E5, G5
                 notes.forEach((freq, i) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
                     osc.type = 'sine';
                     osc.frequency.value = freq;
                     gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6 + i * 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5 + i * 0.12);
                     osc.connect(gain);
                     gain.connect(ctx.destination);
-                    osc.start(ctx.currentTime + i * 0.12);
-                    osc.stop(ctx.currentTime + 0.8 + i * 0.15);
+                    osc.start(ctx.currentTime + i * 0.1);
+                    osc.stop(ctx.currentTime + 0.7 + i * 0.12);
                 });
             } catch(e) {}
         }
 
-        // === API CALLS ===
+        function playErrorSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(90, ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        // ==========================================
+        // 📥 ACCIONES DE DESCARGA
+        // ==========================================
         async function downloadPinterest() {
-            var query = document.getElementById('pin-input').value.trim();
-            var finalMode = currentPinMode;
-            
-            if (currentPinMode === 'tematica' && query.startsWith('http')) {
-                finalMode = 'relacionados';
-            }
-            
-            if(!query) return setStatus('pin', 'Por favor ingresa una URL o búsqueda.', 'error');
-            
-            const cantidad = finalMode === 'individual' ? 1 : document.getElementById('pin-cantidad').value;
+            const input = document.getElementById('pin-input');
+            const query = input.value.trim();
             const format = document.getElementById('pin-format').value;
-            const mediaType = document.getElementById('pin-media').value;
-            
-            setStatus('pin', 'Iniciando descarga en Pinterest...', 'loading');
-            
+            const type = document.getElementById('pin-type').value;
+            const bar = document.getElementById('pin-status-bar');
+            const text = document.getElementById('pin-status-text');
+
+            if (!query) {
+                bar.style.display = 'flex';
+                bar.className = 'status-bar error';
+                text.innerText = 'Por favor ingresa un enlace o temática.';
+                playErrorSound();
+                return;
+            }
+
+            bar.style.display = 'flex';
+            bar.className = 'status-bar loading';
+            text.innerText = '⏳ Extrayendo y descargando fotos en calidad original...';
+
             try {
                 const res = await fetch('/api/download_pinterest', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({query: query, cantidad: cantidad, format: format, media_type: mediaType, pin_tab: finalMode, azar: isAzarActive})
+                    body: JSON.stringify({
+                        query: query,
+                        format: format,
+                        media_type: type,
+                        pin_tab: currentPinMode
+                    })
                 });
                 const data = await res.json();
-                setStatus('pin', data.message, 'loading');
+                if (data.status === 'success') {
+                    bar.className = 'status-bar';
+                    text.innerText = `✅ ${data.message}`;
+                    playDoneSound();
+                    if (data.files && data.files.length > 0) {
+                        data.files.forEach((fileUrl, index) => {
+                            setTimeout(() => {
+                                const a = document.createElement('a');
+                                a.href = fileUrl;
+                                a.download = '';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                            }, index * 200);
+                        });
+                    }
+                } else {
+                    bar.className = 'status-bar error';
+                    text.innerText = `❌ Error: ${data.message}`;
+                    playErrorSound();
+                }
             } catch (err) {
-                setStatus('pin', 'Error conectando al servidor local.', 'error');
+                bar.className = 'status-bar error';
+                text.innerText = '❌ Error conectando con el servidor.';
+                playErrorSound();
             }
         }
 
         async function downloadAudio() {
-            const query = document.getElementById('audio-input').value;
-            if(!query) return setStatus('audio', 'Por favor ingresa una URL o búsqueda.', 'error');
-            
-            const cantidad = currentAudioMode === 'individual' ? 1 : document.getElementById('audio-cantidad').value;
-            const speed = document.getElementById('audio-speed').value;
-            
-            setStatus('audio', 'Iniciando proceso de Audio...', 'loading');
-            
+            const input = document.getElementById('audio-input');
+            const query = input.value.trim();
+            const quality = document.getElementById('audio-quality').value;
+            const format = document.getElementById('audio-format').value;
+            const bar = document.getElementById('audio-status-bar');
+            const text = document.getElementById('audio-status-text');
+
+            if (!query) {
+                bar.style.display = 'flex';
+                bar.className = 'status-bar error';
+                text.innerText = 'Por favor ingresa un nombre de canción o enlace.';
+                playErrorSound();
+                return;
+            }
+
+            bar.style.display = 'flex';
+            bar.className = 'status-bar loading';
+            text.innerText = `⏳ Buscando y procesando audio (${quality}kbps, ${format.toUpperCase()})...`;
+
             try {
                 const res = await fetch('/api/download_audio', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({query, speed, cantidad})
+                    body: JSON.stringify({query: query, quality: quality, format: format})
                 });
                 const data = await res.json();
-                setStatus('audio', data.message, 'loading');
+                if (data.status === 'success') {
+                    bar.className = 'status-bar';
+                    text.innerText = `✅ ${data.message}`;
+                    playDoneSound();
+                    if (data.download_url) {
+                        window.location.href = data.download_url;
+                    }
+                } else {
+                    bar.className = 'status-bar error';
+                    text.innerText = `❌ ${data.message}`;
+                    playErrorSound();
+                }
             } catch (err) {
-                setStatus('audio', 'Error conectando al servidor local.', 'error');
+                bar.className = 'status-bar error';
+                text.innerText = '❌ Error de conexión al procesar audio.';
+                playErrorSound();
             }
         }
 
-        async function downloadExcel() {
-            const input = document.getElementById('excel-input');
-            if (!input.files.length) return;
-            const speed = document.getElementById('audio-speed').value;
-            
-            setStatus('audio', 'Procesando archivo Excel...', 'loading');
+        async function handleExcelUpload(input) {
+            const bar = document.getElementById('audio-status-bar');
+            const text = document.getElementById('audio-status-text');
+            if (!input.files || input.files.length === 0) return;
+
             const formData = new FormData();
             formData.append('file', input.files[0]);
-            formData.append('speed', speed);
-            
-            try {
-                const res = await fetch('/api/download_excel', { method: 'POST', body: formData });
-                const data = await res.json();
-                setStatus('audio', data.message, 'loading');
-            } catch (err) {
-                setStatus('audio', 'Error procesando archivo Excel.', 'error');
-            }
-        }
 
-        async function processWorkOrder() {
-            const workorder = document.getElementById('workorder-input').value;
-            if(!workorder) return setStatus('orders', 'Por favor pega la ORDEN DE TRABAJO de Gemini.', 'error');
-            const speed = document.getElementById('workorder-speed').value;
-            
-            setStatus('orders', 'Delegando orden masiva a los hilos en el fondo...', 'loading');
-            
+            bar.style.display = 'flex';
+            bar.className = 'status-bar loading';
+            text.innerText = '⏳ Procesando archivo Excel/CSV en segundo plano...';
+
             try {
-                const res = await fetch('/api/process_workorder', {
+                const res = await fetch('/api/download_excel', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({workorder, speed})
+                    body: formData
                 });
                 const data = await res.json();
-                setStatus('orders', data.message, 'loading');
+                if (data.status === 'success') {
+                    bar.className = 'status-bar';
+                    text.innerText = `✅ ${data.message}`;
+                    playDoneSound();
+                } else {
+                    bar.className = 'status-bar error';
+                    text.innerText = `❌ ${data.message}`;
+                    playErrorSound();
+                }
             } catch (err) {
-                setStatus('orders', 'Error conectando al servidor local.', 'error');
+                bar.className = 'status-bar error';
+                text.innerText = '❌ Error al subir archivo Excel.';
+                playErrorSound();
             }
         }
 
-        // === POLLING BACKGROUND STATUS ===
-        setInterval(async () => {
+        async function executeVoiceOrder() {
+            const speed = document.getElementById('voice-speed').value;
+            const bar = document.getElementById('orders-status-bar');
+            const text = document.getElementById('orders-status-text');
+
+            bar.className = 'status-bar loading';
+            text.innerText = `⏳ Ejecutando orden: ${selectedOrderText} (${speed}x)...`;
+
             try {
-                let r = await fetch('/api/status');
-                let d = await r.json();
-                
-                if (d.message && d.message !== "Esperando...") {
-                    // Update loading text
-                    document.querySelectorAll('.status-bar.loading .status-text').forEach(textEl => {
-                        textEl.innerText = d.message.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
-                    });
-                    
-                    // If it finished completely with success or error
-                    if (d.message.includes("ERROR") || d.message.includes("Este tablero es privado")) {
-                        document.querySelectorAll('.panel.active .status-bar').forEach(box => {
-                            const panelName = box.id.replace('status-', '');
-                            setStatus(panelName, d.message, 'error');
-                        });
-                    } else if (d.message.includes("ÉXITO")) {
-                        document.querySelectorAll('.panel.active .status-bar').forEach(box => {
-                            const panelName = box.id.replace('status-', '');
-                            setStatus(panelName, d.message, 'success');
-                        });
-                    }
-                }
-            } catch(e) {}
-        }, 1500);
+                const res = await fetch('/api/download_audio', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({query: selectedOrderText, speed: speed})
+                });
+                const data = await res.json();
+                bar.className = 'status-bar';
+                text.innerText = `✅ Orden ejecutada: ${data.message}`;
+                playDoneSound();
+            } catch (err) {
+                bar.className = 'status-bar error';
+                text.innerText = '❌ Error ejecutando orden de voz.';
+                playErrorSound();
+            }
+        }
     </script>
 </body>
 </html>
