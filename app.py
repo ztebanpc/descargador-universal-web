@@ -288,6 +288,7 @@ def api_download_pinterest():
         batch_folder = os.path.join(PINTEREST_DIR, f"batch_{batch_id}")
         os.makedirs(batch_folder, exist_ok=True)
         
+        # Guardar directamente como archivos individuales .jpg/.png
         def download_single_pin(item):
             try:
                 img_url = item['url']
@@ -296,7 +297,7 @@ def api_download_pinterest():
                     raw_name = img_url.split('/')[-1].split('?')[0]
                     if not raw_name.endswith(('.jpg', '.png', '.jpeg', '.webp')):
                         raw_name += ".jpg"
-                    fp = os.path.join(batch_folder, raw_name)
+                    fp = os.path.join(PINTEREST_DIR, raw_name)
                     with open(fp, "wb") as f:
                         f.write(r.content)
                     return raw_name
@@ -312,21 +313,12 @@ def api_download_pinterest():
         
         if not saved:
             return jsonify({"status": "error", "message": "No se pudieron descargar las imágenes."}), 500
-            
-        # Crear archivo ZIP específico para esta descarga
-        zip_filename = f"pinterest_descarga_{batch_id}.zip"
-        zip_path = os.path.join(PINTEREST_DIR, zip_filename)
-        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for fname in saved:
-                file_path = os.path.join(batch_folder, fname)
-                if os.path.exists(file_path):
-                    zipf.write(file_path, fname)
         
         return jsonify({
             "status": "success",
-            "message": f"¡Descargadas {len(saved)} fotos originales en alta resolución!",
+            "message": f"Descargadas {len(saved)} fotos exitosamente a tu carpeta de imágenes.",
             "total": len(saved),
-            "download_zip": f"/api/files/pinterest/{zip_filename}"
+            "files": [f"/api/files/pinterest/{f}" for f in saved]
         })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500

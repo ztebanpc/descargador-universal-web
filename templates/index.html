@@ -146,7 +146,7 @@
             const statusBox = document.getElementById('pinterest-status');
             if(!query) return;
 
-            statusBox.innerHTML = "⏳ Extrayendo y descargando todas las fotos del tablero/búsqueda en alta resolución... Por favor espera.";
+            statusBox.innerHTML = "⏳ Extrayendo fotos en resolución original... Por favor espera.";
             statusBox.className = "status-box loading";
 
             try {
@@ -157,10 +157,21 @@
                 });
                 const result = await response.json();
                 if (result.status === 'success') {
-                    statusBox.innerHTML = `✅ <strong>${result.message}</strong><br><a href="${result.download_zip}" class="btn btn-secondary" style="margin-top:10px; display:inline-flex;">📥 Descargar ZIP con las ${result.total} Fotos</a>`;
+                    statusBox.innerHTML = `✅ <strong>${result.message}</strong> (${result.total} archivos descargados)`;
                     statusBox.className = "status-box success";
-                    // Iniciar descarga del ZIP automáticamente
-                    window.location.href = result.download_zip;
+                    // Descargar las imágenes directamente al dispositivo de forma individual
+                    if (result.files && result.files.length > 0) {
+                        result.files.forEach((fileUrl, index) => {
+                            setTimeout(() => {
+                                const a = document.createElement('a');
+                                a.href = fileUrl;
+                                a.download = '';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                            }, index * 200);
+                        });
+                    }
                 } else {
                     statusBox.innerHTML = `❌ Error: ${result.message}`;
                     statusBox.className = "status-box error";
