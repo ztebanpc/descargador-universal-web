@@ -3,141 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Descargador Universal — Motor Central de Edición</title>
+    <title>Descargador Universal — Motor central para proyectos de edición</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f8fafc;
+            --bg: #fafaf9;
             --card: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --text-light: #94a3b8;
-            --border: #e2e8f0;
-            --input-bg: #f1f5f9;
-            --pinterest: #e60023;
-            --violet: #6366f1;
-            --violet-hover: #4f46e5;
-            --emerald: #10b981;
-            --emerald-hover: #059669;
-            --excel: #107c41;
-            --dark-btn: #0f172a;
-            --dark-btn-hover: #1e293b;
-            --shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+            --text: #1c1917;
+            --text-muted: #78716c;
+            --text-light: #a8a29e;
+            --border: #f5f5f4;
+            --input-bg: #f5f5f4;
+            --shadow: 0 2px 40px -12px rgba(0,0,0,0.08);
+            --pinterest: #E60023;
+            --pinterest-hover: #c4001d;
+            --violet: #7c3aed;
+            --violet-hover: #6d28d9;
+            --emerald: #059669;
+            --emerald-hover: #047857;
+            --excel-green: #107c41;
+            --error: #ef4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
-            color: var(--text-main);
+            color: var(--text);
             min-height: 100vh;
-            padding: 16px 10px 40px;
+            padding: 20px 10px;
+            line-height: 1.5;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
         .container {
             width: 100%;
-            max-width: 580px;
+            max-width: 640px;
             margin: 0 auto;
+            position: relative;
         }
 
         /* Header */
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
-        .logo-icon {
+        .logo-box {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             width: 44px;
             height: 44px;
-            background: #ffffff;
+            background: var(--card);
             border-radius: 14px;
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
             border: 1px solid var(--border);
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
-        .logo-icon svg { width: 22px; height: 22px; color: var(--text-main); }
+        .logo-box svg { width: 22px; height: 22px; color: var(--text); }
 
         h1 {
-            font-size: 20px;
+            font-size: 21px;
             font-weight: 800;
-            letter-spacing: -0.03em;
-            color: var(--text-main);
-            margin-bottom: 3px;
+            letter-spacing: -0.025em;
+            margin-bottom: 4px;
         }
 
         .subtitle {
             color: var(--text-muted);
-            font-size: 12.5px;
-            font-weight: 500;
+            font-size: 13px;
         }
 
-        /* Tabs Navigation */
-        .tabs-nav {
+        /* Tabs */
+        .tabs {
             display: flex;
-            background: #e2e8f0;
             padding: 4px;
+            background: rgba(231, 229, 228, 0.6);
             border-radius: 14px;
-            margin-bottom: 16px;
-            gap: 4px;
+            margin-bottom: 18px;
+            backdrop-filter: blur(8px);
         }
 
         .tab-btn {
             flex: 1;
-            padding: 9px 4px;
-            font-size: 12px;
-            font-weight: 700;
+            padding: 10px 4px;
+            font-size: 13px;
+            font-weight: 600;
             border-radius: 10px;
             border: none;
             background: transparent;
             color: var(--text-muted);
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
             font-family: inherit;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 6px;
             white-space: nowrap;
         }
 
         .tab-btn.active {
-            background: #ffffff;
-            color: var(--text-main);
-            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+            background: var(--card);
+            color: var(--text);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
 
-        .tab-btn svg { width: 14px; height: 14px; }
+        .tab-btn svg { width: 15px; height: 15px; }
 
         /* Panels */
         .panel { display: none; }
         .panel.active { display: block; }
 
-        /* Card Container */
+        /* Card */
         .card {
             background: var(--card);
             border-radius: 20px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
-            padding: 18px 16px;
+            padding: 20px 16px;
+            animation: fadeIn 0.3s ease;
+            box-sizing: border-box;
             width: 100%;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* Module Header */
-        .module-head {
+        .module-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .module-header-left {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 16px;
         }
 
-        .module-badge {
+        .module-icon {
             width: 36px;
             height: 36px;
             border-radius: 10px;
@@ -147,577 +161,628 @@
             flex-shrink: 0;
         }
 
-        .module-badge.pin { background: rgba(230, 0, 35, 0.1); color: var(--pinterest); }
-        .module-badge.audio { background: rgba(99, 102, 241, 0.1); color: var(--violet); }
-        .module-badge.orders { background: rgba(16, 185, 129, 0.1); color: var(--emerald); }
+        .module-icon.pinterest { background: rgba(230, 0, 35, 0.08); }
+        .module-icon.pinterest svg { width: 18px; height: 18px; fill: var(--pinterest); }
 
-        .module-badge svg { width: 18px; height: 18px; }
+        .module-icon.audio { background: rgba(124, 58, 237, 0.08); }
+        .module-icon.audio svg { width: 18px; height: 18px; color: var(--violet); }
+
+        .module-icon.orders { background: rgba(5, 150, 105, 0.08); }
+        .module-icon.orders svg { width: 18px; height: 18px; color: var(--emerald); }
 
         .module-title {
-            font-size: 14.5px;
-            font-weight: 800;
-            color: var(--text-main);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .module-sub {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 500;
+        .module-desc {
+            font-size: 11.5px;
+            color: var(--text-light);
         }
 
-        .btn-info-icon {
+        .btn-info-circle {
             background: none;
             border: none;
             color: var(--text-light);
             cursor: pointer;
-            padding: 2px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            padding: 2px;
         }
-        .btn-info-icon svg { width: 14px; height: 14px; }
+        .btn-info-circle:hover { color: var(--text); }
+        .btn-info-circle svg { width: 15px; height: 15px; }
 
-        /* Mode Toggles */
-        .mode-toggles {
+        /* Toggle Group */
+        .toggle-group {
             display: flex;
             background: var(--input-bg);
-            border-radius: 11px;
-            padding: 3px;
-            margin-bottom: 14px;
-            gap: 2px;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 16px;
         }
 
-        .mode-btn {
+        .toggle-btn {
             flex: 1;
-            padding: 7px 4px;
-            font-size: 11.5px;
-            font-weight: 700;
-            border-radius: 8px;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 9px;
             border: none;
             background: transparent;
             color: var(--text-muted);
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.2s ease;
             font-family: inherit;
         }
 
-        .mode-btn.active {
-            background: #ffffff;
-            color: var(--text-main);
-            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+        .toggle-btn.active {
+            background: var(--card);
+            color: var(--text);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
 
-        /* Inputs */
-        .input-group {
+        /* Input */
+        .input-wrap {
             position: relative;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
 
-        .input-icon-left {
+        .input-icon {
             position: absolute;
             left: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-light);
             pointer-events: none;
-            display: flex;
-            align-items: center;
         }
 
-        .input-icon-left svg { width: 16px; height: 16px; }
+        .input-icon svg { width: 16px; height: 16px; }
 
-        .main-input {
+        .url-input {
             width: 100%;
-            padding: 11px 14px 11px 36px;
+            padding: 12px 14px 12px 38px;
             background: var(--input-bg);
-            border: 1.5px solid transparent;
+            border: 2px solid var(--border);
             border-radius: 12px;
             font-size: 13px;
             font-family: inherit;
-            color: var(--text-main);
-            font-weight: 500;
+            color: var(--text);
             outline: none;
             transition: all 0.2s ease;
+            box-sizing: border-box;
         }
 
-        .main-input:focus {
-            background: #ffffff;
-            border-color: #cbd5e1;
-            box-shadow: 0 0 0 3px rgba(226, 232, 240, 0.5);
+        .url-input::placeholder { color: var(--text-light); }
+        .url-input:focus { background: var(--card); }
+        .url-input.pinterest:focus { border-color: rgba(230, 0, 35, 0.25); }
+        .url-input.audio:focus { border-color: rgba(124, 58, 237, 0.25); }
+
+        /* Filters */
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
         }
 
-        .main-input::placeholder { color: var(--text-light); font-weight: 400; }
+        .filters.three { grid-template-columns: repeat(3, 1fr); }
+        .filters.four { grid-template-columns: repeat(4, 1fr); }
 
-        .main-input.with-mic {
+        @media (max-width: 580px) {
+            .filters.three { grid-template-columns: repeat(2, 1fr); }
+            .filters.four { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .filter-label {
+            display: block;
+            font-size: 10.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 5px;
+        }
+
+        .filter-select, .filter-input {
+            width: 100%;
+            padding: 9px 10px;
+            background: var(--input-bg);
+            border: 1px solid #e7e5e4;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-family: inherit;
+            color: var(--text);
+            outline: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .filter-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 26px;
+        }
+
+        .filter-select:focus, .filter-input:focus { border-color: #d6d3d1; background: #fff; }
+
+        /* Action Buttons Row */
+        .actions-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 600;
+            font-family: inherit;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .btn-action:active { transform: scale(0.98); }
+
+        .btn-action.pinterest {
+            background: var(--text);
+            box-shadow: 0 4px 12px rgba(28, 25, 23, 0.1);
+        }
+        .btn-action.pinterest:hover { background: #292524; }
+
+        .btn-action.audio {
+            background: var(--violet);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+        }
+        .btn-action.audio:hover { background: var(--violet-hover); }
+
+        .btn-action.orders {
+            background: var(--emerald);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+        }
+        .btn-action.orders:hover { background: var(--emerald-hover); }
+
+        .btn-action svg { width: 16px; height: 16px; }
+
+        /* 🔥 Passive ZIP Switch Button (Sólido Oscuro por defecto en todas las pestañas) */
+        .zip-toggle-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 14px;
+            background: #1c1917 !important;
+            color: #ffffff !important;
+            border: 1.5px solid #1c1917 !important;
+            border-radius: 12px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .zip-toggle-btn.inactive {
+            background: var(--input-bg) !important;
+            color: var(--text-muted) !important;
+            border-color: #e7e5e4 !important;
+            box-shadow: none !important;
+        }
+        .zip-toggle-btn svg { width: 15px; height: 15px; }
+
+        /* Secondary Button (Excel) */
+        .btn-excel {
+            width: 100%;
+            padding: 12px;
+            background: rgba(16, 124, 65, 0.08);
+            border: 1px solid rgba(16, 124, 65, 0.2);
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--excel-green);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            margin-top: 12px;
+        }
+        .btn-excel:hover {
+            background: rgba(16, 124, 65, 0.14);
+            border-color: var(--excel-green);
+        }
+        .btn-excel svg { width: 18px; height: 18px; }
+
+        /* Voice Assistant Input with Integrated Mic */
+        .voice-input-wrap {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        .voice-input-wrap .url-input {
             padding-left: 14px;
-            padding-right: 42px;
+            padding-right: 44px;
         }
-
-        .mic-btn {
+        .mic-inline-btn {
             position: absolute;
             right: 6px;
             top: 50%;
             transform: translateY(-50%);
             width: 32px;
             height: 32px;
-            border-radius: 8px;
+            border-radius: 10px;
             border: none;
             background: transparent;
             color: var(--text-muted);
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-        }
-        .mic-btn:hover { background: #e2e8f0; color: var(--text-main); }
-        .mic-btn.listening { background: #fee2e2; color: #ef4444; animation: pulse 1.2s infinite; }
-
-        /* Responsive 2-Column Filters Grid */
-        .filters-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 14px;
-        }
-
-        .filter-col {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .filter-label {
-            font-size: 10px;
-            font-weight: 800;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-        }
-
-        .filter-field {
-            width: 100%;
-            padding: 8px 10px;
-            background: var(--input-bg);
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 600;
-            font-family: inherit;
-            color: var(--text-main);
-            outline: none;
-            transition: all 0.15s ease;
-        }
-
-        .filter-field:focus { background: #ffffff; border-color: #94a3b8; }
-
-        select.filter-field {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 24px;
-        }
-
-        /* Action Row: Main Action + ZIP Toggle */
-        .action-row {
-            display: flex;
-            align-items: stretch;
-            gap: 8px;
-            margin-bottom: 10px;
-            width: 100%;
-        }
-
-        .btn-main {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 700;
-            font-family: inherit;
-            color: #ffffff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-main:active { transform: scale(0.98); }
-
-        .btn-main.pin-btn { background: var(--dark-btn); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
-        .btn-main.pin-btn:hover { background: var(--dark-btn-hover); }
-
-        .btn-main.audio-btn { background: var(--violet); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); }
-        .btn-main.audio-btn:hover { background: var(--violet-hover); }
-
-        .btn-main.orders-btn { background: var(--emerald); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
-        .btn-main.orders-btn:hover { background: var(--emerald-hover); }
-
-        .btn-main svg { width: 16px; height: 16px; }
-
-        /* 🔥 ZIP Switch Pill Button */
-        .btn-zip-switch {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 0 14px;
-            background: #0f172a;
-            color: #ffffff;
-            border: 1.5px solid #0f172a;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 800;
-            font-family: inherit;
             cursor: pointer;
             transition: all 0.2s ease;
-            user-select: none;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
         }
-
-        .btn-zip-switch svg { width: 15px; height: 15px; color: #38bdf8; }
-
-        .btn-zip-switch.off {
-            background: #f1f5f9;
-            color: #64748b;
-            border-color: #cbd5e1;
-            box-shadow: none;
+        .mic-inline-btn:hover { background: #e7e5e4; color: var(--text); }
+        .mic-inline-btn.listening {
+            background: #fee2e2;
+            color: #ef4444;
+            animation: micPulse 1.5s infinite;
         }
-        .btn-zip-switch.off svg { color: #94a3b8; }
-
-        /* Excel Full Width Button */
-        .btn-excel-full {
-            width: 100%;
-            padding: 11px;
-            background: rgba(16, 124, 65, 0.08);
-            border: 1px solid rgba(16, 124, 65, 0.2);
-            border-radius: 12px;
-            font-size: 12.5px;
-            font-weight: 700;
-            font-family: inherit;
-            color: var(--excel);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-            margin-top: 10px;
+        @keyframes micPulse {
+            0%, 100% { transform: translateY(-50%) scale(1); }
+            50% { transform: translateY(-50%) scale(1.1); }
         }
-
-        .btn-excel-full:hover { background: rgba(16, 124, 65, 0.15); }
-        .btn-excel-full svg { width: 16px; height: 16px; }
+        .mic-inline-btn svg { width: 18px; height: 18px; }
 
         /* ✨ AI Thinking Process Container */
-        .thinking-card {
-            background: #f8fafc;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 14px;
+        .ai-thinking-box {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(5, 150, 105, 0.05));
+            border: 1.5px solid rgba(124, 58, 237, 0.2);
+            border-radius: 16px;
+            padding: 16px;
             margin-top: 14px;
             display: none;
+            animation: fadeIn 0.3s ease;
         }
-
-        .thinking-header {
+        .ai-thinking-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-            font-size: 12.5px;
-            font-weight: 700;
-            color: var(--violet);
+            gap: 10px;
+            margin-bottom: 12px;
         }
-
-        .thinking-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(99, 102, 241, 0.2);
+        .ai-thinking-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(124, 58, 237, 0.2);
             border-top-color: var(--violet);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        .thinking-steps {
+        
+        .ai-thinking-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--violet);
+        }
+        .ai-thinking-steps {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            font-size: 11.5px;
+            font-size: 12px;
             color: var(--text-muted);
         }
-
-        .thinking-step {
+        .ai-step-item {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            transition: all 0.3s ease;
         }
-
-        .step-bullet {
-            width: 5px;
-            height: 5px;
+        .ai-step-dot {
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            background: #cbd5e1;
+            background: #d6d3d1;
+        }
+        .ai-step-item.active .ai-step-dot {
+            background: var(--violet);
+            animation: pulse 1s infinite;
+        }
+        .ai-step-item.active {
+            color: var(--text);
+            font-weight: 600;
         }
 
-        .thinking-step.active .step-bullet { background: var(--violet); }
-        .thinking-step.active { color: var(--text-main); font-weight: 600; }
-
-        /* 📱 Line-by-line Order Builder */
-        .builder-box {
-            background: #f8fafc;
-            border: 1px solid var(--border);
+        /* 📱 Line-by-line Order Builder (100% Mobile Responsive) */
+        .order-builder-wrap {
+            background: var(--input-bg);
+            border: 1px solid #e7e5e4;
             border-radius: 16px;
             padding: 14px;
             margin-top: 14px;
             display: none;
+            box-sizing: border-box;
+            width: 100%;
         }
-
-        .builder-title {
-            font-size: 12.5px;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 10px;
-        }
-
-        .builder-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .builder-item-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 10px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .builder-row-1 {
+        .order-builder-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .order-builder-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
         }
 
-        .builder-name-input {
+        .order-lines-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        .order-line-card {
+            background: #fff;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid #e7e5e4;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .order-line-row-1 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            width: 100%;
+        }
+        .order-line-name-input {
             flex: 1;
             border: none;
             outline: none;
             font-size: 13px;
             font-family: inherit;
-            font-weight: 700;
-            color: var(--text-main);
+            color: var(--text);
+            font-weight: 600;
             background: transparent;
+            padding: 2px 0;
+            box-sizing: border-box;
+            width: 100%;
         }
-
-        .builder-del-btn {
+        .order-line-del-btn {
             background: none;
             border: none;
             color: var(--text-light);
             font-size: 18px;
             cursor: pointer;
-            line-height: 1;
             padding: 0 4px;
+            line-height: 1;
+            flex-shrink: 0;
         }
-        .builder-del-btn:hover { color: #ef4444; }
+        .order-line-del-btn:hover { color: var(--error); }
 
-        .builder-row-2 {
+        .order-line-row-2 {
             display: flex;
             align-items: center;
             gap: 8px;
             justify-content: space-between;
+            width: 100%;
+            box-sizing: border-box;
         }
-
-        .builder-qty-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
+        .order-count-badge {
             display: flex;
             align-items: center;
             gap: 4px;
             flex-shrink: 0;
         }
-
-        .builder-qty-input {
-            width: 44px;
-            padding: 4px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 11.5px;
-            font-weight: 700;
-            text-align: center;
-            font-family: inherit;
-            outline: none;
-        }
-
-        .builder-select {
-            flex: 1;
-            padding: 5px 8px;
-            background: var(--input-bg);
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
+        .order-count-label {
             font-size: 11px;
-            font-weight: 700;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .order-count-num-input {
+            width: 44px;
+            padding: 5px 2px;
+            border: 1px solid #e7e5e4;
+            border-radius: 8px;
+            font-size: 12px;
             font-family: inherit;
-            color: var(--text-main);
+            text-align: center;
             outline: none;
+            box-sizing: border-box;
+        }
+        .order-tag-selector {
+            flex: 1;
+            width: 100%;
+            padding: 6px 8px;
+            background: #f5f5f4;
+            border: 1px solid #e7e5e4;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--text);
+            cursor: pointer;
+            outline: none;
+            box-sizing: border-box;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
-        /* 💡 Recommendation Box */
-        .rec-box {
-            background: #ecfdf5;
-            border: 1px solid #a7f3d0;
+        /* 💡 Caja de Recomendación y Razonamiento */
+        .ai-recommendation-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
             border-radius: 12px;
             padding: 10px 12px;
-            margin-bottom: 10px;
-            font-size: 11.5px;
-            color: #065f46;
-            line-height: 1.4;
+            margin-bottom: 12px;
             display: none;
+            font-size: 12px;
+            color: #166534;
+            line-height: 1.45;
         }
-
-        .rec-head {
-            font-weight: 800;
+        .ai-recommendation-title {
+            font-weight: 700;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
-            gap: 5px;
-            margin-bottom: 3px;
+            gap: 6px;
         }
 
-        .btn-add-line-dashed {
-            width: 100%;
-            padding: 7px;
+        .btn-add-line {
+            padding: 8px 12px;
             background: transparent;
-            border: 1px dashed #cbd5e1;
+            border: 1px dashed #d6d3d1;
             border-radius: 10px;
-            font-size: 11.5px;
-            font-weight: 700;
+            font-size: 12px;
+            font-weight: 600;
             font-family: inherit;
             color: var(--text-muted);
             cursor: pointer;
-            margin-bottom: 10px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 4px;
+            gap: 6px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
         }
-        .btn-add-line-dashed:hover { background: #e2e8f0; color: var(--text-main); }
+        .btn-add-line:hover { background: #e7e5e4; color: var(--text); }
 
-        .builder-actions-group {
+        .order-builder-actions {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-
-        .btn-exec-proj {
+        .btn-builder-exec {
             flex: 1;
-            padding: 11px;
+            padding: 12px;
             background: var(--emerald);
-            color: #ffffff;
+            color: #fff;
             border: none;
             border-radius: 12px;
-            font-size: 12.5px;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: inherit;
-        }
-        .btn-exec-proj:hover { background: var(--emerald-hover); }
-
-        .btn-cancel-proj {
-            padding: 11px 12px;
-            background: transparent;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            font-size: 12.5px;
+            font-size: 13px;
             font-weight: 600;
-            color: var(--text-muted);
             cursor: pointer;
-            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        .btn-builder-exec:hover { background: var(--emerald-hover); }
+        .btn-builder-cancel {
+            padding: 12px 14px;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid #e7e5e4;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
-        /* Status & Progress */
-        .status-wrap {
+        /* Status Bar & Explanatory Note */
+        .status-container {
             margin-top: 14px;
             display: none;
         }
 
-        .progress-track {
+        .progress-bar-wrap {
             width: 100%;
-            height: 5px;
-            background: #e2e8f0;
-            border-radius: 5px;
+            height: 6px;
+            background: #e7e5e4;
+            border-radius: 6px;
             overflow: hidden;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
-
-        .progress-bar-inner {
+        .progress-bar-fill {
             height: 100%;
             width: 0%;
             background: var(--emerald);
             transition: width 0.3s ease;
         }
 
-        .status-badge {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-radius: 10px;
-            padding: 10px 12px;
+        .status-bar {
+            background: rgba(5, 150, 105, 0.06);
+            border: 1px solid rgba(5, 150, 105, 0.12);
+            border-radius: 12px;
+            padding: 12px 14px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .status-badge.error { background: #fef2f2; border-color: #fecaca; }
-        .status-badge.loading { background: #eef2ff; border-color: #c7d2fe; }
+        .status-bar.error {
+            background: rgba(239, 68, 68, 0.06);
+            border-color: rgba(239, 68, 68, 0.18);
+        }
 
-        .status-dot-pulse {
-            width: 7px;
-            height: 7px;
+        .status-bar.loading {
+            background: rgba(124, 58, 237, 0.06);
+            border-color: rgba(124, 58, 237, 0.18);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             background: var(--emerald);
-            animation: pulse 1.8s infinite;
+            animation: pulse 2s infinite;
             flex-shrink: 0;
         }
 
-        .status-badge.error .status-dot-pulse { background: #ef4444; animation: none; }
-        .status-badge.loading .status-dot-pulse { background: var(--violet); }
+        .status-bar.error .status-dot { background: var(--error); animation: none; }
+        .status-bar.loading .status-dot { background: var(--violet); }
 
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
 
-        .status-msg {
-            font-size: 11.5px;
-            font-weight: 700;
-            color: #065f46;
+        .status-text {
+            font-size: 12px;
+            color: var(--emerald);
+            font-weight: 600;
             flex: 1;
         }
 
-        .status-badge.error .status-msg { color: #b91c1c; }
-        .status-badge.loading .status-msg { color: #3730a3; }
+        .status-bar.error .status-text { color: var(--error); }
+        .status-bar.loading .status-text { color: var(--violet); }
 
-        .status-detail-note {
+        .status-note {
             font-size: 11px;
             color: var(--text-muted);
-            margin-top: 4px;
-            line-height: 1.35;
+            margin-top: 6px;
+            padding: 0 4px;
+            line-height: 1.4;
             display: none;
         }
 
-        /* Modal */
-        .modal-bg {
+        /* Modal Info */
+        .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.4);
+            background: rgba(0,0,0,0.4);
             backdrop-filter: blur(4px);
             display: none;
             align-items: center;
@@ -725,158 +790,166 @@
             z-index: 1000;
             padding: 16px;
         }
-
-        .modal-inner {
-            background: #ffffff;
+        .modal-card {
+            background: #fff;
             width: 100%;
-            max-width: 440px;
+            max-width: 480px;
             border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+            padding: 22px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: fadeIn 0.2s ease;
         }
-
-        .modal-top {
+        .modal-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
-
-        .modal-heading { font-size: 14.5px; font-weight: 800; }
-        .modal-x { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); }
-        .modal-body { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
-        .modal-body p { margin-bottom: 8px; }
-        .modal-body ul { margin-left: 16px; margin-bottom: 8px; }
+        .modal-title { font-size: 15px; font-weight: 700; }
+        .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); }
+        .modal-content-text { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+        .modal-content-text p { margin-bottom: 10px; }
+        .modal-content-text ul { margin-left: 18px; margin-bottom: 10px; }
+        .modal-content-text li { margin-bottom: 4px; }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="logo-icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            <div class="logo-box">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
             </div>
             <h1>Descargador Universal</h1>
-            <p class="subtitle">Motor central de recursos para creadores y editores</p>
+            <p class="subtitle">El motor central para todas tus descargas de proyectos de edición</p>
         </div>
 
-        <!-- Navigation Tabs -->
-        <div class="tabs-nav">
-            <button class="tab-btn active" onclick="setTab('pinterest')" id="tbtn-pinterest">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('pinterest')" id="tab-pinterest">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
                 Pinterest
             </button>
-            <button class="tab-btn" onclick="setTab('audio')" id="tbtn-audio">
+            <button class="tab-btn" onclick="switchTab('audio')" id="tab-audio">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
                 Audio Inteligente
             </button>
-            <button class="tab-btn" onclick="setTab('orders')" id="tbtn-orders">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <button class="tab-btn" onclick="switchTab('orders')" id="tab-orders">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 3l1.912 5.885L19.798 10.8 13.912 12.715 12 18.6 10.088 12.715 4.202 10.8l5.886-1.915L12 3z"/><path d="M5 3l.956 2.942L8.899 6.9 5.956 7.857 5 10.8l-.956-2.943L1.101 6.9l2.943-.958L5 3z"/></svg>
                 Órdenes IA
             </button>
         </div>
 
-        <!-- ================= Pinterest Panel ================= -->
-        <div class="panel active" id="pnl-pinterest">
+        <!-- Pinterest Panel -->
+        <div class="panel active" id="panel-pinterest">
             <div class="card">
-                <div class="module-head">
-                    <div class="module-badge pin">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
-                    </div>
-                    <div>
-                        <div class="module-title">Pinterest Avanzado</div>
-                        <div class="module-sub">Fotos y videos en calidad original por pin, tablero o temática</div>
+                <div class="module-header">
+                    <div class="module-header-left">
+                        <div class="module-icon pinterest">
+                            <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
+                        </div>
+                        <div>
+                            <div class="module-title">Pinterest Avanzado</div>
+                            <div class="module-desc">Descarga individual, tableros enteros o búsquedas temáticas</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mode-toggles">
-                    <button class="mode-btn active" onclick="setPinType('individual', this)">Individual</button>
-                    <button class="mode-btn" onclick="setPinType('tablero', this)">Tablero</button>
-                    <button class="mode-btn" onclick="setPinType('tematica', this)">Temática</button>
+                <div class="toggle-group" id="pin-toggles">
+                    <button class="toggle-btn active" onclick="setPinMode('individual', this)">Individual</button>
+                    <button class="toggle-btn" onclick="setPinMode('tablero', this)">Tablero</button>
+                    <button class="toggle-btn" onclick="setPinMode('tematica', this)">Temática</button>
                 </div>
 
-                <div class="input-group">
-                    <span class="input-icon-left">
+                <div class="input-wrap">
+                    <span class="input-icon">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                     </span>
-                    <input type="text" id="pin-input" class="main-input" placeholder="Pega el enlace del pin individual...">
+                    <input type="text" id="pin-input" class="url-input pinterest" placeholder="Pega el enlace del pin individual...">
                 </div>
 
-                <div class="filters-grid" id="pin-filters-wrap" style="display:none;">
-                    <div class="filter-col">
+                <!-- Filters Row -->
+                <div class="filters three" id="pin-filters-wrap" style="display: none;">
+                    <div>
                         <label class="filter-label">Formato</label>
-                        <select id="pin-format" class="filter-field">
+                        <select id="pin-format" class="filter-select">
                             <option value="any">Cualquiera</option>
                             <option value="vertical">Vertical (9:16)</option>
                             <option value="horizontal">Horizontal (16:9)</option>
                             <option value="cuadrado">Cuadrado (1:1)</option>
                         </select>
                     </div>
-                    <div class="filter-col">
-                        <label class="filter-label">Tipo de Medio</label>
-                        <select id="pin-media" class="filter-field">
+                    <div>
+                        <label class="filter-label">Tipo</label>
+                        <select id="pin-type" class="filter-select">
                             <option value="both">Ambos (Fotos y Videos)</option>
                             <option value="photos">Solo Fotos</option>
                             <option value="videos">Solo Videos</option>
                         </select>
                     </div>
-                    <div class="filter-col" id="pin-qty-col" style="display:none; grid-column: span 2;">
-                        <label class="filter-label">Cantidad a Descargar</label>
-                        <input type="number" id="pin-qty" class="filter-field" min="1" max="100" value="10">
+                    <div id="pin-count-box" style="display: none;">
+                        <label class="filter-label">Cantidad</label>
+                        <input type="number" id="pin-count" class="filter-input" min="1" max="100" value="1">
                     </div>
                 </div>
 
-                <div class="action-row">
-                    <button class="btn-main pin-btn" onclick="execPinterestDownload()">
+                <!-- Action Buttons Row with Passive ZIP Switch -->
+                <div class="actions-row">
+                    <button class="btn-action pinterest" onclick="downloadPinterest()">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         Descargar de Pinterest
                     </button>
-                    <button class="btn-zip-switch" id="zip-btn-pin" onclick="toggleGlobalZip()" title="Compresión ZIP automática (solo si son 2 o más archivos)">
+                    <button class="zip-toggle-btn" onclick="toggleZipSwitch(this)" title="Compresión ZIP automática (solo si son 2 o más archivos)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                        <span>ZIP Auto</span>
+                        ZIP
                     </button>
                 </div>
 
-                <div class="status-wrap" id="pin-status-wrap">
-                    <div class="progress-track"><div class="progress-bar-inner" id="pin-bar"></div></div>
-                    <div class="status-badge" id="pin-badge">
-                        <div class="status-dot-pulse"></div>
-                        <div class="status-msg" id="pin-msg">Listo</div>
+                <div class="status-container" id="pin-status-container">
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" id="pin-progress"></div>
                     </div>
-                    <div class="status-detail-note" id="pin-note"></div>
+                    <div class="status-bar" id="pin-status-bar">
+                        <div class="status-dot"></div>
+                        <div class="status-text" id="pin-status-text">Listo</div>
+                    </div>
+                    <div class="status-note" id="pin-status-note"></div>
                 </div>
             </div>
         </div>
 
-        <!-- ================= Audio Panel ================= -->
-        <div class="panel" id="pnl-audio">
+        <!-- Audio Panel -->
+        <div class="panel" id="panel-audio">
             <div class="card">
-                <div class="module-head">
-                    <div class="module-badge audio">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
-                    </div>
-                    <div>
-                        <div class="module-title">Audio Inteligente</div>
-                        <div class="module-sub">Descarga MP3 a 192kbps con velocidad modificable y anticopyright</div>
+                <div class="module-header">
+                    <div class="module-header-left">
+                        <div class="module-icon audio">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
+                        </div>
+                        <div>
+                            <div class="module-title">Audio Inteligente</div>
+                            <div class="module-desc">Descarga MP3 a 192kbps con velocidad modificable y anticopyright</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <span class="input-icon-left">
+                <div class="input-wrap">
+                    <span class="input-icon">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                     </span>
-                    <input type="text" id="audio-input" class="main-input" placeholder="Pega enlace de YouTube, TikTok o escribe el nombre...">
+                    <input type="text" id="audio-input" class="url-input audio" placeholder="Pega el enlace de YouTube, TikTok o escribe el nombre...">
                 </div>
 
-                <!-- 2x2 Clean Grid on Mobile -->
-                <div class="filters-grid">
-                    <div class="filter-col">
+                <div class="filters four">
+                    <div>
                         <label class="filter-label">Cantidad</label>
-                        <input type="number" id="audio-qty" class="filter-field" min="1" max="50" value="1">
+                        <input type="number" id="audio-count" class="filter-input" min="1" max="50" value="1">
                     </div>
-                    <div class="filter-col">
+                    <div>
                         <label class="filter-label">Velocidad / Tono</label>
-                        <select id="audio-speed" class="filter-field">
+                        <select id="audio-speed" class="filter-select">
                             <option value="1.0">1.0x (Normal)</option>
                             <option value="1.06">1.06x (Anticopyright)</option>
                             <option value="1.25">1.25x</option>
@@ -884,17 +957,17 @@
                             <option value="2.0">2.0x</option>
                         </select>
                     </div>
-                    <div class="filter-col">
+                    <div>
                         <label class="filter-label">Calidad</label>
-                        <select id="audio-quality" class="filter-field">
+                        <select id="audio-quality" class="filter-select">
                             <option value="320">320 kbps</option>
                             <option value="192" selected>192 kbps</option>
                             <option value="128">128 kbps</option>
                         </select>
                     </div>
-                    <div class="filter-col">
+                    <div>
                         <label class="filter-label">Formato</label>
-                        <select id="audio-fmt" class="filter-field">
+                        <select id="audio-format" class="filter-select">
                             <option value="mp3" selected>MP3</option>
                             <option value="m4a">M4A</option>
                             <option value="wav">WAV</option>
@@ -902,20 +975,20 @@
                     </div>
                 </div>
 
-                <div class="action-row">
-                    <button class="btn-main audio-btn" onclick="execAudioDownload()">
+                <div class="actions-row">
+                    <button class="btn-action audio" onclick="downloadAudio()">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         Descargar Audio
                     </button>
-                    <button class="btn-zip-switch" id="zip-btn-audio" onclick="toggleGlobalZip()" title="Compresión ZIP automática (solo si son 2 o más archivos)">
+                    <button class="zip-toggle-btn" onclick="toggleZipSwitch(this)" title="Compresión ZIP automática (solo si son 2 o más archivos)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                        <span>ZIP Auto</span>
+                        ZIP
                     </button>
                 </div>
 
-                <input type="file" id="excel-hidden-input" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleExcelUpload(this)">
+                <input type="file" id="excel-file-hidden" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleExcelUpload(this)">
 
-                <button class="btn-excel-full" onclick="document.getElementById('excel-hidden-input').click()">
+                <button class="btn-excel" onclick="document.getElementById('excel-file-hidden').click()">
                     <svg viewBox="0 0 32 32" fill="none">
                         <rect x="2" y="4" width="28" height="24" rx="4" fill="#107C41"/>
                         <path d="M19.5 8H26C26.55 8 27 8.45 27 9V23C27 23.55 26.55 24 26 24H19.5V8Z" fill="#185C37"/>
@@ -925,111 +998,127 @@
                     Descargar MP3 desde Excel / CSV
                 </button>
 
-                <div class="status-wrap" id="audio-status-wrap">
-                    <div class="progress-track"><div class="progress-bar-inner" id="audio-bar"></div></div>
-                    <div class="status-badge" id="audio-badge">
-                        <div class="status-dot-pulse"></div>
-                        <div class="status-msg" id="audio-msg">Listo</div>
+                <div class="status-container" id="audio-status-container">
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" id="audio-progress"></div>
                     </div>
-                    <div class="status-detail-note" id="audio-note"></div>
+                    <div class="status-bar" id="audio-status-bar">
+                        <div class="status-dot"></div>
+                        <div class="status-text" id="audio-status-text">Listo</div>
+                    </div>
+                    <div class="status-note" id="audio-status-note"></div>
                 </div>
             </div>
         </div>
 
-        <!-- ================= Orders IA Panel ================= -->
-        <div class="panel" id="pnl-orders">
+        <!-- Orders Panel -->
+        <div class="panel" id="panel-orders">
             <div class="card">
-                <div class="module-head">
-                    <div class="module-badge orders">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    </div>
-                    <div>
-                        <div class="module-title">
-                            Asistente de Órdenes IA
-                            <button class="btn-info-icon" onclick="openModal()" title="Más información">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                            </button>
+                <div class="module-header">
+                    <div class="module-header-left">
+                        <div class="module-icon orders">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 3l1.912 5.885L19.798 10.8 13.912 12.715 12 18.6 10.088 12.715 4.202 10.8l5.886-1.915L12 3z"/><path d="M5 3l.956 2.942L8.899 6.9 5.956 7.857 5 10.8l-.956-2.943L1.101 6.9l2.943-.958L5 3z"/></svg>
                         </div>
-                        <div class="module-sub">Genera proyectos de edición completos con contexto musical y visual</div>
+                        <div>
+                            <div class="module-title">
+                                Asistente de Órdenes IA
+                                <button class="btn-info-circle" onclick="openInfoModal()" title="Más información">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                </button>
+                            </div>
+                            <div class="module-desc">Genera lotes de recursos organizados con contexto musical y visual</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <input type="text" id="order-prompt-input" class="main-input with-mic" placeholder="Ej: video de cumpleaños 20 fotos de memes y tres musicas de tristeza...">
-                    <button class="mic-btn" id="mic-trigger" onclick="toggleVoiceRecording()" title="Dictar por voz">
+                <!-- Voice Input Box with integrated Mic -->
+                <div class="voice-input-wrap">
+                    <input type="text" id="order-prompt" class="url-input" placeholder="Ej: video de cumpleaños 20 fotos de memes y tres musicas de tristeza...">
+                    <button class="mic-inline-btn" id="mic-btn" onclick="toggleMic()" title="Dictar por micrófono">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                     </button>
                 </div>
 
-                <div class="action-row">
-                    <button class="btn-main orders-btn" onclick="execGenerateOrder()">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        Generar con Gemini 3.7
+                <div class="actions-row">
+                    <button class="btn-action orders" onclick="generateAIOrderLines()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Generar Orden con IA (Gemini 3.7)
                     </button>
-                    <button class="btn-zip-switch" id="zip-btn-orders" onclick="toggleGlobalZip()" title="Compresión ZIP automática (solo si son 2 o más archivos)">
+                    <button class="zip-toggle-btn" onclick="toggleZipSwitch(this)" title="Compresión ZIP automática (solo si son 2 o más archivos)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                        <span>ZIP Auto</span>
+                        ZIP
                     </button>
                 </div>
 
-                <!-- Thinking Process Animation -->
-                <div class="thinking-card" id="thinking-card">
-                    <div class="thinking-header">
-                        <div class="thinking-spinner"></div>
-                        <span>Gemini 3.7 razonando tu pedido audiovisual...</span>
+                <!-- ✨ AI Thinking Process Animation Container -->
+                <div class="ai-thinking-box" id="ai-thinking-box">
+                    <div class="ai-thinking-header">
+                        <div class="ai-thinking-spinner"></div>
+                        <div class="ai-thinking-title">Cerebro IA razonando tu solicitud...</div>
                     </div>
-                    <div class="thinking-steps">
-                        <div class="thinking-step active" id="t-step-1">
-                            <div class="step-bullet"></div>
-                            <span>Comprendiendo temática y vibra emocional del video...</span>
+                    <div class="ai-thinking-steps">
+                        <div class="ai-step-item active" id="step-1">
+                            <div class="ai-step-dot"></div>
+                            <span>Analizando temática y contexto visual de edición...</span>
                         </div>
-                        <div class="thinking-step" id="t-step-2">
-                            <div class="step-bullet"></div>
-                            <span>Seleccionando canciones reales con artista y título exactos...</span>
+                        <div class="ai-step-item" id="step-2">
+                            <div class="ai-step-dot"></div>
+                            <span>Desglosando canciones individuales reales por artista y título...</span>
                         </div>
-                        <div class="thinking-step" id="t-step-3">
-                            <div class="step-bullet"></div>
-                            <span>Estructurando formatos visuales (9:16 vertical, 1:1 cuadrada)...</span>
+                        <div class="ai-step-item" id="step-3">
+                            <div class="ai-step-dot"></div>
+                            <span>Optimizando relaciones de aspecto (9:16 vertical, 1:1 cuadrada)...</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Line-by-Line Order Builder -->
-                <div class="builder-box" id="builder-box">
-                    <div class="builder-title">Recursos del Proyecto (Editables)</div>
+                <!-- 📱 Line-by-line Order Builder (100% Mobile Responsive) -->
+                <div class="order-builder-wrap" id="order-builder-wrap">
+                    <div class="order-builder-header">
+                        <div class="order-builder-title">Elementos de la Orden (Editables)</div>
+                    </div>
                     
-                    <div class="builder-list" id="builder-list"></div>
+                    <div class="order-lines-list" id="order-lines-list">
+                        <!-- Dynamic responsive items -->
+                    </div>
 
-                    <button class="btn-add-line-dashed" onclick="addNewLineItem()">
+                    <button class="btn-add-line" onclick="addNewOrderLine()">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         Agregar otra línea
                     </button>
 
-                    <div class="rec-box" id="rec-box">
-                        <div class="rec-head">
+                    <!-- 💡 Caja de Recomendación y Razonamiento -->
+                    <div class="ai-recommendation-box" id="ai-recommendation-box">
+                        <div class="ai-recommendation-title">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                            Recomendación Creativa IA
+                            Recomendación de la IA
                         </div>
-                        <div id="rec-text"></div>
+                        <div id="ai-recommendation-text"></div>
                     </div>
 
-                    <div class="builder-actions-group">
-                        <button class="btn-exec-proj" onclick="execDownloadProject()">
-                            Iniciar Descarga del Proyecto
+                    <div class="order-builder-actions">
+                        <button class="btn-builder-exec" onclick="executeCustomOrderProject()">
+                            Iniciar Descarga del Proyecto Completo
                         </button>
-                        <button class="btn-cancel-proj" onclick="hideBuilder()">
+                        <button class="zip-toggle-btn" onclick="toggleZipSwitch(this)" title="Compresión ZIP automática (solo si son 2 o más archivos)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                            ZIP
+                        </button>
+                        <button class="btn-builder-cancel" onclick="closeOrderBuilder()">
                             Cancelar
                         </button>
                     </div>
                 </div>
 
-                <div class="status-wrap" id="orders-status-wrap">
-                    <div class="progress-track"><div class="progress-bar-inner" id="orders-bar"></div></div>
-                    <div class="status-badge" id="orders-badge">
-                        <div class="status-dot-pulse"></div>
-                        <div class="status-msg" id="orders-msg">Listo</div>
+                <div class="status-container" id="orders-status-container">
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" id="orders-progress"></div>
                     </div>
-                    <div class="status-detail-note" id="orders-note"></div>
+                    <div class="status-bar" id="orders-status-bar">
+                        <div class="status-dot"></div>
+                        <div class="status-text" id="orders-status-text">Listo</div>
+                    </div>
+                    <div class="status-note" id="orders-status-note"></div>
                 </div>
             </div>
         </div>
@@ -1037,46 +1126,40 @@
     </div>
 
     <!-- Info Modal -->
-    <div class="modal-bg" id="info-modal">
-        <div class="modal-inner">
-            <div class="modal-top">
-                <div class="modal-heading">¿Qué son las Órdenes de IA?</div>
-                <button class="modal-x" onclick="closeModal()">&times;</button>
+    <div class="modal-overlay" id="info-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">¿Qué son las Órdenes de IA?</div>
+                <button class="modal-close" onclick="closeInfoModal()">&times;</button>
             </div>
-            <div class="modal-body">
-                <p>Las <strong>Órdenes de Inteligencia Artificial</strong> interpretan tu lenguaje natural y crean automáticamente el paquete de edición perfecto para tu video:</p>
+            <div class="modal-content-text">
+                <p><strong>Órdenes de Inteligencia Artificial:</strong> Es una potente herramienta diseñada para obtener lotes completos de videos, audios e imágenes en una sola carpeta organizada para tus <strong>proyectos de edición</strong>.</p>
+                <p><strong>Ejemplos de lo que puedes pedir:</strong></p>
                 <ul>
                     <li><code>video de cumpleaños 20 fotos de memes y tres musicas de tristeza a 1.06x</code></li>
-                    <li><code>50 videos verticales de carreras de autos</code></li>
+                    <li><code>50 videos Verticales (9:16) de Cumpleaños</code></li>
                     <li><code>Mana Te llore un rio mp3 1.06x</code></li>
                 </ul>
-                <p>Cada línea cuenta con selectores interactivos para cambiar el formato, velocidad o tipo de archivo antes de descargar.</p>
+                <p>Cada línea generada cuenta con su propio selector interactivo contextual para ajustar el tipo, la relación de aspecto o la velocidad antes de ejecutar la descarga.</p>
+                <p style="font-size: 11px; color: var(--text-light);"><em>Nota: Las canciones y videos sugeridos son seleccionados contextualmente por la IA para que coincidan con la emoción y temática de tu video.</em></p>
             </div>
         </div>
     </div>
 
     <script>
         let currentPinMode = 'individual';
-        let isZipActive = true;
-        let isRecording = false;
-        let speechRecognizer = null;
-        let orderItemsList = [];
+        let isZipActive = true; // Activo por defecto con inteligencia automática
+        let isListening = false;
+        let recognition = null;
+        let currentOrderItems = [];
 
-        function toggleGlobalZip() {
+        function toggleZipSwitch(btn) {
             isZipActive = !isZipActive;
-            const buttons = [
-                document.getElementById('zip-btn-pin'),
-                document.getElementById('zip-btn-audio'),
-                document.getElementById('zip-btn-orders')
-            ];
-            buttons.forEach(b => {
-                if (!b) return;
+            document.querySelectorAll('.zip-toggle-btn').forEach(b => {
                 if (isZipActive) {
-                    b.classList.remove('off');
-                    b.querySelector('span').innerText = 'ZIP Auto';
+                    b.classList.remove('inactive');
                 } else {
-                    b.classList.add('off');
-                    b.querySelector('span').innerText = 'ZIP Off';
+                    b.classList.add('inactive');
                 }
             });
         }
@@ -1084,111 +1167,118 @@
         function triggerSmartDownload(data) {
             const total = data.total || 1;
             
-            // 📁 Regla 1 Archivo: NUNCA genera zip
+            // 🧠 Regla Inteligente: Si es 1 solo archivo -> NUNCA hace zip, descarga directa
             if (total === 1) {
-                const url = data.download_url || (data.files && data.files[0]) || data.zip_url;
-                if (url) window.location.href = url;
+                const directUrl = data.download_url || (data.files && data.files[0]) || data.zip_url;
+                if (directUrl) {
+                    window.location.href = directUrl;
+                }
                 return;
             }
 
-            // 📦 Múltiples Archivos:
+            // 🧠 Si son múltiples archivos:
             if (isZipActive && data.zip_url) {
+                // Descargar el archivo ZIP maestro
                 window.location.href = data.zip_url;
             } else if (data.files && data.files.length > 0) {
-                data.files.forEach((fUrl, i) => {
+                // Descargar todos los archivos sueltos en ráfaga
+                data.files.forEach((fileUrl, index) => {
                     setTimeout(() => {
-                        const link = document.createElement('a');
-                        link.href = fUrl;
-                        link.download = '';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    }, i * 250);
+                        const a = document.createElement('a');
+                        a.href = fileUrl;
+                        a.download = '';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }, index * 250);
                 });
             }
         }
 
-        function openModal() { document.getElementById('info-modal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('info-modal').style.display = 'none'; }
+        function openInfoModal() { document.getElementById('info-modal').style.display = 'flex'; }
+        function closeInfoModal() { document.getElementById('info-modal').style.display = 'none'; }
 
-        function setTab(tab) {
+        function switchTab(tab) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            const targetPanel = document.getElementById('pnl-' + tab);
-            if (targetPanel) targetPanel.classList.add('active');
+            const activePanel = document.getElementById('panel-' + tab);
+            if(activePanel) activePanel.classList.add('active');
 
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            const targetBtn = document.getElementById('tbtn-' + tab);
-            if (targetBtn) targetBtn.classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+            const activeBtn = document.getElementById('tab-' + tab);
+            if(activeBtn) activeBtn.classList.add('active');
         }
 
-        function setPinType(type, btn) {
-            currentPinMode = type;
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        function setPinMode(mode, btn) {
+            currentPinMode = mode;
+            document.querySelectorAll('#pin-toggles .toggle-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
+            
             const input = document.getElementById('pin-input');
             const filtersWrap = document.getElementById('pin-filters-wrap');
-            const qtyCol = document.getElementById('pin-qty-col');
+            const countBox = document.getElementById('pin-count-box');
 
-            if (type === 'individual') {
+            if(mode === 'individual') {
                 input.placeholder = "Pega el enlace del pin individual...";
                 filtersWrap.style.display = 'none';
-                qtyCol.style.display = 'none';
-            } else if (type === 'tablero') {
+                countBox.style.display = 'none';
+            } else if (mode === 'tablero') {
                 input.placeholder = "Pega el enlace del tablero o perfil de Pinterest...";
                 filtersWrap.style.display = 'grid';
-                qtyCol.style.display = 'none';
+                countBox.style.display = 'none';
             } else {
-                input.placeholder = "Escribe una temática (ej. parejas aesthetic, autos retro)...";
+                input.placeholder = "Escribe una temática (ej. parejas vintage, autos aesthetic)...";
                 filtersWrap.style.display = 'grid';
-                qtyCol.style.display = 'block';
+                countBox.style.display = 'block';
             }
         }
 
-        function playDingSound() {
+        function playDoneSound() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const freqs = [523.25, 659.25, 783.99];
-                freqs.forEach((freq, i) => {
+                const notes = [523.25, 659.25, 783.99];
+                notes.forEach((freq, i) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
                     osc.type = 'sine';
                     osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0.12, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5 + i * 0.1);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5 + i * 0.12);
                     osc.connect(gain);
                     gain.connect(ctx.destination);
-                    osc.start(ctx.currentTime + i * 0.08);
-                    osc.stop(ctx.currentTime + 0.6 + i * 0.1);
+                    osc.start(ctx.currentTime + i * 0.1);
+                    osc.stop(ctx.currentTime + 0.7 + i * 0.12);
                 });
             } catch(e) {}
         }
 
-        async function execPinterestDownload() {
-            const query = document.getElementById('pin-input').value.trim();
+        async function downloadPinterest() {
+            const input = document.getElementById('pin-input');
+            const query = input.value.trim();
             const format = document.getElementById('pin-format').value;
-            const mediaType = document.getElementById('pin-media').value;
-            const count = document.getElementById('pin-qty').value || 1;
+            const type = document.getElementById('pin-type').value;
+            const count = document.getElementById('pin-count').value || 1;
 
-            const wrap = document.getElementById('pin-status-wrap');
-            const badge = document.getElementById('pin-badge');
-            const msg = document.getElementById('pin-msg');
-            const note = document.getElementById('pin-note');
-            const bar = document.getElementById('pin-bar');
+            const container = document.getElementById('pin-status-container');
+            const bar = document.getElementById('pin-status-bar');
+            const text = document.getElementById('pin-status-text');
+            const note = document.getElementById('pin-status-note');
+            const progress = document.getElementById('pin-progress');
 
             note.style.display = 'none';
 
             if (!query) {
-                wrap.style.display = 'block';
-                badge.className = 'status-badge error';
-                msg.innerText = 'Por favor pega un enlace o escribe un tema.';
+                container.style.display = 'block';
+                bar.className = 'status-bar error';
+                text.innerText = 'Por favor ingresa un enlace o temática.';
+                note.style.display = 'block';
+                note.innerText = 'Nota: Para descargar necesitas pegar una URL válida de Pinterest o escribir el término que deseas buscar.';
                 return;
             }
 
-            wrap.style.display = 'block';
-            badge.className = 'status-badge loading';
-            bar.style.width = '40%';
-            msg.innerText = 'Extrayendo calidad original...';
+            container.style.display = 'block';
+            bar.className = 'status-bar loading';
+            progress.style.width = '35%';
+            text.innerText = 'Buscando y extrayendo calidad original...';
 
             try {
                 const res = await fetch('/api/download_pinterest', {
@@ -1197,57 +1287,61 @@
                     body: JSON.stringify({
                         query: query,
                         format: format,
-                        media_type: mediaType,
+                        media_type: type,
                         pin_tab: currentPinMode,
                         cantidad: count
                     })
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    bar.style.width = '100%';
-                    badge.className = 'status-badge';
-                    msg.innerText = data.message;
-                    playDingSound();
+                    progress.style.width = '100%';
+                    bar.className = 'status-bar';
+                    text.innerText = data.message;
+                    playDoneSound();
                     triggerSmartDownload(data);
                 } else {
-                    bar.style.width = '0%';
-                    badge.className = 'status-badge error';
-                    msg.innerText = data.message;
+                    progress.style.width = '0%';
+                    bar.className = 'status-bar error';
+                    text.innerText = data.message;
                     if (data.note) {
                         note.style.display = 'block';
                         note.innerText = 'Nota: ' + data.note;
                     }
                 }
             } catch (err) {
-                bar.style.width = '0%';
-                badge.className = 'status-badge error';
-                msg.innerText = 'Error de conexión con el servidor.';
+                progress.style.width = '0%';
+                bar.className = 'status-bar error';
+                text.innerText = 'Error de conexión con el servidor.';
             }
         }
 
-        async function execAudioDownload() {
-            const query = document.getElementById('audio-input').value.trim();
-            const count = document.getElementById('audio-qty').value || 1;
-            const speed = document.getElementById('audio-speed').value;
+        async function downloadAudio() {
+            const input = document.getElementById('audio-input');
+            const query = input.value.trim();
+            const count = document.getElementById('audio-count').value || 1;
             const quality = document.getElementById('audio-quality').value;
-            const format = document.getElementById('audio-fmt').value;
+            const format = document.getElementById('audio-format').value;
+            const speed = document.getElementById('audio-speed').value;
 
-            const wrap = document.getElementById('audio-status-wrap');
-            const badge = document.getElementById('audio-badge');
-            const msg = document.getElementById('audio-msg');
-            const bar = document.getElementById('audio-bar');
+            const container = document.getElementById('audio-status-container');
+            const bar = document.getElementById('audio-status-bar');
+            const text = document.getElementById('audio-status-text');
+            const note = document.getElementById('audio-status-note');
+            const progress = document.getElementById('audio-progress');
+
+            note.style.display = 'none';
 
             if (!query) {
-                wrap.style.display = 'block';
-                badge.className = 'status-badge error';
-                msg.innerText = 'Por favor escribe una canción o pega un enlace.';
+                container.style.display = 'block';
+                bar.className = 'status-bar error';
+                text.innerText = 'Por favor ingresa un nombre o enlace de audio.';
                 return;
             }
 
-            wrap.style.display = 'block';
-            badge.className = 'status-badge loading';
-            bar.style.width = '45%';
-            msg.innerText = `Descargando ${count} audio(s) a ${speed}x...`;
+            container.style.display = 'block';
+            bar.className = 'status-bar loading';
+            progress.style.width = '40%';
+            text.innerText = `Extrayendo ${count} audio(s) a ${speed}x (${quality}kbps)...`;
 
             try {
                 const res = await fetch('/api/download_audio', {
@@ -1257,114 +1351,136 @@
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    bar.style.width = '100%';
-                    badge.className = 'status-badge';
-                    msg.innerText = data.message;
-                    playDingSound();
+                    progress.style.width = '100%';
+                    bar.className = 'status-bar';
+                    text.innerText = data.message;
+                    playDoneSound();
                     triggerSmartDownload(data);
                 } else {
-                    bar.style.width = '0%';
-                    badge.className = 'status-badge error';
-                    msg.innerText = data.message;
+                    progress.style.width = '0%';
+                    bar.className = 'status-bar error';
+                    text.innerText = data.message;
+                    if (data.note) {
+                        note.style.display = 'block';
+                        note.innerText = 'Nota: ' + data.note;
+                    }
                 }
             } catch (err) {
-                bar.style.width = '0%';
-                badge.className = 'status-badge error';
-                msg.innerText = 'Error al procesar el audio.';
+                progress.style.width = '0%';
+                bar.className = 'status-bar error';
+                text.innerText = 'Error al procesar el audio.';
             }
         }
 
         async function handleExcelUpload(input) {
-            if (!input.files || input.files.length === 0) return;
+            const container = document.getElementById('audio-status-container');
+            const bar = document.getElementById('audio-status-bar');
+            const text = document.getElementById('audio-status-text');
             const speed = document.getElementById('audio-speed').value;
-            const wrap = document.getElementById('audio-status-wrap');
-            const badge = document.getElementById('audio-badge');
-            const msg = document.getElementById('audio-msg');
+
+            if (!input.files || input.files.length === 0) return;
 
             const formData = new FormData();
             formData.append('file', input.files[0]);
             formData.append('speed', speed);
 
-            wrap.style.display = 'block';
-            badge.className = 'status-badge loading';
-            msg.innerText = 'Procesando lista de Excel en segundo plano...';
+            container.style.display = 'block';
+            bar.className = 'status-bar loading';
+            text.innerText = 'Procesando archivo Excel en segundo plano...';
 
             try {
                 const res = await fetch('/api/download_excel', { method: 'POST', body: formData });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    badge.className = 'status-badge';
-                    msg.innerText = data.message;
-                    playDingSound();
+                    bar.className = 'status-bar';
+                    text.innerText = data.message;
+                    playDoneSound();
                 } else {
-                    badge.className = 'status-badge error';
-                    msg.innerText = data.message;
+                    bar.className = 'status-bar error';
+                    text.innerText = data.message;
                 }
             } catch (err) {
-                badge.className = 'status-badge error';
-                msg.innerText = 'Error subiendo archivo Excel.';
+                bar.className = 'status-bar error';
+                text.innerText = 'Error al subir archivo Excel.';
             }
         }
 
-        // ================= Orders IA Engine =================
-        function toggleVoiceRecording() {
-            const micBtn = document.getElementById('mic-trigger');
-            const input = document.getElementById('order-prompt-input');
+        // ==========================================
+        // 🤖 ASISTENTE DE ÓRDENES IA CON CONTEXTO
+        // ==========================================
+        function toggleMic() {
+            const micBtn = document.getElementById('mic-btn');
+            const promptInput = document.getElementById('order-prompt');
 
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('Tu navegador no soporta dictado de voz. Puedes escribirlo directamente.');
+                alert('Tu navegador no soporta reconocimiento de voz. Puedes escribir la orden directamente.');
                 return;
             }
 
-            if (isRecording) {
-                if (speechRecognizer) speechRecognizer.stop();
-                isRecording = false;
+            if (isListening) {
+                if (recognition) recognition.stop();
+                isListening = false;
                 micBtn.classList.remove('listening');
                 return;
             }
 
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-            speechRecognizer = new SpeechRec();
-            speechRecognizer.lang = 'es-ES';
+            recognition = new SpeechRec();
+            recognition.lang = 'es-ES';
+            recognition.continuous = false;
+            recognition.interimResults = false;
 
-            speechRecognizer.onstart = () => {
-                isRecording = true;
+            recognition.onstart = () => {
+                isListening = true;
                 micBtn.classList.add('listening');
             };
 
-            speechRecognizer.onresult = (e) => {
-                input.value = e.results[0][0].transcript;
-                execGenerateOrder();
+            recognition.onresult = (e) => {
+                const transcript = e.results[0][0].transcript;
+                promptInput.value = transcript;
+                generateAIOrderLines();
             };
 
-            speechRecognizer.onerror = speechRecognizer.onend = () => {
-                isRecording = false;
+            recognition.onerror = () => {
+                isListening = false;
                 micBtn.classList.remove('listening');
             };
 
-            speechRecognizer.start();
+            recognition.onend = () => {
+                isListening = false;
+                micBtn.classList.remove('listening');
+            };
+
+            recognition.start();
         }
 
-        async function execGenerateOrder() {
-            const prompt = document.getElementById('order-prompt-input').value.trim();
+        async function generateAIOrderLines() {
+            const prompt = document.getElementById('order-prompt').value.trim();
             if (!prompt) return;
 
-            const thinkingCard = document.getElementById('thinking-card');
-            const builderBox = document.getElementById('builder-box');
+            const thinkingBox = document.getElementById('ai-thinking-box');
+            const builderWrap = document.getElementById('order-builder-wrap');
+            
+            builderWrap.style.display = 'none';
+            thinkingBox.style.display = 'block';
 
-            builderBox.style.display = 'none';
-            thinkingCard.style.display = 'block';
+            const step1 = document.getElementById('step-1');
+            const step2 = document.getElementById('step-2');
+            const step3 = document.getElementById('step-3');
 
-            const s1 = document.getElementById('t-step-1');
-            const s2 = document.getElementById('t-step-2');
-            const s3 = document.getElementById('t-step-3');
+            step1.className = 'ai-step-item active';
+            step2.className = 'ai-step-item';
+            step3.className = 'ai-step-item';
 
-            s1.className = 'thinking-step active';
-            s2.className = 'thinking-step';
-            s3.className = 'thinking-step';
+            const timerStep2 = setTimeout(() => {
+                step1.className = 'ai-step-item';
+                step2.className = 'ai-step-item active';
+            }, 600);
 
-            const t2 = setTimeout(() => { s1.className = 'thinking-step'; s2.className = 'thinking-step active'; }, 500);
-            const t3 = setTimeout(() => { s2.className = 'thinking-step'; s3.className = 'thinking-step active'; }, 1000);
+            const timerStep3 = setTimeout(() => {
+                step2.className = 'ai-step-item';
+                step3.className = 'ai-step-item active';
+            }, 1200);
 
             try {
                 const res = await fetch('/api/ai_order_assistant', {
@@ -1374,63 +1490,66 @@
                 });
                 const data = await res.json();
                 
-                clearTimeout(t2); clearTimeout(t3);
-
+                clearTimeout(timerStep2);
+                clearTimeout(timerStep3);
+                
                 setTimeout(() => {
-                    thinkingCard.style.display = 'none';
+                    thinkingBox.style.display = 'none';
                     if (data.status === 'success') {
-                        orderItemsList = data.items;
-
-                        const recBox = document.getElementById('rec-box');
-                        const recText = document.getElementById('rec-text');
+                        currentOrderItems = data.items;
+                        
+                        const recBox = document.getElementById('ai-recommendation-box');
+                        const recText = document.getElementById('ai-recommendation-text');
                         if (data.recommendation) {
                             recBox.style.display = 'block';
                             recText.innerText = data.recommendation;
                         } else {
                             recBox.style.display = 'none';
                         }
-
-                        builderBox.style.display = 'block';
-                        renderBuilderRows();
+                        
+                        builderWrap.style.display = 'block';
+                        renderOrderLines();
                     }
-                }, 1200);
+                }, 1400);
 
             } catch (err) {
-                clearTimeout(t2); clearTimeout(t3);
-                thinkingCard.style.display = 'none';
-                alert('Error conectando con el Asistente IA.');
+                clearTimeout(timerStep2);
+                clearTimeout(timerStep3);
+                thinkingBox.style.display = 'none';
+                alert('Error al conectar con el Asistente IA.');
             }
         }
 
-        function renderBuilderRows() {
-            const list = document.getElementById('builder-list');
+        function renderOrderLines() {
+            const list = document.getElementById('order-lines-list');
             list.innerHTML = '';
 
-            orderItemsList.forEach((itm, idx) => {
+            currentOrderItems.forEach((itm, idx) => {
                 const card = document.createElement('div');
-                card.className = 'builder-item-card';
+                card.className = 'order-line-card';
+                
+                const isAudioItem = itm.type === 'audio';
+                const isVideoItem = itm.type === 'video';
+                const isPhotoItem = itm.type === 'photo';
 
-                const isAudio = itm.type === 'audio';
-                const isVideo = itm.type === 'video';
-
-                let optionsHtml = '';
-                if (isAudio) {
-                    optionsHtml = `
+                let selectorOptionsHtml = '';
+                if (isAudioItem) {
+                    selectorOptionsHtml = `
                         <option value="audio_1.06" ${itm.speed === '1.06' ? 'selected' : ''}>MP3 (1.06x Anticopyright)</option>
                         <option value="audio_1.0" ${itm.speed === '1.0' ? 'selected' : ''}>MP3 (1.0x Normal)</option>
                         <option value="audio_1.25" ${itm.speed === '1.25' ? 'selected' : ''}>MP3 (1.25x Rápido)</option>
                         <option value="audio_1.5" ${itm.speed === '1.5' ? 'selected' : ''}>MP3 (1.5x Rápido)</option>
                         <option value="audio_2.0" ${itm.speed === '2.0' ? 'selected' : ''}>MP3 (2.0x)</option>
                     `;
-                } else if (isVideo) {
-                    optionsHtml = `
-                        <option value="video_9:16" ${itm.format === '9:16' ? 'selected' : ''}>Video (9:16 Vertical / Shorts)</option>
-                        <option value="video_16:9" ${itm.format === '16:9' ? 'selected' : ''}>Video (16:9 Horizontal)</option>
+                } else if (isVideoItem) {
+                    selectorOptionsHtml = `
+                        <option value="video_9:16" ${itm.format === '9:16' ? 'selected' : ''}>Video (9:16 Vertical / Reels)</option>
+                        <option value="video_16:9" ${itm.format === '16:9' ? 'selected' : ''}>Video (16:9 Horizontal / YouTube)</option>
                         <option value="video_1:1" ${itm.format === '1:1' ? 'selected' : ''}>Video (1:1 Cuadrado)</option>
                         <option value="video_any" ${itm.format === 'any' ? 'selected' : ''}>Video (Cualquiera)</option>
                     `;
-                } else {
-                    optionsHtml = `
+                } else { // Photo
+                    selectorOptionsHtml = `
                         <option value="photo_1:1" ${itm.format === '1:1' ? 'selected' : ''}>Foto (1:1 Cuadrada)</option>
                         <option value="photo_9:16" ${itm.format === '9:16' ? 'selected' : ''}>Foto (9:16 Vertical)</option>
                         <option value="photo_16:9" ${itm.format === '16:9' ? 'selected' : ''}>Foto (16:9 Horizontal)</option>
@@ -1439,20 +1558,20 @@
                 }
 
                 card.innerHTML = `
-                    <div class="builder-row-1">
-                        <input type="text" class="builder-name-input" value="${itm.term}" placeholder="Nombre exacto..." onchange="updateItemTerm(${idx}, this.value)">
-                        <button class="builder-del-btn" onclick="removeItemRow(${idx})">&times;</button>
+                    <div class="order-line-row-1">
+                        <input type="text" class="order-line-name-input" value="${itm.term}" placeholder="Nombre exacto..." onchange="updateLineTerm(${idx}, this.value)">
+                        <button class="order-line-del-btn" onclick="deleteOrderLine(${idx})" title="Eliminar línea">&times;</button>
                     </div>
-                    <div class="builder-row-2">
-                        <div class="builder-qty-label">
-                            <span>${isAudio ? 'Pista:' : 'Cant:'}</span>
-                            ${isAudio ? 
-                                '<span style="font-weight:700;color:var(--text-main);font-size:11.5px;">1 audio</span>' :
-                                `<input type="number" class="builder-qty-input" value="${itm.count}" min="1" max="100" onchange="updateItemQty(${idx}, this.value)">`
+                    <div class="order-line-row-2">
+                        <div class="order-count-badge">
+                            <span class="order-count-label">${isAudioItem ? 'Canción:' : 'Cant:'}</span>
+                            ${isAudioItem ? 
+                                '<span style="font-size:12px;font-weight:600;color:var(--text);">1 audio</span>' : 
+                                `<input type="number" class="order-count-num-input" value="${itm.count}" min="1" max="100" onchange="updateLineCount(${idx}, this.value)">`
                             }
                         </div>
-                        <select class="builder-select" onchange="updateItemTypeFormat(${idx}, this.value)">
-                            ${optionsHtml}
+                        <select class="order-tag-selector" onchange="updateLineTag(${idx}, this.value)">
+                            ${selectorOptionsHtml}
                         </select>
                     </div>
                 `;
@@ -1460,77 +1579,79 @@
             });
         }
 
-        function updateItemTerm(idx, val) { if (orderItemsList[idx]) orderItemsList[idx].term = val; }
-        function updateItemQty(idx, val) { if (orderItemsList[idx]) orderItemsList[idx].count = parseInt(val) || 1; }
-        function updateItemTypeFormat(idx, code) {
-            if (!orderItemsList[idx]) return;
+        function updateLineTerm(idx, val) { if(currentOrderItems[idx]) currentOrderItems[idx].term = val; }
+        function updateLineCount(idx, val) { if(currentOrderItems[idx]) currentOrderItems[idx].count = parseInt(val) || 1; }
+        function updateLineTag(idx, code) {
+            if(!currentOrderItems[idx]) return;
             const [t, opt] = code.split('_');
-            orderItemsList[idx].type = t;
+            currentOrderItems[idx].type = t;
             if (t === 'audio') {
-                orderItemsList[idx].speed = opt;
-                orderItemsList[idx].format = 'mp3';
-                orderItemsList[idx].count = 1;
+                currentOrderItems[idx].speed = opt;
+                currentOrderItems[idx].format = 'mp3';
+                currentOrderItems[idx].count = 1;
             } else {
-                orderItemsList[idx].format = opt;
-                orderItemsList[idx].speed = '1.0';
+                currentOrderItems[idx].format = opt;
+                currentOrderItems[idx].speed = '1.0';
             }
-            renderBuilderRows();
+            renderOrderLines();
         }
-        function removeItemRow(idx) {
-            orderItemsList.splice(idx, 1);
-            renderBuilderRows();
+        function deleteOrderLine(idx) {
+            currentOrderItems.splice(idx, 1);
+            renderOrderLines();
         }
-        function addNewLineItem() {
-            orderItemsList.push({
+        function addNewOrderLine() {
+            currentOrderItems.push({
                 term: '',
                 type: 'audio',
                 format: 'mp3',
                 speed: '1.06',
                 count: 1
             });
-            renderBuilderRows();
+            renderOrderLines();
         }
-        function hideBuilder() { document.getElementById('builder-box').style.display = 'none'; }
+        function closeOrderBuilder() {
+            document.getElementById('order-builder-wrap').style.display = 'none';
+        }
 
-        async function execDownloadProject() {
-            if (!orderItemsList || orderItemsList.length === 0) return;
+        async function executeCustomOrderProject() {
+            if (!currentOrderItems || currentOrderItems.length === 0) return;
 
-            const wrap = document.getElementById('orders-status-wrap');
-            const badge = document.getElementById('orders-badge');
-            const msg = document.getElementById('orders-msg');
-            const bar = document.getElementById('orders-bar');
+            const container = document.getElementById('orders-status-container');
+            const bar = document.getElementById('orders-status-bar');
+            const text = document.getElementById('orders-status-text');
+            const progress = document.getElementById('orders-progress');
 
-            hideBuilder();
-            wrap.style.display = 'block';
-            badge.className = 'status-badge loading';
-            bar.style.width = '35%';
-            msg.innerText = 'Descargando y organizando recursos del proyecto...';
+            closeOrderBuilder();
+            container.style.display = 'block';
+            bar.className = 'status-bar loading';
+            progress.style.width = '30%';
+            text.innerText = 'Descargando y empaquetando recursos en una sola carpeta de proyecto...';
 
             try {
                 const res = await fetch('/api/execute_custom_order', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        project_name: 'proyecto_' + Date.now(),
-                        items: orderItemsList
+                        project_name: 'proyecto_edicion_' + Date.now(),
+                        items: currentOrderItems
                     })
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    bar.style.width = '100%';
-                    badge.className = 'status-badge';
-                    msg.innerText = data.message;
-                    playDingSound();
+                    progress.style.width = '100%';
+                    bar.className = 'status-bar';
+                    text.innerText = data.message;
+                    playDoneSound();
                     triggerSmartDownload(data);
                 } else {
-                    bar.style.width = '0%';
-                    badge.className = 'status-badge error';
-                    msg.innerText = data.message;
+                    progress.style.width = '0%';
+                    bar.className = 'status-bar error';
+                    text.innerText = data.message;
                 }
             } catch (err) {
-                bar.style.width = '0%';
-                badge.className = 'status-badge error';
-                msg.innerText = 'Error al ejecutar orden de proyecto.';
+                progress.style.width = '0%';
+                bar.className = 'status-bar error';
+                text.innerText = 'Error al ejecutar orden de proyecto.';
             }
         }
     </script>
