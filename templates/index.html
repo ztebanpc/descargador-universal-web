@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Descargador Universal ⚡</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <span class="logo-icon">⚡</span>
+        <div>
+          <h1>Descargador Universal</h1>
+          <p class="subtitle">Cloud Media Engine • Audio, Video, Excel & Pinterest</p>
+        </div>
+      </div>
+      <div class="cloud-badge">
+        <span class="badge-dot"></span> Cloud 24/7 Active
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('audio')">🎵 Audios MP3</button>
+      <button class="tab-btn" onclick="switchTab('bulk')">📊 Carga Excel/CSV</button>
+      <button class="tab-btn" onclick="switchTab('video')">🎬 Videos Vírgenes</button>
+      <button class="tab-btn" onclick="switchTab('pinterest')">📌 Pinterest HD</button>
+      <button class="tab-btn" onclick="switchTab('files')">📂 Mis Archivos (<span id="file-count">0</span>)</button>
+    </nav>
+
+    <!-- TAB 1: AUDIO -->
+    <section id="tab-audio" class="tab-content active">
+      <div class="card">
+        <div class="card-header">
+          <h2>🎵 Descargar Audio MP3 (192kbps)</h2>
+          <p>Ingresa el nombre de una canción o pega un enlace directo de YouTube.</p>
+        </div>
+        <div class="input-group">
+          <input type="text" id="audio-input" placeholder="Ej: Bad Bunny Monaco o enlace de YouTube..." />
+          <button class="btn btn-primary" onclick="downloadAudio()">Descargar MP3</button>
+        </div>
+        <div id="audio-status" class="status-box hidden"></div>
+      </div>
+    </section>
+
+    <!-- TAB 2: BULK EXCEL/CSV -->
+    <section id="tab-bulk" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2>📊 Descarga Masiva por Excel o CSV</h2>
+          <p>Sube una lista de enlaces para extraer todos los audios en lote.</p>
+        </div>
+        <div class="drop-zone" onclick="document.getElementById('file-upload').click()">
+          <span class="drop-icon">📁</span>
+          <p id="file-label">Haz clic para seleccionar o arrastra tu archivo <strong>.xlsx, .xls o .csv</strong></p>
+          <input type="file" id="file-upload" accept=".csv, .xlsx, .xls" style="display:none" onchange="handleFileSelect(event)" />
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top: 15px;" onclick="uploadExcel()">Procesar Lista Masiva</button>
+        <div id="bulk-status" class="status-box hidden"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: CLEAN VIDEOS -->
+    <section id="tab-video" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2>🎬 Descargador de Videos Vírgenes & B-Rolls</h2>
+          <p>Filtro de pureza activo: elimina automáticamente memes, texto y marcas de agua.</p>
+        </div>
+        <div class="input-group">
+          <input type="text" id="video-input" placeholder="Ej: https://youtube.com/shorts/... o Reels/TikTok" />
+          <button class="btn btn-primary" onclick="downloadVideo()">Descargar Video</button>
+        </div>
+        <div id="video-status" class="status-box hidden"></div>
+      </div>
+    </section>
+
+    <!-- TAB 4: PINTEREST -->
+    <section id="tab-pinterest" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2>📌 Pinterest HD Scraper</h2>
+          <p>Encuentra fotos y fondos aesthetic verticales en máxima resolución original.</p>
+        </div>
+        <div class="input-group">
+          <input type="text" id="pinterest-input" placeholder="Ej: aesthetic neon cyberpunk 9:16..." />
+          <button class="btn btn-primary" onclick="searchPinterest()">Buscar Fotos</button>
+        </div>
+        <div id="pinterest-status" class="status-box hidden"></div>
+        <div id="pinterest-gallery" class="gallery-grid"></div>
+      </div>
+    </section>
+
+    <!-- TAB 5: FILES -->
+    <section id="tab-files" class="tab-content">
+      <div class="card">
+        <div class="card-header flex-between">
+          <div>
+            <h2>📂 Biblioteca de Archivos Descargados</h2>
+            <p>Guarda los archivos directamente en tu celular o PC.</p>
+          </div>
+          <div>
+            <button class="btn btn-secondary" onclick="loadFiles()">🔄 Actualizar</button>
+            <a href="/api/download_zip" class="btn btn-primary">📦 Descargar Todo en ZIP</a>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="files-table">
+            <thead>
+              <tr>
+                <th>Archivo</th>
+                <th>Tipo</th>
+                <th>Tamaño</th>
+                <th>Fecha</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="files-tbody">
+              <tr><td colspan="5" style="text-align:center;">Cargando archivos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
