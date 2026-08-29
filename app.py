@@ -50,7 +50,7 @@ def sanitize_filename(name):
     return re.sub(r'[^\w\-_.]', '_', name)
 
 # ==========================================
-# 🎵 AUDIO DOWNLOADER CON VELOCIDAD Y ANTICOPYRIGHT
+# 🎵 AUDIO DOWNLOADER CON ANTICOPYRIGHT
 # ==========================================
 def process_audio_download(query, quality="192", format_type="mp3", speed="1.0", target_folder=AUDIO_DIR):
     try:
@@ -66,7 +66,6 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
         
         postprocessor_args = []
         if speed == "1.06":
-            # 1.06x pitch & speed shift (Anticopyright para edición)
             postprocessor_args = ['-filter:a', 'asetrate=46746,aresample=44100']
         elif speed and speed != "1.0":
             try:
@@ -78,6 +77,11 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
         ydl_opts = {
             'format': 'bestaudio/best',
             'postprocessors': postprocessors,
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'ios', 'web'],
+                }
+            },
             'outtmpl': out_template,
             'noplaylist': True,
             'quiet': True,
@@ -111,6 +115,51 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
     except Exception as e:
         print(f"[Audio] [ERROR] Error en descarga de audio: {e}")
         return None
+
+# ==========================================
+# 🎬 VIDEO SHORTS / CLIPS DOWNLOADER (Vertical HD)
+# ==========================================
+def process_video_download(term, count=1, format_type='9:16', target_folder=ORDENES_DIR):
+    try:
+        cnt = int(count) if int(count) > 0 else 1
+        print(f"[Video] Buscando {cnt} clips para: {term} (Formato: {format_type})")
+        
+        hashtag = "#shorts " if format_type in ('9:16', 'vertical', 'any') else ""
+        query = term if term.startswith('http') else f"ytsearch{cnt}:{hashtag}{term}"
+        
+        filename_base = f"video_{int(time.time())}"
+        out_template = os.path.join(target_folder, f"{filename_base}_%(id)s.%(ext)s")
+        
+        ydl_opts = {
+            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'ios', 'web'],
+                }
+            },
+            'outtmpl': out_template,
+            'noplaylist': True,
+            'quiet': True,
+            'no_warnings': True,
+            'max_downloads': cnt,
+        }
+        
+        saved_files = []
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            try:
+                ydl.download([query])
+            except yt_dlp.utils.MaxDownloadsReached:
+                pass
+                
+        for f in os.listdir(target_folder):
+            if f.startswith(filename_base) and f.endswith(('.mp4', '.mov', '.webm', '.mkv')):
+                saved_files.append(f)
+                
+        print(f"[Video] [OK] Descargados {len(saved_files)} clips de video.")
+        return saved_files
+    except Exception as e:
+        print(f"[Video] [ERROR]: {e}")
+        return []
 
 def process_bulk_audio(links, speed="1.0"):
     print(f"[Excel] Procesando {len(links)} enlaces en lote...")
@@ -221,7 +270,6 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
                     shutil.copy(os.path.join(batch_folder, f), os.path.join(target_folder, f))
                 return saved_files, None
 
-        # Tablero o Temática
         limit = req_count
         if pin_tab == 'tablero' and req_count == 1 and len(images) > 1:
             limit = len(images)
@@ -263,7 +311,6 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
                         with open(temp_fp, 'wb') as f:
                             f.write(r.content)
                             
-                        # Validación de Aspect Ratio
                         if Image and format_type in ('9:16', 'vertical', '16:9', 'horizontal', '1:1', 'cuadrado'):
                             try:
                                 with Image.open(temp_fp) as img_pil:
@@ -316,7 +363,7 @@ def interpret_ai_order_with_llm(prompt_text):
     if api_key and genai:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            model = genai.GenerativeModel('gemini-3.6-flash')
             system_instruction = """
 Eres el Cerebro de Órdenes IA para proyectos de edición audiovisual profesional.
 Interpreta profundamente la solicitud del usuario (escrita o por voz) y desglósala en recursos de máxima calidad para descargar.
@@ -326,7 +373,7 @@ REGLAS DE ORO:
 2. VIDEOS: Extrae los términos de búsqueda visual más potentes para B-Rolls y clips (ej. "cumpleaños fiesta globos confeti", "aesthetic retro vintage"). Asigna cantidad y formato ("9:16", "16:9").
 3. FOTOS: Extrae el término estético limpio, cantidad y formato ("1:1", "9:16", "16:9", "any").
 
-Responde ÚNICAMENTE un JSON con:
+Responde ÚNICAMENTE un JSON válido:
 {
   "reasoning": "Breve explicación en 1 frase de lo que la IA interpretó creativamente",
   "project_name": "nombre_corto_del_proyecto",
@@ -349,7 +396,6 @@ Responde ÚNICAMENTE un JSON con:
         except Exception as e:
             print("[AI Orders] Error consultando Gemini API:", e)
             
-    # Motor Semántico Avanzado de Respaldo
     return deep_nlp_semantic_reasoner(prompt_text)
 
 def deep_nlp_semantic_reasoner(prompt_text):
@@ -397,7 +443,6 @@ def deep_nlp_semantic_reasoner(prompt_text):
             clean = seg.strip()
             
         if is_audio:
-            # Desglose de canciones específicas
             if 'harry style' in clean.lower():
                 clean = clean.title()
             elif 'cumpleaños' in clean.lower() or 'fiesta infantil' in clean.lower():
@@ -410,7 +455,7 @@ def deep_nlp_semantic_reasoner(prompt_text):
                 "count": 1
             })
         elif is_video:
-            v_count = count if count > 0 else 10
+            v_count = count if count > 0 else 5
             if 'cumpleaños' in clean.lower():
                 clean = "Cumpleaños fiesta globos confeti"
             items.append({
@@ -421,7 +466,7 @@ def deep_nlp_semantic_reasoner(prompt_text):
                 "count": v_count
             })
         else:
-            p_count = count if count > 0 else 10
+            p_count = count if count > 0 else 5
             if 'cumpleaños' in clean.lower() or 'decoracion' in clean.lower():
                 clean = "Cumpleaños decoración aesthetic"
             items.append({
@@ -477,7 +522,7 @@ def download_audio():
             "filename": filename,
             "download_url": f"/api/files/audio/{filename}"
         })
-    return jsonify({"status": "error", "message": "No se pudo extraer el audio.", "note": "Comprueba que el video de YouTube esté disponible públicamente."}), 500
+    return jsonify({"status": "error", "message": "No se pudo extraer el audio.", "note": "Comprueba que el video esté disponible públicamente."}), 500
 
 @app.route('/api/download_excel', methods=['POST'])
 def download_excel():
@@ -590,9 +635,11 @@ def execute_custom_order():
         if itype == 'audio':
             f = process_audio_download(term, speed=speed, target_folder=project_folder)
             if f: downloaded_files.append(f)
-        else:
-            media_t = 'videos' if itype == 'video' else 'photos'
-            pins, _ = process_pinterest_download(term, format_type=fmt, media_type=media_t, pin_tab='tematica', count=cnt, target_folder=project_folder)
+        elif itype == 'video':
+            vids = process_video_download(term, count=cnt, format_type=fmt, target_folder=project_folder)
+            if vids: downloaded_files.extend(vids)
+        else: # photo
+            pins, _ = process_pinterest_download(term, format_type=fmt, media_type='photos', pin_tab='tematica', count=cnt, target_folder=project_folder)
             if pins: downloaded_files.extend(pins)
             
     zip_name = f"{project_name}_completo.zip"
