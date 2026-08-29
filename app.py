@@ -267,35 +267,44 @@ def api_download_excel():
     except Exception as e:
         return jsonify({"status": "error", "message": f"Error leyendo archivo: {e}"}), 500
 
-@app.route('/api/search_pinterest', methods=['POST'])
-def api_search_pinterest():
+@app.route('/api/download_pinterest', methods=['POST'])
+def api_download_pinterest():
     data = request.get_json(silent=True) or request.form
     query = data.get('query', '').strip()
-    if not query:
-        return jsonify({"status": "error", "message": "Ingresa un término de búsqueda."}), 400
+    format_type = data.get('format', 'any')
+    media_type = data.get('media_type', 'both')
     
-    images = search_pinterest_images(query, limit=12)
-    return jsonify({"status": "success", "images": images})
-
-@app.route('/api/save_pinterest_image', methods=['POST'])
-def api_save_pinterest():
-    data = request.get_json(silent=True) or request.form
-    img_url = data.get('url', '')
-    if not img_url:
-        return jsonify({"status": "error", "message": "URL requerida"}), 400
+    if not query:
+        return jsonify({"status": "error", "message": "Debes ingresar una URL o término."}), 400
+    
     try:
-        r = requests.get(img_url, timeout=15)
-        if r.status_code == 200:
-            fname = f"pin_{int(time.time())}_{img_url.split('/')[-1].split('?')[0]}"
-            if not fname.endswith(('.jpg', '.png', '.jpeg', '.webp')):
-                fname += ".jpg"
-            fp = os.path.join(PINTEREST_DIR, fname)
-            with open(fp, "wb") as f:
-                f.write(r.content)
-            return jsonify({"status": "success", "filename": fname, "download_url": f"/api/files/pinterest/{fname}"})
+        images = search_pinterest_images(query, limit=20)
+        if not images:
+            return jsonify({"status": "error", "message": "No se encontraron fotos o el enlace no es accesible."}), 404
+        
+        saved = []
+        for img in images:
+            try:
+                r = requests.get(img['url'], timeout=10)
+                if r.status_code == 200:
+                    fname = f"pin_{int(time.time())}_{img['url'].split('/')[-1].split('?')[0]}"
+                    if not fname.endswith(('.jpg', '.png', '.jpeg', '.webp')):
+                        fname += ".jpg"
+                    fp = os.path.join(PINTEREST_DIR, fname)
+                    with open(fp, "wb") as f:
+                        f.write(r.content)
+                    saved.append(fname)
+            except Exception:
+                pass
+        
+        return jsonify({
+            "status": "success",
+            "message": f"Descargadas {len(saved)} fotos exitosamente de Pinterest.",
+            "total": len(saved),
+            "download_zip": "/api/download_zip"
+        })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
-    return jsonify({"status": "error", "message": "No se pudo descargar la imagen."}), 500
 
 @app.route('/api/files/<category>/<filename>')
 def serve_file(category, filename):
