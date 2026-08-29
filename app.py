@@ -22,7 +22,10 @@ import yt_dlp
 
 try:
     import google.generativeai as genai
-except ImportError:
+    GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+    if GEMINI_API_KEY:
+        genai.configure(api_key=GEMINI_API_KEY)
+except Exception:
     genai = None
 
 try:
@@ -50,7 +53,7 @@ def sanitize_filename(name):
     return re.sub(r'[^\w\-_.]', '_', name)
 
 # ==========================================
-# 🎵 AUDIO DOWNLOADER CON ANTICOPYRIGHT
+# 🎵 AUDIO DOWNLOADER CON ANTICOPYRIGHT & 403 BYPASS
 # ==========================================
 def process_audio_download(query, quality="192", format_type="mp3", speed="1.0", target_folder=AUDIO_DIR):
     try:
@@ -352,112 +355,127 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
 # ==========================================
 # 🧠 CEREBRO DE INTERPRETACIÓN INTELIGENTE DE ÓRDENES IA
 # ==========================================
+SONG_BANKS = {
+    "tristeza": [
+        "Maná - Te Lloré Un Río",
+        "Adele - Someone Like You",
+        "Lewis Capaldi - Someone You Loved",
+        "Sam Smith - Stay With Me",
+        "Billie Eilish - Lovely"
+    ],
+    "triste": [
+        "Maná - Te Lloré Un Río",
+        "Adele - Someone Like You",
+        "Lewis Capaldi - Someone You Loved",
+        "Sam Smith - Stay With Me"
+    ],
+    "cumpleaños": [
+        "Cepillín - Las Mañanitas",
+        "Parchis - Cumpleaños Feliz",
+        "Stevie Wonder - Happy Birthday",
+        "Canción Infantil - Feliz en tu Día"
+    ],
+    "fiesta": [
+        "Bad Bunny - Tití Me Preguntó",
+        "Feid - Feliz Cumpleaños Ferxxo",
+        "Don Omar - Danza Kuduro",
+        "Daddy Yankee - Gasolina"
+    ],
+    "aesthetic": [
+        "Harry Styles - As It Was",
+        "The Weeknd - Blinding Lights",
+        "Glass Animals - Heat Waves",
+        "Dua Lipa - Levitating"
+    ],
+    "desamor": [
+        "Shakira - Monotonía",
+        "Rauw Alejandro - Todo De Ti",
+        "Bizarrap & Quevedo - Bzrp Music Sessions",
+        "Morat - No Se Va"
+    ]
+}
+
 def clean_term_string(s):
-    s = re.sub(r'(\b\d+\b|\b(vertical(?:es)?|horizontal(?:es)?|cuadrad[ao]s?|formato|velocidad|calidad|mp3|wav|flac|de|fotos?|im[aá]genes|videos?|vídeos?|audios?|cancion(?:es)?|m[uú]sicas?|anticopyright|anti copyright|quiero|necesito|me gustaría|me gustaria|unos|unas|un|una|para|que tengan que ver con|que tengan|relacionados? con|tem[aá]ticas?)\b)', '', s, flags=re.IGNORECASE)
+    s = re.sub(r'(\b\d+\b|\b(tres|dos|cuatro|cinco|diez|veinte|treinta|vertical(?:es)?|horizontal(?:es)?|cuadrad[ao]s?|formato|velocidad|calidad|mp3|wav|flac|de|fotos?|im[aá]genes|videos?|vídeos?|audios?|cancion(?:es)?|m[uú]sicas?|anticopyright|anti copyright|quiero|necesito|me gustaría|me gustaria|unos|unas|un|una|para|que tengan que ver con|que tengan|relacionados? con|tem[aá]ticas?)\b)', '', s, flags=re.IGNORECASE)
     s = re.sub(r'[:;.,_()\[\]\\0-9]', ' ', s)
     s = re.sub(r'\s+', ' ', s).strip()
     return s
 
-def interpret_ai_order_with_llm(prompt_text):
-    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if api_key and genai:
-        try:
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-3.6-flash')
-            system_instruction = """
-Eres el Cerebro de Órdenes IA para proyectos de edición audiovisual profesional.
-Interpreta profundamente la solicitud del usuario (escrita o por voz) y desglósala en recursos de máxima calidad para descargar.
-
-REGLAS DE ORO:
-1. AUDIOS: Cada audio DEBE ser una canción específica, real y con nombre individual de tema y artista (ej. "Cepillín - Las Mañanitas", "Harry Styles - As It Was", "Musica Instrumental Feliz"). Cantidad siempre es 1 por cada canción. Si pide anticopyright o 1.06, pon speed: "1.06".
-2. VIDEOS: Extrae los términos de búsqueda visual más potentes para B-Rolls y clips (ej. "cumpleaños fiesta globos confeti", "aesthetic retro vintage"). Asigna cantidad y formato ("9:16", "16:9").
-3. FOTOS: Extrae el término estético limpio, cantidad y formato ("1:1", "9:16", "16:9", "any").
-
-Responde ÚNICAMENTE un JSON válido:
-{
-  "reasoning": "Breve explicación en 1 frase de lo que la IA interpretó creativamente",
-  "project_name": "nombre_corto_del_proyecto",
-  "items": [
-    {
-      "term": "Nombre exacto de canción o búsqueda limpia",
-      "type": "photo" | "video" | "audio",
-      "format": "1:1" | "9:16" | "16:9" | "any" | "mp3",
-      "speed": "1.0" | "1.06" | "1.25",
-      "count": 1
-    }
-  ]
-}
-"""
-            res = model.generate_content(system_instruction + "\n\nSolicitud del usuario:\n" + prompt_text)
-            clean_res = res.text.strip().replace('```json', '').replace('```', '').strip()
-            parsed = json.loads(clean_res)
-            if "items" in parsed and len(parsed["items"]) > 0:
-                return parsed
-        except Exception as e:
-            print("[AI Orders] Error consultando Gemini API:", e)
-            
-    return deep_nlp_semantic_reasoner(prompt_text)
-
-def deep_nlp_semantic_reasoner(prompt_text):
+def parse_order_with_deep_context(prompt_text):
     prompt_clean = prompt_text.strip()
     slug = re.sub(r'[^\w\-_]', '_', prompt_clean[:25]).strip('_') or "proyecto_edicion"
     
-    normalized = re.sub(r'(\d+)\.(\d+)', r'\1_DOT_\2', prompt_clean)
-    normalized = re.sub(r'1\)\.?96|9\.16|9:15|9:16', '9:16', normalized)
+    normalized = re.sub(r'(\d+)\.(\d+)(?:x)?', r'\1_DOT_\2', prompt_clean)
+    normalized = re.sub(r'(?<=[^\s,;])\s+(\d+\s+(?:fotos?|im[aá]genes|videos?|vídeos?|audios?|cancion(?:es)?|m[uú]sicas?))', r', \1', normalized, flags=re.IGNORECASE)
+    normalized = re.sub(r'(?<=[^\s,;])\s+((?:tres|dos|cuatro|cinco|diez|veinte)\s+(?:fotos?|im[aá]genes|videos?|vídeos?|audios?|cancion(?:es)?|m[uú]sicas?))', r', \1', normalized, flags=re.IGNORECASE)
     
     segments = re.split(r'[,;\n]|\by\b|\be\b|\bcon\b', normalized, flags=re.IGNORECASE)
     global_speed = "1.06" if any(w in prompt_clean.lower() for w in ["1.06", "1.6", "anti copyright", "anticopyright"]) else "1.0"
     
     items = []
+    recommended_songs = []
+    word_to_num = {'un': 1, 'una': 1, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5, 'seis': 6, 'diez': 10, 'veinte': 20, 'treinta': 30}
     
     for seg in segments:
-        seg = seg.replace('_DOT_', '.').strip()
-        if not seg or len(seg) < 2: continue
+        seg_clean_dots = seg.replace('_DOT_', '.').strip()
+        if not seg_clean_dots or len(seg_clean_dots) < 2: continue
         
-        seg_lower = seg.lower()
-        count_match = re.search(r'\b(\d+)\b', seg)
-        count = int(count_match.group(1)) if count_match else 0
+        seg_lower = seg_clean_dots.lower()
+        seg_without_speed = re.sub(r'\b1\.06(?:x)?\b|\b1\.25(?:x)?\b|\b1\.5(?:x)?\b|\b2\.0(?:x)?\b|\b1\.0(?:x)?\b', '', seg_lower).strip()
         
-        is_audio = any(w in seg_lower for w in ['audio', 'cancion', 'canción', 'musica', 'música', 'mp3', 'sound', 'tema', 'track', 'odio'])
-        is_video = any(w in seg_lower for w in ['video', 'vídeo', 'clip', 'reels', 'shorts', 'broll', 'b-roll', 'aestetik', 'aesthetic']) and not is_audio
-        is_photo = any(w in seg_lower for w in ['foto', 'imagen', 'imágenes', 'portada', 'wallpaper', 'pic']) and not is_audio and not is_video
-        
-        if any(w in seg_lower for w in ['harry style', 'harry styles', 'bad bunny', 'duki', 'feid', 'taylor swift', 'morat', 'queen', 'beatles', 'pop', 'rock', 'trap']):
-            is_audio = True
-            is_video = False
-            is_photo = False
-            
-        if '9:16' in seg_lower or 'vertical' in seg_lower:
-            fmt = '9:16'
-        elif '16:9' in seg_lower or 'horizontal' in seg_lower:
-            fmt = '16:9'
-        elif '1:1' in seg_lower or '1;1' in seg_lower or 'cuadrad' in seg_lower:
-            fmt = '1:1'
+        count = 0
+        count_match = re.search(r'\b(\d+)\b', seg_without_speed)
+        if count_match:
+            count = int(count_match.group(1))
         else:
-            fmt = 'any' if not is_audio else 'mp3'
+            for w, n in word_to_num.items():
+                if re.search(rf'\b{w}\b', seg_without_speed):
+                    count = n; break
+                    
+        is_audio = any(w in seg_lower for w in ['audio', 'cancion', 'canción', 'musica', 'música', 'mp3', 'sound', 'tema', 'track', 'tristeza', 'triste', 'desamor', 'mana', 'harry style'])
+        is_video = any(w in seg_lower for w in ['video', 'vídeo', 'clip', 'reels', 'shorts', 'broll', 'b-roll']) and not is_audio
+        is_photo = any(w in seg_lower for w in ['foto', 'imagen', 'imágenes', 'portada', 'wallpaper', 'pic', 'meme', 'memes']) and not is_audio and not is_video
+        
+        if any(w in seg_lower for w in ['harry style', 'harry styles', 'bad bunny', 'duki', 'feid', 'taylor swift', 'morat', 'queen', 'beatles', 'mana', 'maná', 'adele']):
+            is_audio = True; is_video = False; is_photo = False
             
+        fmt = '9:16' if ('9:16' in seg_lower or 'vertical' in seg_lower) else ('16:9' if ('16:9' in seg_lower or 'horizontal' in seg_lower) else ('1:1' if ('1:1' in seg_lower or 'cuadrad' in seg_lower or 'meme' in seg_lower) else 'any'))
         speed = "1.06" if any(w in seg_lower for w in ["1.06", "1.6", "anticopyright", "anti copyright"]) else global_speed
         
-        clean = clean_term_string(seg)
-        if not clean or len(clean) < 2:
-            clean = seg.strip()
-            
+        clean = clean_term_string(seg_without_speed)
+        if not clean or len(clean) < 2: clean = seg_clean_dots.strip()
+        
         if is_audio:
-            if 'harry style' in clean.lower():
-                clean = clean.title()
-            elif 'cumpleaños' in clean.lower() or 'fiesta infantil' in clean.lower():
-                clean = "Canción Cumpleaños Infantil Animada"
-            items.append({
-                "term": clean,
-                "type": "audio",
-                "format": "mp3",
-                "speed": speed,
-                "count": 1
-            })
+            audio_count = count if count > 0 else 1
+            matched_theme = None
+            for theme_key in SONG_BANKS:
+                if theme_key in seg_lower:
+                    matched_theme = theme_key; break
+                    
+            if matched_theme:
+                bank = SONG_BANKS[matched_theme]
+                for i in range(min(audio_count, len(bank))):
+                    song_name = bank[i]
+                    recommended_songs.append(song_name)
+                    items.append({
+                        "term": song_name,
+                        "type": "audio",
+                        "format": "mp3",
+                        "speed": speed,
+                        "count": 1
+                    })
+            else:
+                items.append({
+                    "term": clean.title(),
+                    "type": "audio",
+                    "format": "mp3",
+                    "speed": speed,
+                    "count": 1
+                })
         elif is_video:
             v_count = count if count > 0 else 5
             if 'cumpleaños' in clean.lower():
-                clean = "Cumpleaños fiesta globos confeti"
+                clean = "Cumpleaños fiesta celebración confeti"
             items.append({
                 "term": clean,
                 "type": "video",
@@ -465,9 +483,12 @@ def deep_nlp_semantic_reasoner(prompt_text):
                 "speed": "1.0",
                 "count": v_count
             })
-        else:
-            p_count = count if count > 0 else 5
-            if 'cumpleaños' in clean.lower() or 'decoracion' in clean.lower():
+        else: # Foto
+            p_count = count if count > 0 else 10
+            if 'meme' in clean.lower():
+                clean = "Memes graciosos virales"
+                fmt = "1:1"
+            elif 'cumpleaños' in clean.lower():
                 clean = "Cumpleaños decoración aesthetic"
             items.append({
                 "term": clean,
@@ -477,18 +498,15 @@ def deep_nlp_semantic_reasoner(prompt_text):
                 "count": p_count
             })
             
-    if not items:
-        items.append({
-            "term": prompt_clean,
-            "type": "photo",
-            "format": "any",
-            "speed": "1.0",
-            "count": 5
-        })
+    recommendation = f"Se estructuraron {len(items)} recursos creativos. "
+    if recommended_songs:
+        recommendation += f"Se eligieron las canciones ({', '.join(recommended_songs[:3])}) para darle la vibra musical exacta a la edición."
+    else:
+        recommendation += "Recursos listos con formato y velocidad balanceados para tu proyecto."
         
     return {
-        "reasoning": f"Estructurados {len(items)} recursos creativos con formato y velocidad optimizados.",
-        "project_name": slug, 
+        "recommendation": recommendation,
+        "project_name": slug,
         "items": items
     }
 
@@ -602,10 +620,10 @@ def ai_order_assistant():
     if not prompt:
         return jsonify({"status": "error", "message": "Por favor ingresa o dicta una orden."}), 400
         
-    res = interpret_ai_order_with_llm(prompt)
+    res = parse_order_with_deep_context(prompt)
     return jsonify({
         "status": "success",
-        "reasoning": res.get("reasoning", "Orden analizada y optimizada para edición."),
+        "recommendation": res.get("recommendation", "Orden analizada y optimizada con contexto musical y visual."),
         "project_name": res.get("project_name", "proyecto_edicion"),
         "items": res.get("items", [])
     })

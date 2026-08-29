@@ -529,17 +529,6 @@
             font-weight: 700;
             color: var(--text);
         }
-        .ai-reasoning-badge {
-            font-size: 11px;
-            background: rgba(5, 150, 105, 0.1);
-            color: var(--emerald);
-            padding: 4px 8px;
-            border-radius: 8px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            display: none;
-            line-height: 1.4;
-        }
 
         .order-lines-list {
             display: flex;
@@ -638,6 +627,26 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
+        }
+
+        /* 💡 Caja de Recomendación y Razonamiento */
+        .ai-recommendation-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            display: none;
+            font-size: 12px;
+            color: #166534;
+            line-height: 1.45;
+        }
+        .ai-recommendation-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .btn-add-line {
@@ -886,7 +895,6 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         Descargar de Pinterest
                     </button>
-                    <!-- Switch Pasivo ZIP -->
                     <button class="zip-toggle-btn" id="zip-toggle" onclick="toggleZipSwitch()" title="Activar/Desactivar compresión ZIP">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                         ZIP
@@ -1002,14 +1010,14 @@
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                                 </button>
                             </div>
-                            <div class="module-desc">Genera lotes de recursos organizados con formato y velocidad por línea</div>
+                            <div class="module-desc">Genera lotes de recursos organizados con contexto musical y visual</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Voice Input Box with integrated Mic -->
                 <div class="voice-input-wrap">
-                    <input type="text" id="order-prompt" class="url-input" placeholder="Ej: 20 videos aesthetic 9:16, 10 fotos vintage 1:1 y cancion harry styles mp3 1.06...">
+                    <input type="text" id="order-prompt" class="url-input" placeholder="Ej: video de cumpleaños 20 fotos de memes y tres musicas de tristeza...">
                     <button class="mic-inline-btn" id="mic-btn" onclick="toggleMic()" title="Dictar por micrófono">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                     </button>
@@ -1033,7 +1041,7 @@
                         </div>
                         <div class="ai-step-item" id="step-2">
                             <div class="ai-step-dot"></div>
-                            <span>Seleccionando canciones individuales y ajustando anticopyright (1.06x)...</span>
+                            <span>Desglosando canciones individuales reales por artista y título...</span>
                         </div>
                         <div class="ai-step-item" id="step-3">
                             <div class="ai-step-dot"></div>
@@ -1048,8 +1056,6 @@
                         <div class="order-builder-title">Elementos de la Orden (Editables)</div>
                     </div>
                     
-                    <div class="ai-reasoning-badge" id="ai-reasoning-badge"></div>
-                    
                     <div class="order-lines-list" id="order-lines-list">
                         <!-- Dynamic responsive items -->
                     </div>
@@ -1058,6 +1064,15 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         Agregar otra línea
                     </button>
+
+                    <!-- 💡 Caja de Recomendación y Razonamiento -->
+                    <div class="ai-recommendation-box" id="ai-recommendation-box">
+                        <div class="ai-recommendation-title">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                            Recomendación de la IA
+                        </div>
+                        <div id="ai-recommendation-text"></div>
+                    </div>
 
                     <div class="order-builder-actions">
                         <button class="btn-builder-exec" onclick="executeCustomOrderProject()">
@@ -1095,12 +1110,12 @@
                 <p><strong>Órdenes de Inteligencia Artificial:</strong> Es una potente herramienta diseñada para obtener lotes completos de videos, audios e imágenes en una sola carpeta organizada para tus <strong>proyectos de edición</strong>.</p>
                 <p><strong>Ejemplos de lo que puedes pedir:</strong></p>
                 <ul>
+                    <li><code>video de cumpleaños 20 fotos de memes y tres musicas de tristeza a 1.06x</code></li>
                     <li><code>50 videos Verticales (9:16) de Cumpleaños</code></li>
-                    <li><code>20 fotos Cuadradas (1:1) de Decoración</code></li>
-                    <li><code>harry styles hoy te odio mp3 1.06</code></li>
+                    <li><code>Mana Te llore un rio mp3 1.06x</code></li>
                 </ul>
                 <p>Cada línea generada cuenta con su propio selector interactivo para ajustar el tipo, la relación de aspecto o la velocidad antes de ejecutar la descarga.</p>
-                <p style="font-size: 11px; color: var(--text-light);"><em>Nota: Las sugerencias de la IA son recomendaciones inteligentes que puedes modificar y ajustar a tu gusto.</em></p>
+                <p style="font-size: 11px; color: var(--text-light);"><em>Nota: Las canciones y videos sugeridos son seleccionados contextualmente por la IA para que coincidan con la emoción y temática de tu video.</em></p>
             </div>
         </div>
     </div>
@@ -1159,13 +1174,10 @@
             }
         }
 
-        // ==========================================
-        // 🔊 SINTETIZADOR DE SONIDOS (Solo Éxito)
-        // ==========================================
         function playDoneSound() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const notes = [523.25, 659.25, 783.99]; // Acorde C5, E5, G5
+                const notes = [523.25, 659.25, 783.99];
                 notes.forEach((freq, i) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
@@ -1181,9 +1193,6 @@
             } catch(e) {}
         }
 
-        // ==========================================
-        // 📌 PINTEREST ACTIONS
-        // ==========================================
         async function downloadPinterest() {
             const input = document.getElementById('pin-input');
             const query = input.value.trim();
@@ -1259,14 +1268,9 @@
                 progress.style.width = '0%';
                 bar.className = 'status-bar error';
                 text.innerText = 'Error de conexión con el servidor.';
-                note.style.display = 'block';
-                note.innerText = 'Nota: Verifica tu conexión a internet o intenta recargar la página.';
             }
         }
 
-        // ==========================================
-        // 🎵 AUDIO ACTIONS
-        // ==========================================
         async function downloadAudio() {
             const input = document.getElementById('audio-input');
             const query = input.value.trim();
@@ -1286,8 +1290,6 @@
                 container.style.display = 'block';
                 bar.className = 'status-bar error';
                 text.innerText = 'Por favor ingresa un nombre o enlace de audio.';
-                note.style.display = 'block';
-                note.innerText = 'Nota: Puedes pegar un link directo de YouTube o escribir el nombre de la canción.';
                 return;
             }
 
@@ -1359,7 +1361,7 @@
         }
 
         // ==========================================
-        // 🤖 ASISTENTE DE ÓRDENES IA CON ANIMACIÓN DE PENSAMIENTO
+        // 🤖 ASISTENTE DE ÓRDENES IA CON CONTEXTO
         // ==========================================
         function toggleMic() {
             const micBtn = document.getElementById('mic-btn');
@@ -1417,7 +1419,6 @@
             builderWrap.style.display = 'none';
             thinkingBox.style.display = 'block';
 
-            // Animación fluida de pasos de pensamiento
             const step1 = document.getElementById('step-1');
             const step2 = document.getElementById('step-2');
             const step3 = document.getElementById('step-3');
@@ -1447,18 +1448,18 @@
                 clearTimeout(timerStep2);
                 clearTimeout(timerStep3);
                 
-                // Transición suave
                 setTimeout(() => {
                     thinkingBox.style.display = 'none';
                     if (data.status === 'success') {
                         currentOrderItems = data.items;
                         
-                        const badge = document.getElementById('ai-reasoning-badge');
-                        if (data.reasoning) {
-                            badge.style.display = 'block';
-                            badge.innerText = '💡 ' + data.reasoning;
+                        const recBox = document.getElementById('ai-recommendation-box');
+                        const recText = document.getElementById('ai-recommendation-text');
+                        if (data.recommendation) {
+                            recBox.style.display = 'block';
+                            recText.innerText = data.recommendation;
                         } else {
-                            badge.style.display = 'none';
+                            recBox.style.display = 'none';
                         }
                         
                         builderWrap.style.display = 'block';
@@ -1501,16 +1502,16 @@
                             }
                         </div>
                         <select class="order-tag-selector" onchange="updateLineTag(${idx}, this.value)">
-                            <option value="audio_1.06" ${selectedCode === 'audio_1.06' ? 'selected' : ''}>🎵 Audio (1.06x Anticopyright)</option>
-                            <option value="audio_1.0" ${selectedCode === 'audio_1.0' ? 'selected' : ''}>🎵 Audio (1.0x Normal)</option>
-                            <option value="audio_1.25" ${selectedCode === 'audio_1.25' ? 'selected' : ''}>🎵 Audio (1.25x)</option>
-                            <option value="video_9:16" ${selectedCode === 'video_9:16' ? 'selected' : ''}>🎬 Video (9:16 Vertical)</option>
-                            <option value="video_16:9" ${selectedCode === 'video_16:9' ? 'selected' : ''}>🎬 Video (16:9 Horizontal)</option>
-                            <option value="video_any" ${selectedCode === 'video_any' ? 'selected' : ''}>🎬 Video (Cualquiera)</option>
-                            <option value="photo_1:1" ${selectedCode === 'photo_1:1' ? 'selected' : ''}>📸 Foto (1:1 Cuadrada)</option>
-                            <option value="photo_9:16" ${selectedCode === 'photo_9:16' ? 'selected' : ''}>📸 Foto (9:16 Vertical)</option>
-                            <option value="photo_16:9" ${selectedCode === 'photo_16:9' ? 'selected' : ''}>📸 Foto (16:9 Horizontal)</option>
-                            <option value="photo_any" ${selectedCode === 'photo_any' ? 'selected' : ''}>📸 Foto (Cualquiera)</option>
+                            <option value="audio_1.06" ${selectedCode === 'audio_1.06' ? 'selected' : ''}>Audio MP3 (1.06x Anticopyright)</option>
+                            <option value="audio_1.0" ${selectedCode === 'audio_1.0' ? 'selected' : ''}>Audio MP3 (1.0x Normal)</option>
+                            <option value="audio_1.25" ${selectedCode === 'audio_1.25' ? 'selected' : ''}>Audio MP3 (1.25x)</option>
+                            <option value="video_9:16" ${selectedCode === 'video_9:16' ? 'selected' : ''}>Video (9:16 Vertical)</option>
+                            <option value="video_16:9" ${selectedCode === 'video_16:9' ? 'selected' : ''}>Video (16:9 Horizontal)</option>
+                            <option value="video_any" ${selectedCode === 'video_any' ? 'selected' : ''}>Video (Cualquiera)</option>
+                            <option value="photo_1:1" ${selectedCode === 'photo_1:1' ? 'selected' : ''}>Foto (1:1 Cuadrada)</option>
+                            <option value="photo_9:16" ${selectedCode === 'photo_9:16' ? 'selected' : ''}>Foto (9:16 Vertical)</option>
+                            <option value="photo_16:9" ${selectedCode === 'photo_16:9' ? 'selected' : ''}>Foto (16:9 Horizontal)</option>
+                            <option value="photo_any" ${selectedCode === 'photo_any' ? 'selected' : ''}>Foto (Cualquiera)</option>
                         </select>
                     </div>
                 `;
