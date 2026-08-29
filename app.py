@@ -101,7 +101,7 @@ def download_video_sync(url):
             return os.path.basename(latest), title
     return None, None
 
-def search_pinterest_images(query, limit=30):
+def search_pinterest_images(query, limit=150):
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -267,6 +267,8 @@ def api_download_excel():
     except Exception as e:
         return jsonify({"status": "error", "message": f"Error leyendo archivo: {e}"}), 500
 
+from concurrent.futures import ThreadPoolExecutor
+
 @app.route('/api/download_pinterest', methods=['POST'])
 def api_download_pinterest():
     data = request.get_json(silent=True) or request.form
@@ -278,30 +280,53 @@ def api_download_pinterest():
         return jsonify({"status": "error", "message": "Debes ingresar una URL o término."}), 400
     
     try:
-        images = search_pinterest_images(query, limit=20)
+        images = search_pinterest_images(query, limit=150)
         if not images:
             return jsonify({"status": "error", "message": "No se encontraron fotos o el enlace no es accesible."}), 404
         
-        saved = []
-        for img in images:
+        batch_id = int(time.time())
+        batch_folder = os.path.join(PINTEREST_DIR, f"batch_{batch_id}")
+        os.makedirs(batch_folder, exist_ok=True)
+        
+        def download_single_pin(item):
             try:
-                r = requests.get(img['url'], timeout=10)
+                img_url = item['url']
+                r = requests.get(img_url, timeout=10)
                 if r.status_code == 200:
-                    fname = f"pin_{int(time.time())}_{img['url'].split('/')[-1].split('?')[0]}"
-                    if not fname.endswith(('.jpg', '.png', '.jpeg', '.webp')):
-                        fname += ".jpg"
-                    fp = os.path.join(PINTEREST_DIR, fname)
+                    raw_name = img_url.split('/')[-1].split('?')[0]
+                    if not raw_name.endswith(('.jpg', '.png', '.jpeg', '.webp')):
+                        raw_name += ".jpg"
+                    fp = os.path.join(batch_folder, raw_name)
                     with open(fp, "wb") as f:
                         f.write(r.content)
-                    saved.append(fname)
+                    return raw_name
             except Exception:
-                pass
+                return None
+            return None
+
+        # Descarga ultrarrápida en paralelo con 12 hilos
+        with ThreadPoolExecutor(max_workers=12) as executor:
+            downloaded = list(executor.map(download_single_pin, images))
+        
+        saved = [f for f in downloaded if f]
+        
+        if not saved:
+            return jsonify({"status": "error", "message": "No se pudieron descargar las imágenes."}), 500
+            
+        # Crear archivo ZIP específico para esta descarga
+        zip_filename = f"pinterest_descarga_{batch_id}.zip"
+        zip_path = os.path.join(PINTEREST_DIR, zip_filename)
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for fname in saved:
+                file_path = os.path.join(batch_folder, fname)
+                if os.path.exists(file_path):
+                    zipf.write(file_path, fname)
         
         return jsonify({
             "status": "success",
-            "message": f"Descargadas {len(saved)} fotos exitosamente de Pinterest.",
+            "message": f"¡Descargadas {len(saved)} fotos originales en alta resolución!",
             "total": len(saved),
-            "download_zip": "/api/download_zip"
+            "download_zip": f"/api/files/pinterest/{zip_filename}"
         })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500

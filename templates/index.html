@@ -141,35 +141,32 @@
 
         async function downloadPinterest() {
             const query = document.getElementById('pinterest-input').value.trim();
+            const format = document.getElementById('pinterest-format').value;
+            const type = document.getElementById('pinterest-type').value;
             const statusBox = document.getElementById('pinterest-status');
             if(!query) return;
 
-            statusBox.innerHTML = "⏳ Buscando fotos en máxima resolución en Pinterest...";
+            statusBox.innerHTML = "⏳ Extrayendo y descargando todas las fotos del tablero/búsqueda en alta resolución... Por favor espera.";
             statusBox.className = "status-box loading";
 
             try {
-                const response = await fetch('/api/search_pinterest', {
+                const response = await fetch('/api/download_pinterest', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({query})
+                    body: JSON.stringify({query, format, media_type: type})
                 });
                 const result = await response.json();
-                if (result.status === 'success' && result.images.length > 0) {
-                    statusBox.innerHTML = `✅ Se encontraron ${result.images.length} fotos originales.<br><a href="/api/download_zip" class="btn btn-secondary" style="margin-top:10px; display:inline-flex;">📥 Guardar Fotos en mi Dispositivo</a>`;
+                if (result.status === 'success') {
+                    statusBox.innerHTML = `✅ <strong>${result.message}</strong><br><a href="${result.download_zip}" class="btn btn-secondary" style="margin-top:10px; display:inline-flex;">📥 Descargar ZIP con las ${result.total} Fotos</a>`;
                     statusBox.className = "status-box success";
-                    for (const img of result.images.slice(0, 5)) {
-                        await fetch('/api/save_pinterest_image', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({url: img.url})
-                        });
-                    }
+                    // Iniciar descarga del ZIP automáticamente
+                    window.location.href = result.download_zip;
                 } else {
-                    statusBox.innerHTML = "❌ No se encontraron fotos.";
+                    statusBox.innerHTML = `❌ Error: ${result.message}`;
                     statusBox.className = "status-box error";
                 }
             } catch (error) {
-                statusBox.innerHTML = "❌ Error de conexión con Pinterest";
+                statusBox.innerHTML = "❌ Error de conexión con el servidor";
                 statusBox.className = "status-box error";
             }
         }
