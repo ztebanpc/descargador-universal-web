@@ -273,9 +273,11 @@
         }
 
         .filters.three { grid-template-columns: repeat(3, 1fr); }
+        .filters.four { grid-template-columns: repeat(4, 1fr); }
 
         @media (max-width: 580px) {
             .filters.three { grid-template-columns: repeat(2, 1fr); }
+            .filters.four { grid-template-columns: repeat(2, 1fr); }
         }
 
         .filter-label {
@@ -361,7 +363,7 @@
 
         .btn-action svg { width: 16px; height: 16px; }
 
-        /* Passive ZIP Switch Button */
+        /* Passive ZIP Switch Button (Disponible en las 3 pestañas) */
         .zip-toggle-btn {
             display: flex;
             align-items: center;
@@ -382,6 +384,7 @@
             background: #292524;
             color: #ffffff;
             border-color: #292524;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
         }
         .zip-toggle-btn svg { width: 15px; height: 15px; }
 
@@ -669,6 +672,7 @@
 
         .order-builder-actions {
             display: flex;
+            align-items: center;
             gap: 8px;
         }
         .btn-builder-exec {
@@ -895,7 +899,7 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         Descargar de Pinterest
                     </button>
-                    <button class="zip-toggle-btn" id="zip-toggle" onclick="toggleZipSwitch()" title="Activar/Desactivar compresión ZIP">
+                    <button class="zip-toggle-btn active" onclick="toggleZipSwitch()" title="Compresión ZIP automática (solo si son 2 o más archivos)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                         ZIP
                     </button>
@@ -936,7 +940,11 @@
                     <input type="text" id="audio-input" class="url-input audio" placeholder="Pega el enlace de YouTube, TikTok o escribe el nombre...">
                 </div>
 
-                <div class="filters three">
+                <div class="filters four">
+                    <div>
+                        <label class="filter-label">Cantidad</label>
+                        <input type="number" id="audio-count" class="filter-input" min="1" max="50" value="1">
+                    </div>
                     <div>
                         <label class="filter-label">Velocidad / Tono</label>
                         <select id="audio-speed" class="filter-select">
@@ -965,10 +973,16 @@
                     </div>
                 </div>
 
-                <button class="btn-action audio" onclick="downloadAudio()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    Descargar Audio
-                </button>
+                <div class="actions-row">
+                    <button class="btn-action audio" onclick="downloadAudio()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Descargar Audio
+                    </button>
+                    <button class="zip-toggle-btn active" onclick="toggleZipSwitch()" title="Compresión ZIP automática (solo si son 2 o más archivos)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        ZIP
+                    </button>
+                </div>
 
                 <input type="file" id="excel-file-hidden" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleExcelUpload(this)">
 
@@ -1023,10 +1037,12 @@
                     </button>
                 </div>
 
-                <button class="btn-action orders" onclick="generateAIOrderLines()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    Generar Orden con IA
-                </button>
+                <div class="actions-row">
+                    <button class="btn-action orders" onclick="generateAIOrderLines()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Generar Orden con IA (Gemini 3.7)
+                    </button>
+                </div>
 
                 <!-- ✨ AI Thinking Process Animation Container -->
                 <div class="ai-thinking-box" id="ai-thinking-box">
@@ -1078,6 +1094,10 @@
                         <button class="btn-builder-exec" onclick="executeCustomOrderProject()">
                             Iniciar Descarga del Proyecto Completo
                         </button>
+                        <button class="zip-toggle-btn active" onclick="toggleZipSwitch()" title="Compresión ZIP automática (solo si son 2 o más archivos)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                            ZIP
+                        </button>
                         <button class="btn-builder-cancel" onclick="closeOrderBuilder()">
                             Cancelar
                         </button>
@@ -1122,18 +1142,50 @@
 
     <script>
         let currentPinMode = 'individual';
-        let isZipActive = false;
+        let isZipActive = true; // Activo por defecto con inteligencia automática
         let isListening = false;
         let recognition = null;
         let currentOrderItems = [];
 
         function toggleZipSwitch() {
             isZipActive = !isZipActive;
-            const btn = document.getElementById('zip-toggle');
-            if (isZipActive) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
+            document.querySelectorAll('.zip-toggle-btn').forEach(btn => {
+                if (isZipActive) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        function triggerSmartDownload(data) {
+            const total = data.total || 1;
+            
+            // 🧠 Regla Inteligente: Si es 1 solo archivo -> NUNCA hace zip, descarga directa
+            if (total === 1) {
+                const directUrl = data.download_url || (data.files && data.files[0]) || data.zip_url;
+                if (directUrl) {
+                    window.location.href = directUrl;
+                }
+                return;
+            }
+
+            // 🧠 Si son múltiples archivos:
+            if (isZipActive && data.zip_url) {
+                // Descargar el archivo ZIP maestro
+                window.location.href = data.zip_url;
+            } else if (data.files && data.files.length > 0) {
+                // Descargar todos los archivos sueltos en ráfaga
+                data.files.forEach((fileUrl, index) => {
+                    setTimeout(() => {
+                        const a = document.createElement('a');
+                        a.href = fileUrl;
+                        a.download = '';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }, index * 250);
+                });
             }
         }
 
@@ -1240,21 +1292,7 @@
                     bar.className = 'status-bar';
                     text.innerText = data.message;
                     playDoneSound();
-
-                    if (isZipActive && data.zip_url) {
-                        window.location.href = data.zip_url;
-                    } else if (data.files && data.files.length > 0) {
-                        data.files.forEach((fileUrl, index) => {
-                            setTimeout(() => {
-                                const a = document.createElement('a');
-                                a.href = fileUrl;
-                                a.download = '';
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                            }, index * 200);
-                        });
-                    }
+                    triggerSmartDownload(data);
                 } else {
                     progress.style.width = '0%';
                     bar.className = 'status-bar error';
@@ -1274,6 +1312,7 @@
         async function downloadAudio() {
             const input = document.getElementById('audio-input');
             const query = input.value.trim();
+            const count = document.getElementById('audio-count').value || 1;
             const quality = document.getElementById('audio-quality').value;
             const format = document.getElementById('audio-format').value;
             const speed = document.getElementById('audio-speed').value;
@@ -1296,13 +1335,13 @@
             container.style.display = 'block';
             bar.className = 'status-bar loading';
             progress.style.width = '40%';
-            text.innerText = `Extrayendo audio a ${speed}x (${quality}kbps)...`;
+            text.innerText = `Extrayendo ${count} audio(s) a ${speed}x (${quality}kbps)...`;
 
             try {
                 const res = await fetch('/api/download_audio', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({query, quality, format, speed})
+                    body: JSON.stringify({query, quality, format, speed, cantidad: count})
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
@@ -1310,7 +1349,7 @@
                     bar.className = 'status-bar';
                     text.innerText = data.message;
                     playDoneSound();
-                    if (data.download_url) window.location.href = data.download_url;
+                    triggerSmartDownload(data);
                 } else {
                     progress.style.width = '0%';
                     bar.className = 'status-bar error';
@@ -1598,7 +1637,7 @@
                     bar.className = 'status-bar';
                     text.innerText = data.message;
                     playDoneSound();
-                    if (data.zip_url) window.location.href = data.zip_url;
+                    triggerSmartDownload(data);
                 } else {
                     progress.style.width = '0%';
                     bar.className = 'status-bar error';

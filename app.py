@@ -54,13 +54,12 @@ def sanitize_filename(name):
     return clean[:40].strip('_') or f"proyecto_{int(time.time())}"
 
 # ==========================================
-# 🎵 AUDIO DOWNLOADER CON ANTICOPYRIGHT & 403 BYPASS
+# 🎵 AUDIO DOWNLOADER CON ANTICOPYRIGHT & MULTI-CANTIDAD
 # ==========================================
-def process_audio_download(query, quality="192", format_type="mp3", speed="1.0", target_folder=AUDIO_DIR):
+def process_audio_download(query, quality="192", format_type="mp3", speed="1.0", count=1, target_folder=AUDIO_DIR):
     try:
-        print(f"[Audio] Buscando: {query} | Calidad: {quality}kbps | Formato: {format_type} | Velocidad: {speed}x")
-        filename_base = f"audio_{int(time.time())}_{sanitize_filename(query[:20])}"
-        out_template = os.path.join(target_folder, f"{filename_base}.%(ext)s")
+        cnt = int(count) if (str(count).isdigit() and int(count) > 0) else 1
+        print(f"[Audio] Buscando {cnt} audios para: {query} | Calidad: {quality}kbps | Formato: {format_type} | Velocidad: {speed}x")
         
         postprocessors = [{
             'key': 'FFmpegExtractAudio',
@@ -78,6 +77,10 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
             except ValueError:
                 pass
                 
+        batch_id = int(time.time())
+        filename_base = f"audio_{batch_id}_{sanitize_filename(query[:15])}"
+        out_template = os.path.join(target_folder, f"{filename_base}_%(id)s.%(ext)s") if cnt > 1 else os.path.join(target_folder, f"{filename_base}.%(ext)s")
+        
         ydl_opts = {
             'format': 'bestaudio/best',
             'postprocessors': postprocessors,
@@ -90,35 +93,35 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
             'noplaylist': True,
             'quiet': True,
             'no_warnings': True,
+            'max_downloads': cnt,
         }
         if postprocessor_args:
             ydl_opts['postprocessor_args'] = {'ffmpeg': postprocessor_args}
             
-        search_query = query if query.startswith('http') else f"ytsearch1:{query}"
+        search_query = query if query.startswith('http') else f"ytsearch{cnt}:{query}"
             
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             try:
-                ydl.extract_info(search_query, download=True)
+                ydl.download([search_query])
             except yt_dlp.utils.MaxDownloadsReached:
                 pass
                 
-        final_filename = None
+        saved_files = []
         for f in os.listdir(target_folder):
-            if f.startswith(filename_base):
-                final_filename = f
-                break
+            if f.startswith(filename_base) and f.endswith(('.mp3', '.m4a', '.wav', '.flac')):
+                saved_files.append(f)
                 
-        if not final_filename:
+        if not saved_files:
             files = [f for f in os.listdir(target_folder) if f.endswith(('.mp3', '.m4a', '.wav', '.flac'))]
             if files:
                 latest = max([os.path.join(target_folder, f) for f in files], key=os.path.getctime)
-                final_filename = os.path.basename(latest)
+                saved_files.append(os.path.basename(latest))
 
-        print(f"[Audio] [OK] Completado: {final_filename}")
-        return final_filename
+        print(f"[Audio] [OK] Completados {len(saved_files)} audios.")
+        return saved_files
     except Exception as e:
         print(f"[Audio] [ERROR] Error en descarga de audio: {e}")
-        return None
+        return []
 
 # ==========================================
 # 🎬 VIDEO SHORTS / CLIPS DOWNLOADER (Vertical HD)
@@ -168,7 +171,7 @@ def process_video_download(term, count=1, format_type='9:16', target_folder=ORDE
 def process_bulk_audio(links, speed="1.0"):
     print(f"[Excel] Procesando {len(links)} enlaces en lote...")
     for link in links:
-        process_audio_download(link, speed=speed, target_folder=EXCEL_DIR)
+        process_audio_download(link, speed=speed, count=1, target_folder=EXCEL_DIR)
         time.sleep(1.5)
     print(f"[Excel] [OK] Todos los enlaces de Excel fueron procesados.")
 
@@ -344,7 +347,7 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
             shutil.copy(os.path.join(batch_folder, f), os.path.join(target_folder, f))
             
         zip_filename = None
-        if create_zip:
+        if create_zip and len(saved_files) > 1:
             zip_filename = f"pinterest_descarga_{batch_id}.zip"
             zip_path = os.path.join(target_folder, zip_filename)
             with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -644,19 +647,35 @@ def download_audio():
     quality = data.get('quality', '192')
     format_type = data.get('format', 'mp3')
     speed = data.get('speed', '1.0')
+    count = data.get('cantidad', 1)
     
     if not query:
         return jsonify({"status": "error", "message": "Debes ingresar un enlace o nombre.", "note": "Verifica que el término de búsqueda no esté vacío."}), 400
         
-    filename = process_audio_download(query, quality=quality, format_type=format_type, speed=speed)
-    if filename:
+    saved_files = process_audio_download(query, quality=quality, format_type=format_type, speed=speed, count=count)
+    if saved_files:
+        file_urls = [f"/api/files/audio/{f}" for f in saved_files]
+        zip_url = None
+        if len(saved_files) > 1:
+            batch_id = int(time.time())
+            zip_filename = f"audios_lote_{batch_id}.zip"
+            zip_path = os.path.join(AUDIO_DIR, zip_filename)
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for f in saved_files:
+                    fp = os.path.join(AUDIO_DIR, f)
+                    if os.path.isfile(fp):
+                        zipf.write(fp, f)
+            zip_url = f"/api/files/audio/{zip_filename}"
+            
         return jsonify({
             "status": "success",
-            "message": f"Audio descargado exitosamente ({speed}x): {query}",
-            "filename": filename,
-            "download_url": f"/api/files/audio/{filename}"
+            "message": f"Descargados {len(saved_files)} audios exitosamente ({speed}x).",
+            "total": len(saved_files),
+            "files": file_urls,
+            "download_url": file_urls[0] if len(file_urls) == 1 else None,
+            "zip_url": zip_url
         })
-    return jsonify({"status": "error", "message": "No se pudo extraer el audio.", "note": "Comprueba que el video esté disponible públicamente."}), 500
+    return jsonify({"status": "error", "message": "No se pudo extraer el audio.", "note": "Comprueba que el video o búsqueda esté disponible públicamente."}), 500
 
 @app.route('/api/download_excel', methods=['POST'])
 def download_excel():
@@ -720,6 +739,7 @@ def download_pinterest():
             "message": f"Descargados {len(saved)} archivos en calidad original.",
             "total": len(saved),
             "files": file_urls,
+            "download_url": file_urls[0] if len(file_urls) == 1 else None,
             "zip_url": zip_url
         })
     return jsonify({
@@ -769,8 +789,8 @@ def execute_custom_order():
         if not term: continue
         
         if itype == 'audio':
-            f = process_audio_download(term, speed=speed, target_folder=project_folder)
-            if f: downloaded_files.append(f)
+            auds = process_audio_download(term, speed=speed, count=cnt, target_folder=project_folder)
+            if auds: downloaded_files.extend(auds)
         elif itype == 'video':
             vids = process_video_download(term, count=cnt, format_type=fmt, target_folder=project_folder)
             if vids: downloaded_files.extend(vids)
@@ -778,24 +798,25 @@ def execute_custom_order():
             pins, _ = process_pinterest_download(term, format_type=fmt, media_type='photos', pin_tab='tematica', count=cnt, target_folder=project_folder, create_zip=False)
             if pins: downloaded_files.extend(pins)
             
-    # Empaquetar todo en un único ZIP maestro limpio sin archivos anidados
     master_zip_name = f"Ordenes_IA_{project_slug}.zip"
     master_zip_path = os.path.join(ORDENES_DIR, master_zip_name)
     
     with zipfile.ZipFile(master_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(project_folder):
             for file in files:
-                if not file.endswith('.zip'): # Nunca meter zips adentro del zip maestro
+                if not file.endswith('.zip'):
                     file_path = os.path.join(root, file)
                     arcname = os.path.relpath(file_path, project_folder)
                     zipf.write(file_path, arcname)
                     
+    file_urls = [f"/api/files/ordenes/{f}" for f in downloaded_files]
     return jsonify({
         "status": "success",
         "message": f"Proyecto completado con {len(downloaded_files)} archivos descargados.",
         "total": len(downloaded_files),
+        "download_url": file_urls[0] if len(file_urls) == 1 else None,
         "zip_url": f"/api/files/ordenes/{master_zip_name}",
-        "files": [f"/api/files/ordenes/{f}" for f in downloaded_files]
+        "files": file_urls
     })
 
 @app.route('/api/files/<category>/<filename>')
