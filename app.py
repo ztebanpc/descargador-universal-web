@@ -101,17 +101,35 @@ def download_video_sync(url):
             return os.path.basename(latest), title
     return None, None
 
-# ==========================================
-# 📌 PINTEREST SCRAPER (API Interna HD)
-# ==========================================
-def search_pinterest_images(query, limit=12):
+def search_pinterest_images(query, limit=30):
     try:
-        clean_q = build_clean_query(query)
-        url = f"https://www.pinterest.com/resource/BaseSearchResource/get/?source_url=/search/pins/?q={clean_q}&data=%7B%22options%22%3A%7B%22query%22%3A%22{clean_q}%22%2C%22scope%22%3A%22pins%22%7D%2C%22context%22%3A%7B%7D%7D"
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "X-Requested-With": "XMLHttpRequest"
         }
+        
+        # 1. Si es un enlace directo (pin.it o pinterest.com)
+        if query.startswith("http://") or query.startswith("https://") or "pin.it" in query or "pinterest.com" in query:
+            url_to_fetch = query if query.startswith("http") else "https://" + query
+            res = requests.get(url_to_fetch, headers=headers, allow_redirects=True, timeout=12)
+            if res.status_code == 200:
+                matches = re.findall(r'https://i\.pinimg\.com/[^"\'\s<>]+?\.(?:jpg|jpeg|png|webp)', res.text)
+                images = []
+                for m in matches:
+                    if any(bad in m for bad in ['avatar', '75x75', '200x150', '150x150', '30x30']):
+                        continue
+                    orig = re.sub(r'/(?:236x|474x|564x|736x)/', '/originals/', m)
+                    if orig not in [img["url"] for img in images]:
+                        pin_id = f"pin_{len(images)+1}"
+                        images.append({"id": pin_id, "title": f"Pinterest {len(images)+1}", "url": orig})
+                    if len(images) >= limit:
+                        break
+                if images:
+                    return images
+        
+        # 2. Si es una búsqueda temática / palabra clave
+        clean_q = build_clean_query(query)
+        url = f"https://www.pinterest.com/resource/BaseSearchResource/get/?source_url=/search/pins/?q={clean_q}&data=%7B%22options%22%3A%7B%22query%22%3A%22{clean_q}%22%2C%22scope%22%3A%22pins%22%7D%2C%22context%22%3A%7B%7D%7D"
         res = requests.get(url, headers=headers, timeout=12)
         if res.status_code == 200:
             data = res.json()
