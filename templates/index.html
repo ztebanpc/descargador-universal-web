@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Descargador Universal — Motor central para proyectos de edición</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -33,14 +33,15 @@
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            padding: 24px 12px;
+            padding: 20px 10px;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
         .container {
             width: 100%;
-            max-width: 680px;
+            max-width: 640px;
             margin: 0 auto;
             position: relative;
         }
@@ -48,26 +49,26 @@
         /* Header */
         .header {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
 
         .logo-box {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             background: var(--card);
-            border-radius: 16px;
+            border-radius: 14px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04);
             border: 1px solid var(--border);
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
-        .logo-box svg { width: 24px; height: 24px; color: var(--text); }
+        .logo-box svg { width: 22px; height: 22px; color: var(--text); }
 
         h1 {
-            font-size: 22px;
+            font-size: 21px;
             font-weight: 800;
             letter-spacing: -0.025em;
             margin-bottom: 4px;
@@ -83,17 +84,17 @@
             display: flex;
             padding: 4px;
             background: rgba(231, 229, 228, 0.6);
-            border-radius: 16px;
-            margin-bottom: 20px;
+            border-radius: 14px;
+            margin-bottom: 18px;
             backdrop-filter: blur(8px);
         }
 
         .tab-btn {
             flex: 1;
-            padding: 10px 6px;
+            padding: 10px 4px;
             font-size: 13px;
             font-weight: 600;
-            border-radius: 12px;
+            border-radius: 10px;
             border: none;
             background: transparent;
             color: var(--text-muted);
@@ -113,7 +114,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
 
-        .tab-btn svg { width: 16px; height: 16px; }
+        .tab-btn svg { width: 15px; height: 15px; }
 
         /* Panels */
         .panel { display: none; }
@@ -125,8 +126,10 @@
             border-radius: 20px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
-            padding: 22px 18px;
+            padding: 20px 16px;
             animation: fadeIn 0.3s ease;
+            box-sizing: border-box;
+            width: 100%;
         }
 
         @keyframes fadeIn {
@@ -139,19 +142,19 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .module-header-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .module-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -159,13 +162,13 @@
         }
 
         .module-icon.pinterest { background: rgba(230, 0, 35, 0.08); }
-        .module-icon.pinterest svg { width: 20px; height: 20px; fill: var(--pinterest); }
+        .module-icon.pinterest svg { width: 18px; height: 18px; fill: var(--pinterest); }
 
         .module-icon.audio { background: rgba(124, 58, 237, 0.08); }
-        .module-icon.audio svg { width: 20px; height: 20px; color: var(--violet); }
+        .module-icon.audio svg { width: 18px; height: 18px; color: var(--violet); }
 
         .module-icon.orders { background: rgba(5, 150, 105, 0.08); }
-        .module-icon.orders svg { width: 20px; height: 20px; color: var(--emerald); }
+        .module-icon.orders svg { width: 18px; height: 18px; color: var(--emerald); }
 
         .module-title {
             font-size: 15px;
@@ -177,7 +180,7 @@
         }
 
         .module-desc {
-            font-size: 12px;
+            font-size: 11.5px;
             color: var(--text-light);
         }
 
@@ -191,9 +194,10 @@
             justify-content: center;
             border-radius: 50%;
             transition: all 0.2s ease;
+            padding: 2px;
         }
         .btn-info-circle:hover { color: var(--text); }
-        .btn-info-circle svg { width: 16px; height: 16px; }
+        .btn-info-circle svg { width: 15px; height: 15px; }
 
         /* Toggle Group */
         .toggle-group {
@@ -201,7 +205,7 @@
             background: var(--input-bg);
             border-radius: 12px;
             padding: 4px;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .toggle-btn {
@@ -209,7 +213,7 @@
             padding: 8px;
             font-size: 12px;
             font-weight: 600;
-            border-radius: 10px;
+            border-radius: 9px;
             border: none;
             background: transparent;
             color: var(--text-muted);
@@ -227,12 +231,12 @@
         /* Input */
         .input-wrap {
             position: relative;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .input-icon {
             position: absolute;
-            left: 14px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-light);
@@ -243,15 +247,16 @@
 
         .url-input {
             width: 100%;
-            padding: 13px 14px 13px 40px;
+            padding: 12px 14px 12px 38px;
             background: var(--input-bg);
             border: 2px solid var(--border);
-            border-radius: 14px;
+            border-radius: 12px;
             font-size: 13px;
             font-family: inherit;
             color: var(--text);
             outline: none;
             transition: all 0.2s ease;
+            box-sizing: border-box;
         }
 
         .url-input::placeholder { color: var(--text-light); }
@@ -264,7 +269,7 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .filters.three { grid-template-columns: repeat(3, 1fr); }
@@ -275,25 +280,26 @@
 
         .filter-label {
             display: block;
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         .filter-select, .filter-input {
             width: 100%;
-            padding: 10px 12px;
+            padding: 9px 10px;
             background: var(--input-bg);
             border: 1px solid #e7e5e4;
-            border-radius: 12px;
-            font-size: 13px;
+            border-radius: 10px;
+            font-size: 12.5px;
             font-family: inherit;
             color: var(--text);
             outline: none;
             transition: all 0.2s ease;
+            box-sizing: border-box;
         }
 
         .filter-select {
@@ -302,7 +308,7 @@
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 10px center;
-            padding-right: 28px;
+            padding-right: 26px;
         }
 
         .filter-select:focus, .filter-input:focus { border-color: #d6d3d1; background: #fff; }
@@ -311,16 +317,16 @@
         .actions-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
+            gap: 8px;
+            margin-bottom: 10px;
         }
 
         .btn-action {
             flex: 1;
             padding: 13px;
             border: none;
-            border-radius: 14px;
-            font-size: 14px;
+            border-radius: 12px;
+            font-size: 13.5px;
             font-weight: 600;
             font-family: inherit;
             color: #fff;
@@ -363,20 +369,21 @@
             padding: 12px 14px;
             background: var(--input-bg);
             border: 1.5px solid #e7e5e4;
-            border-radius: 14px;
+            border-radius: 12px;
             color: var(--text-muted);
-            font-size: 13px;
+            font-size: 12.5px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             user-select: none;
+            flex-shrink: 0;
         }
         .zip-toggle-btn.active {
             background: #292524;
             color: #ffffff;
             border-color: #292524;
         }
-        .zip-toggle-btn svg { width: 16px; height: 16px; }
+        .zip-toggle-btn svg { width: 15px; height: 15px; }
 
         /* Secondary Button (Excel) */
         .btn-excel {
@@ -384,7 +391,7 @@
             padding: 12px;
             background: rgba(16, 124, 65, 0.08);
             border: 1px solid rgba(16, 124, 65, 0.2);
-            border-radius: 14px;
+            border-radius: 12px;
             font-size: 13px;
             font-weight: 600;
             font-family: inherit;
@@ -401,12 +408,12 @@
             background: rgba(16, 124, 65, 0.14);
             border-color: var(--excel-green);
         }
-        .btn-excel svg { width: 20px; height: 20px; }
+        .btn-excel svg { width: 18px; height: 18px; }
 
         /* Voice Assistant Input with Integrated Mic */
         .voice-input-wrap {
             position: relative;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
         .voice-input-wrap .url-input {
             padding-left: 14px;
@@ -441,14 +448,75 @@
         }
         .mic-inline-btn svg { width: 18px; height: 18px; }
 
-        /* Line-by-line Order Builder (Responsive for Mobile) */
+        /* ✨ AI Thinking Process Container */
+        .ai-thinking-box {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(5, 150, 105, 0.05));
+            border: 1.5px solid rgba(124, 58, 237, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 14px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .ai-thinking-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .ai-thinking-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(124, 58, 237, 0.2);
+            border-top-color: var(--violet);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .ai-thinking-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--violet);
+        }
+        .ai-thinking-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .ai-step-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        .ai-step-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #d6d3d1;
+        }
+        .ai-step-item.active .ai-step-dot {
+            background: var(--violet);
+            animation: pulse 1s infinite;
+        }
+        .ai-step-item.active {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* 📱 Line-by-line Order Builder (100% Mobile Responsive) */
         .order-builder-wrap {
             background: var(--input-bg);
             border: 1px solid #e7e5e4;
             border-radius: 16px;
             padding: 14px;
-            margin-top: 18px;
+            margin-top: 14px;
             display: none;
+            box-sizing: border-box;
+            width: 100%;
         }
         .order-builder-header {
             display: flex;
@@ -461,13 +529,26 @@
             font-weight: 700;
             color: var(--text);
         }
+        .ai-reasoning-badge {
+            font-size: 11px;
+            background: rgba(5, 150, 105, 0.1);
+            color: var(--emerald);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: none;
+            line-height: 1.4;
+        }
+
         .order-lines-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
             margin-bottom: 12px;
+            width: 100%;
         }
-        .order-line-item {
+        .order-line-card {
             background: #fff;
             padding: 10px 12px;
             border-radius: 12px;
@@ -475,15 +556,17 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            box-sizing: border-box;
+            width: 100%;
         }
-        .order-line-top {
+        .order-line-row-1 {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 8px;
             width: 100%;
         }
-        .order-line-input {
+        .order-line-name-input {
             flex: 1;
             border: none;
             outline: none;
@@ -492,8 +575,11 @@
             color: var(--text);
             font-weight: 600;
             background: transparent;
+            padding: 2px 0;
+            box-sizing: border-box;
+            width: 100%;
         }
-        .order-line-del {
+        .order-line-del-btn {
             background: none;
             border: none;
             color: var(--text-light);
@@ -501,49 +587,57 @@
             cursor: pointer;
             padding: 0 4px;
             line-height: 1;
+            flex-shrink: 0;
         }
-        .order-line-del:hover { color: var(--error); }
+        .order-line-del-btn:hover { color: var(--error); }
 
-        .order-line-bottom {
+        .order-line-row-2 {
             display: flex;
             align-items: center;
             gap: 8px;
             justify-content: space-between;
             width: 100%;
+            box-sizing: border-box;
         }
-        .order-line-count-wrap {
+        .order-count-badge {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
+            flex-shrink: 0;
         }
-        .order-line-count-label {
+        .order-count-label {
             font-size: 11px;
             color: var(--text-muted);
             font-weight: 500;
         }
-        .order-line-count {
-            width: 48px;
-            padding: 6px 4px;
+        .order-count-num-input {
+            width: 44px;
+            padding: 5px 2px;
             border: 1px solid #e7e5e4;
             border-radius: 8px;
             font-size: 12px;
             font-family: inherit;
             text-align: center;
             outline: none;
+            box-sizing: border-box;
         }
-        .order-tag-select {
+        .order-tag-selector {
             flex: 1;
-            max-width: 220px;
+            width: 100%;
             padding: 6px 8px;
             background: #f5f5f4;
             border: 1px solid #e7e5e4;
             border-radius: 8px;
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 600;
             font-family: inherit;
             color: var(--text);
             cursor: pointer;
             outline: none;
+            box-sizing: border-box;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .btn-add-line {
@@ -559,7 +653,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             transition: all 0.2s ease;
         }
         .btn-add-line:hover { background: #e7e5e4; color: var(--text); }
@@ -915,7 +1009,7 @@
 
                 <!-- Voice Input Box with integrated Mic -->
                 <div class="voice-input-wrap">
-                    <input type="text" id="order-prompt" class="url-input" placeholder="Ej: harry styles hoy te odio mp3 1.06, 20 video aesthetic 9:16...">
+                    <input type="text" id="order-prompt" class="url-input" placeholder="Ej: 20 videos aesthetic 9:16, 10 fotos vintage 1:1 y cancion harry styles mp3 1.06...">
                     <button class="mic-inline-btn" id="mic-btn" onclick="toggleMic()" title="Dictar por micrófono">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                     </button>
@@ -926,11 +1020,35 @@
                     Generar Orden con IA
                 </button>
 
-                <!-- Interactive Line-by-Line Order Builder (Fully Responsive on Mobile) -->
+                <!-- ✨ AI Thinking Process Animation Container -->
+                <div class="ai-thinking-box" id="ai-thinking-box">
+                    <div class="ai-thinking-header">
+                        <div class="ai-thinking-spinner"></div>
+                        <div class="ai-thinking-title">Cerebro IA razonando tu solicitud...</div>
+                    </div>
+                    <div class="ai-thinking-steps">
+                        <div class="ai-step-item active" id="step-1">
+                            <div class="ai-step-dot"></div>
+                            <span>Analizando temática y contexto visual de edición...</span>
+                        </div>
+                        <div class="ai-step-item" id="step-2">
+                            <div class="ai-step-dot"></div>
+                            <span>Seleccionando canciones individuales y ajustando anticopyright (1.06x)...</span>
+                        </div>
+                        <div class="ai-step-item" id="step-3">
+                            <div class="ai-step-dot"></div>
+                            <span>Optimizando relaciones de aspecto (9:16 vertical, 1:1 cuadrada)...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 📱 Line-by-line Order Builder (100% Mobile Responsive) -->
                 <div class="order-builder-wrap" id="order-builder-wrap">
                     <div class="order-builder-header">
                         <div class="order-builder-title">Elementos de la Orden (Editables)</div>
                     </div>
+                    
+                    <div class="ai-reasoning-badge" id="ai-reasoning-badge"></div>
                     
                     <div class="order-lines-list" id="order-lines-list">
                         <!-- Dynamic responsive items -->
@@ -1241,7 +1359,7 @@
         }
 
         // ==========================================
-        // 🤖 ASISTENTE DE ÓRDENES IA (Líneas Editables & Responsivas)
+        // 🤖 ASISTENTE DE ÓRDENES IA CON ANIMACIÓN DE PENSAMIENTO
         // ==========================================
         function toggleMic() {
             const micBtn = document.getElementById('mic-btn');
@@ -1293,9 +1411,30 @@
             const prompt = document.getElementById('order-prompt').value.trim();
             if (!prompt) return;
 
-            const builder = document.getElementById('order-builder-wrap');
-            builder.style.display = 'block';
-            document.getElementById('order-lines-list').innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px 0;">Interpretando orden con IA...</div>';
+            const thinkingBox = document.getElementById('ai-thinking-box');
+            const builderWrap = document.getElementById('order-builder-wrap');
+            
+            builderWrap.style.display = 'none';
+            thinkingBox.style.display = 'block';
+
+            // Animación fluida de pasos de pensamiento
+            const step1 = document.getElementById('step-1');
+            const step2 = document.getElementById('step-2');
+            const step3 = document.getElementById('step-3');
+
+            step1.className = 'ai-step-item active';
+            step2.className = 'ai-step-item';
+            step3.className = 'ai-step-item';
+
+            const timerStep2 = setTimeout(() => {
+                step1.className = 'ai-step-item';
+                step2.className = 'ai-step-item active';
+            }, 600);
+
+            const timerStep3 = setTimeout(() => {
+                step2.className = 'ai-step-item';
+                step3.className = 'ai-step-item active';
+            }, 1200);
 
             try {
                 const res = await fetch('/api/ai_order_assistant', {
@@ -1304,12 +1443,34 @@
                     body: JSON.stringify({prompt})
                 });
                 const data = await res.json();
-                if (data.status === 'success') {
-                    currentOrderItems = data.items;
-                    renderOrderLines();
-                }
+                
+                clearTimeout(timerStep2);
+                clearTimeout(timerStep3);
+                
+                // Transición suave
+                setTimeout(() => {
+                    thinkingBox.style.display = 'none';
+                    if (data.status === 'success') {
+                        currentOrderItems = data.items;
+                        
+                        const badge = document.getElementById('ai-reasoning-badge');
+                        if (data.reasoning) {
+                            badge.style.display = 'block';
+                            badge.innerText = '💡 ' + data.reasoning;
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                        
+                        builderWrap.style.display = 'block';
+                        renderOrderLines();
+                    }
+                }, 1400);
+
             } catch (err) {
-                document.getElementById('order-lines-list').innerHTML = '<div style="font-size:12px;color:var(--error);padding:8px 0;">Error interpretando orden.</div>';
+                clearTimeout(timerStep2);
+                clearTimeout(timerStep3);
+                thinkingBox.style.display = 'none';
+                alert('Error al conectar con el Asistente IA.');
             }
         }
 
@@ -1318,31 +1479,31 @@
             list.innerHTML = '';
 
             currentOrderItems.forEach((itm, idx) => {
-                const row = document.createElement('div');
-                row.className = 'order-line-item';
+                const card = document.createElement('div');
+                card.className = 'order-line-card';
                 
                 let selectedCode = `${itm.type}_${itm.format}`;
                 if (itm.type === 'audio') selectedCode = `audio_${itm.speed}`;
 
                 const isAudioItem = itm.type === 'audio';
 
-                row.innerHTML = `
-                    <div class="order-line-top">
-                        <input type="text" class="order-line-input" value="${itm.term}" placeholder="Nombre de canción, foto o video..." onchange="updateLineTerm(${idx}, this.value)">
-                        <button class="order-line-del" onclick="deleteOrderLine(${idx})" title="Eliminar línea">&times;</button>
+                card.innerHTML = `
+                    <div class="order-line-row-1">
+                        <input type="text" class="order-line-name-input" value="${itm.term}" placeholder="Nombre de canción, foto o video..." onchange="updateLineTerm(${idx}, this.value)">
+                        <button class="order-line-del-btn" onclick="deleteOrderLine(${idx})" title="Eliminar línea">&times;</button>
                     </div>
-                    <div class="order-line-bottom">
-                        <div class="order-line-count-wrap">
-                            <span class="order-line-count-label">${isAudioItem ? 'Canción:' : 'Cant:'}</span>
+                    <div class="order-line-row-2">
+                        <div class="order-count-badge">
+                            <span class="order-count-label">${isAudioItem ? 'Canción:' : 'Cant:'}</span>
                             ${isAudioItem ? 
                                 '<span style="font-size:12px;font-weight:600;color:var(--text);">1 audio</span>' : 
-                                `<input type="number" class="order-line-count" value="${itm.count}" min="1" max="100" onchange="updateLineCount(${idx}, this.value)">`
+                                `<input type="number" class="order-count-num-input" value="${itm.count}" min="1" max="100" onchange="updateLineCount(${idx}, this.value)">`
                             }
                         </div>
-                        <select class="order-tag-select" onchange="updateLineTag(${idx}, this.value)">
-                            <option value="audio_1.06" ${selectedCode === 'audio_1.06' ? 'selected' : ''}>🎵 Audio MP3 (1.06x Anticopyright)</option>
-                            <option value="audio_1.0" ${selectedCode === 'audio_1.0' ? 'selected' : ''}>🎵 Audio MP3 (1.0x Normal)</option>
-                            <option value="audio_1.25" ${selectedCode === 'audio_1.25' ? 'selected' : ''}>🎵 Audio MP3 (1.25x)</option>
+                        <select class="order-tag-selector" onchange="updateLineTag(${idx}, this.value)">
+                            <option value="audio_1.06" ${selectedCode === 'audio_1.06' ? 'selected' : ''}>🎵 Audio (1.06x Anticopyright)</option>
+                            <option value="audio_1.0" ${selectedCode === 'audio_1.0' ? 'selected' : ''}>🎵 Audio (1.0x Normal)</option>
+                            <option value="audio_1.25" ${selectedCode === 'audio_1.25' ? 'selected' : ''}>🎵 Audio (1.25x)</option>
                             <option value="video_9:16" ${selectedCode === 'video_9:16' ? 'selected' : ''}>🎬 Video (9:16 Vertical)</option>
                             <option value="video_16:9" ${selectedCode === 'video_16:9' ? 'selected' : ''}>🎬 Video (16:9 Horizontal)</option>
                             <option value="video_any" ${selectedCode === 'video_any' ? 'selected' : ''}>🎬 Video (Cualquiera)</option>
@@ -1353,7 +1514,7 @@
                         </select>
                     </div>
                 `;
-                list.appendChild(row);
+                list.appendChild(card);
             });
         }
 
@@ -1397,10 +1558,8 @@
             const container = document.getElementById('orders-status-container');
             const bar = document.getElementById('orders-status-bar');
             const text = document.getElementById('orders-status-text');
-            const note = document.getElementById('orders-status-note');
             const progress = document.getElementById('orders-progress');
 
-            note.style.display = 'none';
             closeOrderBuilder();
             container.style.display = 'block';
             bar.className = 'status-bar loading';

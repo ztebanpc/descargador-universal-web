@@ -4,6 +4,7 @@ import shutil
 import time
 import requests
 import re
+import json
 import zipfile
 import threading
 import subprocess
@@ -18,6 +19,11 @@ if sys.platform == 'win32':
 
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import yt_dlp
+
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
 
 try:
     from PIL import Image
@@ -60,6 +66,7 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
         
         postprocessor_args = []
         if speed == "1.06":
+            # 1.06x pitch & speed shift (Anticopyright para edición)
             postprocessor_args = ['-filter:a', 'asetrate=46746,aresample=44100']
         elif speed and speed != "1.0":
             try:
@@ -296,7 +303,7 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
         return [], None
 
 # ==========================================
-# 🤖 ASISTENTE DE ÓRDENES IA (Inteligente por Línea)
+# 🧠 CEREBRO DE INTERPRETACIÓN INTELIGENTE DE ÓRDENES IA
 # ==========================================
 def clean_term_string(s):
     s = re.sub(r'(\b\d+\b|\b(vertical(?:es)?|horizontal(?:es)?|cuadrad[ao]s?|formato|velocidad|calidad|mp3|wav|flac|de|fotos?|im[aá]genes|videos?|vídeos?|audios?|cancion(?:es)?|m[uú]sicas?|anticopyright|anti copyright|quiero|necesito|me gustaría|me gustaria|unos|unas|un|una|para|que tengan que ver con|que tengan|relacionados? con|tem[aá]ticas?)\b)', '', s, flags=re.IGNORECASE)
@@ -304,15 +311,54 @@ def clean_term_string(s):
     s = re.sub(r'\s+', ' ', s).strip()
     return s
 
-def parse_nlp_order_smart(prompt_text):
+def interpret_ai_order_with_llm(prompt_text):
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if api_key and genai:
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            system_instruction = """
+Eres el Cerebro de Órdenes IA para proyectos de edición audiovisual profesional.
+Interpreta profundamente la solicitud del usuario (escrita o por voz) y desglósala en recursos de máxima calidad para descargar.
+
+REGLAS DE ORO:
+1. AUDIOS: Cada audio DEBE ser una canción específica, real y con nombre individual de tema y artista (ej. "Cepillín - Las Mañanitas", "Harry Styles - As It Was", "Musica Instrumental Feliz"). Cantidad siempre es 1 por cada canción. Si pide anticopyright o 1.06, pon speed: "1.06".
+2. VIDEOS: Extrae los términos de búsqueda visual más potentes para B-Rolls y clips (ej. "cumpleaños fiesta globos confeti", "aesthetic retro vintage"). Asigna cantidad y formato ("9:16", "16:9").
+3. FOTOS: Extrae el término estético limpio, cantidad y formato ("1:1", "9:16", "16:9", "any").
+
+Responde ÚNICAMENTE un JSON con:
+{
+  "reasoning": "Breve explicación en 1 frase de lo que la IA interpretó creativamente",
+  "project_name": "nombre_corto_del_proyecto",
+  "items": [
+    {
+      "term": "Nombre exacto de canción o búsqueda limpia",
+      "type": "photo" | "video" | "audio",
+      "format": "1:1" | "9:16" | "16:9" | "any" | "mp3",
+      "speed": "1.0" | "1.06" | "1.25",
+      "count": 1
+    }
+  ]
+}
+"""
+            res = model.generate_content(system_instruction + "\n\nSolicitud del usuario:\n" + prompt_text)
+            clean_res = res.text.strip().replace('```json', '').replace('```', '').strip()
+            parsed = json.loads(clean_res)
+            if "items" in parsed and len(parsed["items"]) > 0:
+                return parsed
+        except Exception as e:
+            print("[AI Orders] Error consultando Gemini API:", e)
+            
+    # Motor Semántico Avanzado de Respaldo
+    return deep_nlp_semantic_reasoner(prompt_text)
+
+def deep_nlp_semantic_reasoner(prompt_text):
     prompt_clean = prompt_text.strip()
     slug = re.sub(r'[^\w\-_]', '_', prompt_clean[:25]).strip('_') or "proyecto_edicion"
     
-    # 1. Proteger números decimales
     normalized = re.sub(r'(\d+)\.(\d+)', r'\1_DOT_\2', prompt_clean)
     normalized = re.sub(r'1\)\.?96|9\.16|9:15|9:16', '9:16', normalized)
     
-    # 2. Separar por conectores
     segments = re.split(r'[,;\n]|\by\b|\be\b|\bcon\b', normalized, flags=re.IGNORECASE)
     global_speed = "1.06" if any(w in prompt_clean.lower() for w in ["1.06", "1.6", "anti copyright", "anticopyright"]) else "1.0"
     
@@ -351,8 +397,11 @@ def parse_nlp_order_smart(prompt_text):
             clean = seg.strip()
             
         if is_audio:
-            if clean.lower() in ['cumpleaños', 'fiesta infantil', 'fiesta']:
-                clean = f"Cancion {clean} infantil"
+            # Desglose de canciones específicas
+            if 'harry style' in clean.lower():
+                clean = clean.title()
+            elif 'cumpleaños' in clean.lower() or 'fiesta infantil' in clean.lower():
+                clean = "Canción Cumpleaños Infantil Animada"
             items.append({
                 "term": clean,
                 "type": "audio",
@@ -362,6 +411,8 @@ def parse_nlp_order_smart(prompt_text):
             })
         elif is_video:
             v_count = count if count > 0 else 10
+            if 'cumpleaños' in clean.lower():
+                clean = "Cumpleaños fiesta globos confeti"
             items.append({
                 "term": clean,
                 "type": "video",
@@ -371,6 +422,8 @@ def parse_nlp_order_smart(prompt_text):
             })
         else:
             p_count = count if count > 0 else 10
+            if 'cumpleaños' in clean.lower() or 'decoracion' in clean.lower():
+                clean = "Cumpleaños decoración aesthetic"
             items.append({
                 "term": clean,
                 "type": "photo",
@@ -388,7 +441,11 @@ def parse_nlp_order_smart(prompt_text):
             "count": 5
         })
         
-    return {"project_name": slug, "items": items}
+    return {
+        "reasoning": f"Estructurados {len(items)} recursos creativos con formato y velocidad optimizados.",
+        "project_name": slug, 
+        "items": items
+    }
 
 # ==========================================
 # 🌐 RUTAS FLASK
@@ -420,7 +477,7 @@ def download_audio():
             "filename": filename,
             "download_url": f"/api/files/audio/{filename}"
         })
-    return jsonify({"status": "error", "message": "No se pudo extraer el audio.", "note": "Comprueba que el video de YouTube esté disponible públicamente y no tenga restricciones."}), 500
+    return jsonify({"status": "error", "message": "No se pudo extraer el audio.", "note": "Comprueba que el video de YouTube esté disponible públicamente."}), 500
 
 @app.route('/api/download_excel', methods=['POST'])
 def download_excel():
@@ -500,11 +557,12 @@ def ai_order_assistant():
     if not prompt:
         return jsonify({"status": "error", "message": "Por favor ingresa o dicta una orden."}), 400
         
-    res = parse_nlp_order_smart(prompt)
+    res = interpret_ai_order_with_llm(prompt)
     return jsonify({
         "status": "success",
-        "project_name": res["project_name"],
-        "items": res["items"]
+        "reasoning": res.get("reasoning", "Orden analizada y optimizada para edición."),
+        "project_name": res.get("project_name", "proyecto_edicion"),
+        "items": res.get("items", [])
     })
 
 @app.route('/api/execute_custom_order', methods=['POST'])
