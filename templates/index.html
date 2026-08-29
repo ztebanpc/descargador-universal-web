@@ -1114,7 +1114,7 @@
                     <li><code>50 videos Verticales (9:16) de Cumpleaños</code></li>
                     <li><code>Mana Te llore un rio mp3 1.06x</code></li>
                 </ul>
-                <p>Cada línea generada cuenta con su propio selector interactivo para ajustar el tipo, la relación de aspecto o la velocidad antes de ejecutar la descarga.</p>
+                <p>Cada línea generada cuenta con su propio selector interactivo contextual para ajustar el tipo, la relación de aspecto o la velocidad antes de ejecutar la descarga.</p>
                 <p style="font-size: 11px; color: var(--text-light);"><em>Nota: Las canciones y videos sugeridos son seleccionados contextualmente por la IA para que coincidan con la emoción y temática de tu video.</em></p>
             </div>
         </div>
@@ -1483,14 +1483,39 @@
                 const card = document.createElement('div');
                 card.className = 'order-line-card';
                 
-                let selectedCode = `${itm.type}_${itm.format}`;
-                if (itm.type === 'audio') selectedCode = `audio_${itm.speed}`;
-
                 const isAudioItem = itm.type === 'audio';
+                const isVideoItem = itm.type === 'video';
+                const isPhotoItem = itm.type === 'photo';
+
+                // Generar opciones contextuales y limpias según el tipo de archivo
+                let selectorOptionsHtml = '';
+                if (isAudioItem) {
+                    selectorOptionsHtml = `
+                        <option value="audio_1.06" ${itm.speed === '1.06' ? 'selected' : ''}>MP3 (1.06x Anticopyright)</option>
+                        <option value="audio_1.0" ${itm.speed === '1.0' ? 'selected' : ''}>MP3 (1.0x Normal)</option>
+                        <option value="audio_1.25" ${itm.speed === '1.25' ? 'selected' : ''}>MP3 (1.25x Rápido)</option>
+                        <option value="audio_1.5" ${itm.speed === '1.5' ? 'selected' : ''}>MP3 (1.5x Rápido)</option>
+                        <option value="audio_2.0" ${itm.speed === '2.0' ? 'selected' : ''}>MP3 (2.0x)</option>
+                    `;
+                } else if (isVideoItem) {
+                    selectorOptionsHtml = `
+                        <option value="video_9:16" ${itm.format === '9:16' ? 'selected' : ''}>Video (9:16 Vertical / Reels)</option>
+                        <option value="video_16:9" ${itm.format === '16:9' ? 'selected' : ''}>Video (16:9 Horizontal / YouTube)</option>
+                        <option value="video_1:1" ${itm.format === '1:1' ? 'selected' : ''}>Video (1:1 Cuadrado)</option>
+                        <option value="video_any" ${itm.format === 'any' ? 'selected' : ''}>Video (Cualquiera)</option>
+                    `;
+                } else { // Photo
+                    selectorOptionsHtml = `
+                        <option value="photo_1:1" ${itm.format === '1:1' ? 'selected' : ''}>Foto (1:1 Cuadrada)</option>
+                        <option value="photo_9:16" ${itm.format === '9:16' ? 'selected' : ''}>Foto (9:16 Vertical)</option>
+                        <option value="photo_16:9" ${itm.format === '16:9' ? 'selected' : ''}>Foto (16:9 Horizontal)</option>
+                        <option value="photo_any" ${itm.format === 'any' ? 'selected' : ''}>Foto (Cualquiera)</option>
+                    `;
+                }
 
                 card.innerHTML = `
                     <div class="order-line-row-1">
-                        <input type="text" class="order-line-name-input" value="${itm.term}" placeholder="Nombre de canción, foto o video..." onchange="updateLineTerm(${idx}, this.value)">
+                        <input type="text" class="order-line-name-input" value="${itm.term}" placeholder="Nombre exacto..." onchange="updateLineTerm(${idx}, this.value)">
                         <button class="order-line-del-btn" onclick="deleteOrderLine(${idx})" title="Eliminar línea">&times;</button>
                     </div>
                     <div class="order-line-row-2">
@@ -1502,16 +1527,7 @@
                             }
                         </div>
                         <select class="order-tag-selector" onchange="updateLineTag(${idx}, this.value)">
-                            <option value="audio_1.06" ${selectedCode === 'audio_1.06' ? 'selected' : ''}>Audio MP3 (1.06x Anticopyright)</option>
-                            <option value="audio_1.0" ${selectedCode === 'audio_1.0' ? 'selected' : ''}>Audio MP3 (1.0x Normal)</option>
-                            <option value="audio_1.25" ${selectedCode === 'audio_1.25' ? 'selected' : ''}>Audio MP3 (1.25x)</option>
-                            <option value="video_9:16" ${selectedCode === 'video_9:16' ? 'selected' : ''}>Video (9:16 Vertical)</option>
-                            <option value="video_16:9" ${selectedCode === 'video_16:9' ? 'selected' : ''}>Video (16:9 Horizontal)</option>
-                            <option value="video_any" ${selectedCode === 'video_any' ? 'selected' : ''}>Video (Cualquiera)</option>
-                            <option value="photo_1:1" ${selectedCode === 'photo_1:1' ? 'selected' : ''}>Foto (1:1 Cuadrada)</option>
-                            <option value="photo_9:16" ${selectedCode === 'photo_9:16' ? 'selected' : ''}>Foto (9:16 Vertical)</option>
-                            <option value="photo_16:9" ${selectedCode === 'photo_16:9' ? 'selected' : ''}>Foto (16:9 Horizontal)</option>
-                            <option value="photo_any" ${selectedCode === 'photo_any' ? 'selected' : ''}>Foto (Cualquiera)</option>
+                            ${selectorOptionsHtml}
                         </select>
                     </div>
                 `;
