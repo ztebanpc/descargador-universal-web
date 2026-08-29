@@ -60,7 +60,6 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
         
         postprocessor_args = []
         if speed == "1.06":
-            # 1.06x pitch & speed shift (Anticopyright de CapCut)
             postprocessor_args = ['-filter:a', 'asetrate=46746,aresample=44100']
         elif speed and speed != "1.0":
             try:
@@ -88,7 +87,6 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
             except yt_dlp.utils.MaxDownloadsReached:
                 pass
                 
-        # Buscar el archivo generado
         final_filename = None
         for f in os.listdir(target_folder):
             if f.startswith(filename_base):
@@ -131,11 +129,9 @@ def extract_pinterest_raw_links(query, count=20):
             res = requests.get(url, headers=headers, allow_redirects=True, timeout=12)
             if res.status_code == 200:
                 html = res.text
-                # Videos (.mp4)
                 v_matches = re.findall(r'https://[^"\'\s<>]+?\.pinimg\.com/[^"\'\s<>]+\.mp4', html)
                 for v in v_matches:
                     if v not in videos: videos.append(v)
-                # Imágenes (/originals/)
                 i_matches = re.findall(r'https://i\.pinimg\.com/[^"\'\s<>]+?\.(?:jpg|jpeg|png|webp)', html)
                 for m in i_matches:
                     if any(bad in m for bad in ['avatar', '75x75', '200x150', '150x150', '30x30']):
@@ -146,7 +142,6 @@ def extract_pinterest_raw_links(query, count=20):
         except Exception as e:
             print("[Pinterest] Error al resolver enlace:", e)
     else:
-        # Búsqueda temática mediante gallery-dl
         try:
             range_req = max(40, count * 3)
             cmd = [sys.executable, "-m", "gallery_dl", "--get-urls", "--range", f"1-{range_req}", f"https://www.pinterest.com/search/pins/?q={query.replace(' ', '+')}"]
@@ -168,10 +163,11 @@ def extract_pinterest_raw_links(query, count=20):
 
     return {"videos": videos, "images": images}
 
-def process_pinterest_download(query, format_type='any', media_type='both', pin_tab='individual', count=20, target_folder=PINTEREST_DIR):
+def process_pinterest_download(query, format_type='any', media_type='both', pin_tab='individual', count=1, target_folder=PINTEREST_DIR):
     try:
-        print(f"[Pinterest] Procesando: {query} | Modo: {pin_tab} | Formato: {format_type} | Tipo: {media_type} | Cantidad: {count}")
-        raw = extract_pinterest_raw_links(query, count=count)
+        req_count = int(count) if (str(count).isdigit() and int(count) > 0) else 1
+        print(f"[Pinterest] Procesando: {query} | Modo: {pin_tab} | Formato: {format_type} | Tipo: {media_type} | Cantidad: {req_count}")
+        raw = extract_pinterest_raw_links(query, count=req_count)
         videos = raw.get("videos", [])
         images = raw.get("images", [])
         
@@ -184,7 +180,6 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
         batch_folder = os.path.join(target_folder, f"lote_{batch_id}")
         os.makedirs(batch_folder, exist_ok=True)
         
-        # 1. Modo Individual: Auto-detección de formato y tipo
         if pin_tab == 'individual':
             if videos:
                 v_url = videos[0]
@@ -219,10 +214,10 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
                     shutil.copy(os.path.join(batch_folder, f), os.path.join(target_folder, f))
                 return saved_files, None
 
-        # 2. Modo Tablero o Temática (Filtrado por formato y tipo)
-        limit = int(count) if (str(count).isdigit() and int(count) > 0) else 20
-        if pin_tab == 'tablero' and limit == 20 and len(images) > 20:
-            limit = len(images)
+        # Tablero o Temática
+        limit = req_count
+        if pin_tab == 'tablero' and req_count == 1 and len(images) > 1:
+            limit = len(images) # Si es tablero y no especificó número pequeño, descarga todo el tablero
             
         items_to_download = []
         if media_type in ('both', 'videos'):
@@ -261,7 +256,7 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
                         with open(temp_fp, 'wb') as f:
                             f.write(r.content)
                             
-                        # Validación de Ratio de Aspecto
+                        # Validación de Aspect Ratio
                         if Image and format_type in ('9:16', 'vertical', '16:9', 'horizontal', '1:1', 'cuadrado'):
                             try:
                                 with Image.open(temp_fp) as img_pil:
@@ -284,11 +279,9 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
             except Exception:
                 continue
 
-        # Copiar archivos a la carpeta general
         for f in saved_files:
             shutil.copy(os.path.join(batch_folder, f), os.path.join(target_folder, f))
             
-        # Generar ZIP
         zip_filename = f"pinterest_descarga_{batch_id}.zip"
         zip_path = os.path.join(target_folder, zip_filename)
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -301,24 +294,6 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
     except Exception as e:
         print("[Pinterest] [ERROR]:", e)
         return [], None
-
-# ==========================================
-# 🧹 AUTOLIMPIEZA (14 días)
-# ==========================================
-def cleanup_old_files():
-    while True:
-        now = time.time()
-        for folder in [AUDIO_DIR, PINTEREST_DIR, EXCEL_DIR, ORDENES_DIR]:
-            if os.path.exists(folder):
-                for root, dirs, files in os.walk(folder):
-                    for filename in files:
-                        filepath = os.path.join(root, filename)
-                        try:
-                            if os.stat(filepath).st_mtime < now - 14 * 86400:
-                                os.remove(filepath)
-                        except Exception:
-                            pass
-        time.sleep(86400)
 
 # ==========================================
 # 🌐 RUTAS FLASK
@@ -340,7 +315,7 @@ def download_audio():
     speed = data.get('speed', '1.0')
     
     if not query:
-        return jsonify({"status": "error", "message": "Debes ingresar un enlace o nombre."}), 400
+        return jsonify({"status": "error", "message": "Debes ingresar un enlace o nombre.", "note": "Verifica que el término de búsqueda no esté vacío."}), 400
         
     filename = process_audio_download(query, quality=quality, format_type=format_type, speed=speed)
     if filename:
@@ -350,14 +325,14 @@ def download_audio():
             "filename": filename,
             "download_url": f"/api/files/audio/{filename}"
         })
-    return jsonify({"status": "error", "message": "No se pudo extraer el audio."}), 500
+    return jsonify({"status": "error", "message": "No se pudo extraer el audio.", "note": "Comprueba que el video de YouTube esté disponible públicamente y no tenga restricciones de edad o región."}), 500
 
 @app.route('/api/download_excel', methods=['POST'])
 def download_excel():
     file = request.files.get('file')
     speed = request.form.get('speed', '1.0')
     if not file:
-        return jsonify({"status": "error", "message": "No se subió ningún archivo."}), 400
+        return jsonify({"status": "error", "message": "No se subió ningún archivo.", "note": "Selecciona un archivo .xlsx o .csv válido."}), 400
 
     links = []
     fname = file.filename.lower()
@@ -386,7 +361,7 @@ def download_excel():
             return jsonify({"status": "error", "message": "Formato no soportado. Usa .xlsx o .csv"}), 400
 
         if not links:
-            return jsonify({"status": "error", "message": "No se encontraron enlaces en el archivo."}), 400
+            return jsonify({"status": "error", "message": "No se encontraron enlaces en el archivo.", "note": "Asegúrate de que las celdas contengan URLs completas que empiecen por http://"}), 400
 
         threading.Thread(target=process_bulk_audio, args=(links, speed)).start()
         return jsonify({"status": "success", "message": f"Procesando {len(links)} audios desde Excel a {speed}x en segundo plano."})
@@ -400,10 +375,10 @@ def download_pinterest():
     format_type = data.get('format', 'any')
     media_type = data.get('media_type', 'both')
     pin_tab = data.get('pin_tab', 'individual')
-    count = data.get('cantidad', 20)
+    count = data.get('cantidad', 1)
     
     if not query:
-        return jsonify({"status": "error", "message": "Debes ingresar una URL o término."}), 400
+        return jsonify({"status": "error", "message": "Debes ingresar una URL o término.", "note": "Pega un enlace de pin/tablero o escribe una palabra clave para buscar."}), 400
         
     saved, zip_name = process_pinterest_download(query, format_type=format_type, media_type=media_type, pin_tab=pin_tab, count=count)
     if saved:
@@ -416,78 +391,130 @@ def download_pinterest():
             "files": file_urls,
             "zip_url": zip_url
         })
-    return jsonify({"status": "error", "message": "No se encontraron fotos o el enlace no es accesible."}), 404
+    return jsonify({
+        "status": "error", 
+        "message": "No se encontraron archivos con los criterios indicados.",
+        "note": "Si seleccionaste un formato específico (ej. 9:16 o 16:9), es posible que los pines encontrados no coincidan con esa proporción. Prueba cambiando a 'Cualquiera' o ajusta el término de búsqueda."
+    }), 404
 
 # ==========================================
-# 🤖 ASISTENTE DE ÓRDENES IA
+# 🤖 ASISTENTE DE ÓRDENES IA (Línea por Línea Inteligente)
 # ==========================================
 @app.route('/api/ai_order_assistant', methods=['POST'])
 def ai_order_assistant():
     data = request.get_json(silent=True) or request.form
     prompt = data.get('prompt', '').strip()
-    speed = data.get('speed', '1.0')
-    format_pref = data.get('format', 'any')
     
     if not prompt:
         return jsonify({"status": "error", "message": "Por favor ingresa o dicta una orden."}), 400
         
     slug = re.sub(r'[^\w\-_]', '_', prompt[:25]).strip('_') or "proyecto_capcut"
-    prompt_lower = prompt.lower()
     
-    # Extraer cantidades
-    num_photos = 6
-    photo_match = re.search(r'(\d+)\s*(?:fotos?|im[aá]gen(?:es)?)', prompt_lower)
-    if photo_match: num_photos = int(photo_match.group(1))
+    # Parser inteligente de líneas
+    # Divide por comas, " y ", saltos de línea o conjunciones
+    raw_segments = re.split(r'[,;\n]|\by\b', prompt, flags=re.IGNORECASE)
+    items = []
+    item_id = 1
+    
+    for seg in raw_segments:
+        seg = seg.strip()
+        if not seg: continue
         
-    num_audios = 1
-    audio_match = re.search(r'(\d+)\s*(?:audios?|cancion(?:es)?|m[uú]sicas?)', prompt_lower)
-    if audio_match: num_audios = int(audio_match.group(1))
-
-    clean_term = re.sub(r'\b(quiero|necesito|descargar|buscar|fotos?|audios?|cancion|imagenes|videos)\b', '', prompt, flags=re.IGNORECASE).strip()
-    if not clean_term: clean_term = prompt
+        # Detectar cantidad
+        count_match = re.search(r'(\d+)', seg)
+        count = int(count_match.group(1)) if count_match else 1
+        
+        # Detectar tipo
+        is_audio = any(w in seg.lower() for w in ['audio', 'cancion', 'canción', 'musica', 'música', 'mp3', 'sound', 'tema'])
+        is_video = any(w in seg.lower() for w in ['video', 'vídeo', 'clip', 'reels', 'shorts', 'broll', 'b-roll'])
+        is_photo = any(w in seg.lower() for w in ['foto', 'imagen', 'imágenes', 'portada', 'wallpaper', 'pic'])
+        
+        if is_audio:
+            item_type = 'audio'
+        elif is_video:
+            item_type = 'video'
+        else:
+            item_type = 'photo'
+            
+        # Detectar formato / ratio
+        if '9:16' in seg or 'vertical' in seg.lower():
+            fmt = '9:16'
+        elif '16:9' in seg or 'horizontal' in seg.lower():
+            fmt = '16:9'
+        elif '1:1' in seg or 'cuadrad' in seg.lower():
+            fmt = '1:1'
+        else:
+            fmt = 'any' if item_type != 'audio' else 'mp3'
+            
+        # Detectar velocidad para audios
+        speed = "1.0"
+        if '1.06' in seg or 'anticopyright' in seg.lower() or 'anti copyright' in seg.lower():
+            speed = "1.06"
+        elif '1.25' in seg:
+            speed = "1.25"
+        elif '1.5' in seg:
+            speed = "1.5"
+            
+        # Limpiar término
+        clean = re.sub(r'(\d+|\b(de|fotos?|im[aá]genes|videos?|audios?|cancion(?:es)?|m[uú]sicas?|mp3|vertical|horizontal|cuadrada|1:1|9:16|16:9|1\.06x?|anticopyright|quiero|necesito|para|un|una|unos|unas)\b)', '', seg, flags=re.IGNORECASE).strip()
+        if not clean: clean = seg.strip()
+        
+        items.append({
+            "id": item_id,
+            "term": clean,
+            "type": item_type,
+            "format": fmt,
+            "speed": speed,
+            "count": count
+        })
+        item_id += 1
+        
+    if not items:
+        items.append({
+            "id": 1,
+            "term": prompt,
+            "type": "photo",
+            "format": "any",
+            "speed": "1.0",
+            "count": 5
+        })
 
     return jsonify({
         "status": "success",
         "project_name": slug,
-        "clean_term": clean_term,
-        "plan": {
-            "num_photos": num_photos,
-            "num_audios": num_audios,
-            "format": format_pref,
-            "speed": speed,
-            "audio_term": clean_term,
-            "pin_term": clean_term
-        }
+        "items": items
     })
 
-@app.route('/api/execute_project_order', methods=['POST'])
-def execute_project_order():
+@app.route('/api/execute_custom_order', methods=['POST'])
+def execute_custom_order():
     data = request.get_json(silent=True) or request.form
     project_name = sanitize_filename(data.get('project_name', f"proyecto_{int(time.time())}"))
-    pin_term = data.get('pin_term', '')
-    num_photos = int(data.get('num_photos', 6))
-    audio_term = data.get('audio_term', '')
-    speed = data.get('speed', '1.0')
-    format_pref = data.get('format', 'any')
+    items = data.get('items', [])
     
+    if not items:
+        return jsonify({"status": "error", "message": "No hay elementos en la orden."}), 400
+        
     project_folder = os.path.join(ORDENES_DIR, project_name)
     os.makedirs(project_folder, exist_ok=True)
-    
     downloaded_files = []
     
-    # 1. Descargar audios
-    if audio_term:
-        audio_file = process_audio_download(audio_term, speed=speed, target_folder=project_folder)
-        if audio_file:
-            downloaded_files.append(audio_file)
+    for itm in items:
+        term = itm.get('term', '').strip()
+        itype = itm.get('type', 'photo')
+        fmt = itm.get('format', 'any')
+        speed = itm.get('speed', '1.0')
+        cnt = int(itm.get('count', 1))
+        
+        if not term: continue
+        
+        if itype == 'audio':
+            f = process_audio_download(term, speed=speed, target_folder=project_folder)
+            if f: downloaded_files.append(f)
+        else:
+            media_t = 'videos' if itype == 'video' else 'photos'
+            pins, _ = process_pinterest_download(term, format_type=fmt, media_type=media_t, pin_tab='tematica', count=cnt, target_folder=project_folder)
+            if pins: downloaded_files.extend(pins)
             
-    # 2. Descargar Pinterest
-    if pin_term:
-        pin_files, _ = process_pinterest_download(pin_term, format_type=format_pref, pin_tab='tematica', count=num_photos, target_folder=project_folder)
-        if pin_files:
-            downloaded_files.extend(pin_files)
-            
-    # Crear ZIP unificado del proyecto
     zip_name = f"{project_name}_completo.zip"
     zip_path = os.path.join(ORDENES_DIR, zip_name)
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -498,7 +525,7 @@ def execute_project_order():
                 
     return jsonify({
         "status": "success",
-        "message": f"Proyecto '{project_name}' completado con {len(downloaded_files)} recursos.",
+        "message": f"Proyecto completado con {len(downloaded_files)} archivos descargados.",
         "total": len(downloaded_files),
         "zip_url": f"/api/files/ordenes/{zip_name}",
         "files": [f"/api/files/ordenes/{f}" for f in downloaded_files]
@@ -516,7 +543,5 @@ def serve_file(category, filename):
     return send_from_directory(target_dir, filename, as_attachment=True)
 
 if __name__ == '__main__':
-    print("[Sistema] Iniciando mecanismo de autolimpieza (14 días)...")
-    threading.Thread(target=cleanup_old_files, daemon=True).start()
     print("[Sistema] Iniciando Descargador Universal...")
     app.run(host='0.0.0.0', port=10000, debug=False)

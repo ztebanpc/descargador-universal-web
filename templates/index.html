@@ -49,28 +49,7 @@
         .header {
             text-align: center;
             margin-bottom: 32px;
-            position: relative;
         }
-
-        .settings-btn {
-            position: absolute;
-            right: 0;
-            top: 0;
-            background: var(--card);
-            border: 1px solid #e7e5e4;
-            border-radius: 12px;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .settings-btn:hover { color: var(--text); background: #f5f5f4; }
-        .settings-btn svg { width: 20px; height: 20px; }
 
         .logo-box {
             display: inline-flex;
@@ -158,8 +137,14 @@
         .module-header {
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
             margin-bottom: 24px;
+        }
+
+        .module-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .module-icon {
@@ -185,12 +170,29 @@
             font-size: 16px;
             font-weight: 700;
             color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .module-desc {
             font-size: 12px;
             color: var(--text-light);
         }
+
+        .btn-info-circle {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        .btn-info-circle:hover { color: var(--text); }
+        .btn-info-circle svg { width: 16px; height: 16px; }
 
         /* Toggle Group */
         .toggle-group {
@@ -307,6 +309,7 @@
         /* Action Buttons Row */
         .actions-row {
             display: flex;
+            align-items: center;
             gap: 10px;
             margin-bottom: 14px;
         }
@@ -351,23 +354,28 @@
 
         .btn-action svg { width: 16px; height: 16px; }
 
-        .btn-icon-zip {
-            padding: 0 16px;
-            background: #292524;
-            color: #fff;
-            border: none;
-            border-radius: 14px;
+        /* Passive ZIP Switch Button */
+        .zip-toggle-btn {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 6px;
+            gap: 8px;
+            padding: 13px 16px;
+            background: var(--input-bg);
+            border: 1.5px solid #e7e5e4;
+            border-radius: 14px;
+            color: var(--text-muted);
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
+            user-select: none;
         }
-        .btn-icon-zip:hover { background: #1c1917; }
-        .btn-icon-zip svg { width: 16px; height: 16px; }
+        .zip-toggle-btn.active {
+            background: #292524;
+            color: #ffffff;
+            border-color: #292524;
+        }
+        .zip-toggle-btn svg { width: 16px; height: 16px; }
 
         /* Secondary Button (Excel) */
         .btn-excel {
@@ -394,98 +402,167 @@
         }
         .btn-excel svg { width: 20px; height: 20px; }
 
-        /* Voice Assistant Box */
-        .voice-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
+        /* Voice Assistant Input with Integrated Mic */
+        .voice-input-wrap {
+            position: relative;
+            margin-bottom: 14px;
         }
-
-        .mic-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            border: 1px solid #e7e5e4;
-            background: var(--input-bg);
+        .voice-input-wrap .url-input {
+            padding-right: 48px;
+        }
+        .mic-inline-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
             color: var(--text-muted);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s ease;
-            flex-shrink: 0;
         }
-        .mic-btn.listening {
+        .mic-inline-btn:hover { background: #e7e5e4; color: var(--text); }
+        .mic-inline-btn.listening {
             background: #fee2e2;
             color: #ef4444;
-            border-color: #fca5a5;
             animation: micPulse 1.5s infinite;
         }
         @keyframes micPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+            0%, 100% { transform: translateY(-50%) scale(1); }
+            50% { transform: translateY(-50%) scale(1.1); }
         }
-        .mic-btn svg { width: 20px; height: 20px; }
+        .mic-inline-btn svg { width: 18px; height: 18px; }
 
-        /* Confirmation Card */
-        .confirm-card {
+        /* Line-by-line Order Builder */
+        .order-builder-wrap {
             background: var(--input-bg);
             border: 1px solid #e7e5e4;
-            border-radius: 16px;
+            border-radius: 18px;
             padding: 16px;
-            margin-top: 16px;
+            margin-top: 20px;
             display: none;
         }
-        .confirm-header {
+        .order-builder-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .order-builder-title {
             font-size: 13px;
             font-weight: 700;
             color: var(--text);
-            margin-bottom: 8px;
         }
-        .confirm-body {
-            font-size: 13px;
-            color: var(--text-muted);
+        .order-lines-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             margin-bottom: 14px;
-            line-height: 1.6;
         }
-        .confirm-actions {
+        .order-line-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid #e7e5e4;
+        }
+        .order-line-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text);
+            font-weight: 500;
+            background: transparent;
+        }
+        .order-line-count {
+            width: 50px;
+            padding: 6px 8px;
+            border: 1px solid #e7e5e4;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: inherit;
+            text-align: center;
+            outline: none;
+        }
+        .order-tag-select {
+            padding: 6px 10px;
+            background: #f5f5f4;
+            border: 1px solid #e7e5e4;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--text);
+            cursor: pointer;
+            outline: none;
+        }
+        .order-line-del {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .order-line-del:hover { color: var(--error); }
+
+        .btn-add-line {
+            padding: 8px 12px;
+            background: transparent;
+            border: 1px dashed #d6d3d1;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+        }
+        .btn-add-line:hover { background: #e7e5e4; color: var(--text); }
+
+        .order-builder-actions {
             display: flex;
             gap: 8px;
         }
-        .btn-confirm-yes {
+        .btn-builder-exec {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             background: var(--emerald);
             color: #fff;
             border: none;
-            border-radius: 10px;
-            font-size: 12px;
+            border-radius: 12px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
-        .btn-confirm-edit {
-            padding: 10px 14px;
-            background: #e7e5e4;
-            color: var(--text);
-            border: none;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .btn-confirm-no {
-            padding: 10px 14px;
+        .btn-builder-exec:hover { background: var(--emerald-hover); }
+        .btn-builder-cancel {
+            padding: 12px 16px;
             background: transparent;
-            color: var(--error);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 10px;
-            font-size: 12px;
+            color: var(--text-muted);
+            border: 1px solid #e7e5e4;
+            border-radius: 12px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
         }
 
-        /* Progress & Status Bar */
+        /* Status Bar & Explanatory Note */
         .status-container {
             margin-top: 16px;
             display: none;
@@ -553,7 +630,16 @@
         .status-bar.error .status-text { color: var(--error); }
         .status-bar.loading .status-text { color: var(--violet); }
 
-        /* Settings Modal */
+        .status-note {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            padding: 0 4px;
+            line-height: 1.4;
+            display: none;
+        }
+
+        /* Modal Info */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -568,7 +654,7 @@
         .modal-card {
             background: #fff;
             width: 100%;
-            max-width: 440px;
+            max-width: 500px;
             border-radius: 20px;
             padding: 24px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.15);
@@ -578,19 +664,18 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         .modal-title { font-size: 16px; font-weight: 700; }
         .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); }
+        .modal-content-text { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+        .modal-content-text p { margin-bottom: 12px; }
+        .modal-content-text ul { margin-left: 18px; margin-bottom: 12px; }
+        .modal-content-text li { margin-bottom: 4px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Settings Button -->
-        <button class="settings-btn" onclick="openSettings()" title="Configuración Predeterminada">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
-
         <!-- Header -->
         <div class="header">
             <div class="logo-box">
@@ -613,7 +698,8 @@
                 Audio Inteligente
             </button>
             <button class="tab-btn" onclick="switchTab('orders')" id="tab-orders">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                <!-- Sparkles / IA Icon -->
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 3l1.912 5.885L19.798 10.8 13.912 12.715 12 18.6 10.088 12.715 4.202 10.8l5.886-1.915L12 3z"/><path d="M5 3l.956 2.942L8.899 6.9 5.956 7.857 5 10.8l-.956-2.943L1.101 6.9l2.943-.958L5 3z"/></svg>
                 Órdenes IA
             </button>
         </div>
@@ -622,12 +708,14 @@
         <div class="panel active" id="panel-pinterest">
             <div class="card">
                 <div class="module-header">
-                    <div class="module-icon pinterest">
-                        <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
-                    </div>
-                    <div>
-                        <div class="module-title">Pinterest Avanzado</div>
-                        <div class="module-desc">Descarga individual, tableros enteros o búsquedas temáticas</div>
+                    <div class="module-header-left">
+                        <div class="module-icon pinterest">
+                            <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>
+                        </div>
+                        <div>
+                            <div class="module-title">Pinterest Avanzado</div>
+                            <div class="module-desc">Descarga individual, tableros enteros o búsquedas temáticas</div>
+                        </div>
                     </div>
                 </div>
 
@@ -665,17 +753,18 @@
                     </div>
                     <div id="pin-count-box" style="display: none;">
                         <label class="filter-label">Cantidad</label>
-                        <input type="number" id="pin-count" class="filter-input" min="1" max="100" value="20">
+                        <input type="number" id="pin-count" class="filter-input" min="1" max="100" value="1">
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
+                <!-- Action Buttons Row with Passive ZIP Switch -->
                 <div class="actions-row">
-                    <button class="btn-action pinterest" onclick="downloadPinterest(false)">
+                    <button class="btn-action pinterest" onclick="downloadPinterest()">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         Descargar de Pinterest
                     </button>
-                    <button class="btn-icon-zip" onclick="downloadPinterest(true)" title="Descargar como archivo ZIP comprimido">
+                    <!-- Switch Pasivo ZIP -->
+                    <button class="zip-toggle-btn" id="zip-toggle" onclick="toggleZipSwitch()" title="Activar/Desactivar compresión ZIP">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                         ZIP
                     </button>
@@ -689,6 +778,7 @@
                         <div class="status-dot"></div>
                         <div class="status-text" id="pin-status-text">Listo</div>
                     </div>
+                    <div class="status-note" id="pin-status-note"></div>
                 </div>
             </div>
         </div>
@@ -697,12 +787,14 @@
         <div class="panel" id="panel-audio">
             <div class="card">
                 <div class="module-header">
-                    <div class="module-icon audio">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
-                    </div>
-                    <div>
-                        <div class="module-title">Audio Inteligente</div>
-                        <div class="module-desc">Descarga MP3 a 192kbps con velocidad modificable y anticopyright</div>
+                    <div class="module-header-left">
+                        <div class="module-icon audio">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
+                        </div>
+                        <div>
+                            <div class="module-title">Audio Inteligente</div>
+                            <div class="module-desc">Descarga MP3 a 192kbps con velocidad modificable y anticopyright</div>
+                        </div>
                     </div>
                 </div>
 
@@ -750,7 +842,7 @@
                 <input type="file" id="excel-file-hidden" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleExcelUpload(this)">
 
                 <button class="btn-excel" onclick="document.getElementById('excel-file-hidden').click()">
-                    <!-- SVG Profesional de Excel -->
+                    <!-- SVG Oficial de Excel -->
                     <svg viewBox="0 0 32 32" fill="none">
                         <rect x="2" y="4" width="28" height="24" rx="4" fill="#107C41"/>
                         <path d="M19.5 8H26C26.55 8 27 8.45 27 9V23C27 23.55 26.55 24 26 24H19.5V8Z" fill="#185C37"/>
@@ -768,6 +860,7 @@
                         <div class="status-dot"></div>
                         <div class="status-text" id="audio-status-text">Listo</div>
                     </div>
+                    <div class="status-note" id="audio-status-note"></div>
                 </div>
             </div>
         </div>
@@ -776,35 +869,57 @@
         <div class="panel" id="panel-orders">
             <div class="card">
                 <div class="module-header">
-                    <div class="module-icon orders">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
-                    </div>
-                    <div>
-                        <div class="module-title">Asistente de Órdenes IA</div>
-                        <div class="module-desc">Dicta o escribe tu orden para extraer audios, fotos y videos juntos</div>
+                    <div class="module-header-left">
+                        <div class="module-icon orders">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 3l1.912 5.885L19.798 10.8 13.912 12.715 12 18.6 10.088 12.715 4.202 10.8l5.886-1.915L12 3z"/><path d="M5 3l.956 2.942L8.899 6.9 5.956 7.857 5 10.8l-.956-2.943L1.101 6.9l2.943-.958L5 3z"/></svg>
+                        </div>
+                        <div>
+                            <div class="module-title">
+                                Asistente de Órdenes IA
+                                <button class="btn-info-circle" onclick="openInfoModal()" title="Más información">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                </button>
+                            </div>
+                            <div class="module-desc">Genera lotes de recursos organizados con formato y velocidad por línea</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="voice-box">
-                    <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Hablar por micrófono">
+                <!-- Voice Input Box with Mic inside -->
+                <div class="voice-input-wrap">
+                    <input type="text" id="order-prompt" class="url-input" placeholder="Ej: 5 fotos de cumpleaños 1:1, 2 videos aesthetic 9:16 y cancion de harry styles mp3 a 1.06x...">
+                    <button class="mic-inline-btn" id="mic-btn" onclick="toggleMic()" title="Dictar por micrófono">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
                     </button>
-                    <input type="text" id="order-prompt" class="url-input" placeholder="Ej: Quiero 5 fotos de parejas vintage y 2 canciones románticas..." style="margin-bottom: 0;">
                 </div>
 
-                <button class="btn-action orders" onclick="consultAIOrder()">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    Analizar Orden con IA
+                <button class="btn-action orders" onclick="generateAIOrderLines()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    Generar Orden con IA
                 </button>
 
-                <!-- Interactive Confirmation Card -->
-                <div class="confirm-card" id="order-confirm-card">
-                    <div class="confirm-header">Propuesta del Asistente IA</div>
-                    <div class="confirm-body" id="order-confirm-body">Cargando propuesta...</div>
-                    <div class="confirm-actions">
-                        <button class="btn-confirm-yes" onclick="executeApprovedOrder()">Iniciar Descarga Completa</button>
-                        <button class="btn-confirm-edit" onclick="editOrderPrompt()">Modificar</button>
-                        <button class="btn-confirm-no" onclick="cancelOrder()">Cancelar</button>
+                <!-- Interactive Line-by-Line Order Builder -->
+                <div class="order-builder-wrap" id="order-builder-wrap">
+                    <div class="order-builder-header">
+                        <div class="order-builder-title">Elementos de la Orden (Editables)</div>
+                    </div>
+                    
+                    <div class="order-lines-list" id="order-lines-list">
+                        <!-- Dynamic editable items -->
+                    </div>
+
+                    <button class="btn-add-line" onclick="addNewOrderLine()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Agregar otra línea
+                    </button>
+
+                    <div class="order-builder-actions">
+                        <button class="btn-builder-exec" onclick="executeCustomOrderProject()">
+                            Iniciar Descarga del Proyecto Completo
+                        </button>
+                        <button class="btn-builder-cancel" onclick="closeOrderBuilder()">
+                            Cancelar
+                        </button>
                     </div>
                 </div>
 
@@ -814,89 +929,55 @@
                     </div>
                     <div class="status-bar" id="orders-status-bar">
                         <div class="status-dot"></div>
-                        <div class="status-text" id="orders-status-text">Asistente listo</div>
+                        <div class="status-text" id="orders-status-text">Listo</div>
                     </div>
+                    <div class="status-note" id="orders-status-note"></div>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <!-- Settings Modal -->
-    <div class="modal-overlay" id="settings-modal">
+    <!-- Info Modal -->
+    <div class="modal-overlay" id="info-modal">
         <div class="modal-card">
             <div class="modal-header">
-                <div class="modal-title">Configuración Predeterminada</div>
-                <button class="modal-close" onclick="closeSettings()">&times;</button>
+                <div class="modal-title">¿Qué son las Órdenes de IA?</div>
+                <button class="modal-close" onclick="closeInfoModal()">&times;</button>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 14px;">
-                <div>
-                    <label class="filter-label">Formato de Medios Predeterminado</label>
-                    <select id="pref-format" class="filter-select">
-                        <option value="any">Cualquiera</option>
-                        <option value="vertical">Vertical (9:16)</option>
-                        <option value="horizontal">Horizontal (16:9)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="filter-label">Velocidad de Audio Predeterminada</label>
-                    <select id="pref-speed" class="filter-select">
-                        <option value="1.0">1.0x (Normal)</option>
-                        <option value="1.06">1.06x (Anticopyright)</option>
-                        <option value="1.25">1.25x</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="filter-label">Calidad de Audio</label>
-                    <select id="pref-quality" class="filter-select">
-                        <option value="320">320 kbps</option>
-                        <option value="192">192 kbps</option>
-                    </select>
-                </div>
-                <button class="btn-action orders" onclick="saveSettings()" style="margin-top: 8px;">Guardar Configuración</button>
+            <div class="modal-content-text">
+                <p><strong>Órdenes de Inteligencia Artificial:</strong> Es una potente herramienta diseñada para obtener lotes completos de videos, audios e imágenes en una sola carpeta organizada para tus proyectos de CapCut.</p>
+                <p><strong>Ejemplo de lo que puedes pedir:</strong></p>
+                <ul>
+                    <li><code>50 videos Verticales (9:16) de Cumpleaños</code></li>
+                    <li><code>20 fotos Cuadradas (1:1) de Decoración</code></li>
+                    <li><code>15 canciones MP3 a 1.06x (Anticopyright)</code></li>
+                </ul>
+                <p>Cada línea generada cuenta con su propio selector interactivo para ajustar el tipo, la relación de aspecto o la velocidad antes de ejecutar la descarga.</p>
+                <p style="font-size: 11px; color: var(--text-light);"><em>Nota: Las sugerencias iniciales de la IA son recomendaciones que puedes modificar libremente.</em></p>
             </div>
         </div>
     </div>
 
     <script>
         let currentPinMode = 'individual';
-        let currentPlanData = null;
+        let isZipActive = false;
         let isListening = false;
         let recognition = null;
+        let currentOrderItems = [];
 
-        // Cargar preferencias guardadas
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedFormat = localStorage.getItem('capcut_pref_format') || 'any';
-            const savedSpeed = localStorage.getItem('capcut_pref_speed') || '1.0';
-            const savedQuality = localStorage.getItem('capcut_pref_quality') || '192';
-
-            document.getElementById('pref-format').value = savedFormat;
-            document.getElementById('pref-speed').value = savedSpeed;
-            document.getElementById('pref-quality').value = savedQuality;
-
-            document.getElementById('pin-format').value = savedFormat;
-            document.getElementById('audio-speed').value = savedSpeed;
-            document.getElementById('audio-quality').value = savedQuality;
-        });
-
-        function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
-        function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
-        function saveSettings() {
-            const f = document.getElementById('pref-format').value;
-            const s = document.getElementById('pref-speed').value;
-            const q = document.getElementById('pref-quality').value;
-
-            localStorage.setItem('capcut_pref_format', f);
-            localStorage.setItem('capcut_pref_speed', s);
-            localStorage.setItem('capcut_pref_quality', q);
-
-            document.getElementById('pin-format').value = f;
-            document.getElementById('audio-speed').value = s;
-            document.getElementById('audio-quality').value = q;
-
-            closeSettings();
-            playDoneSound();
+        function toggleZipSwitch() {
+            isZipActive = !isZipActive;
+            const btn = document.getElementById('zip-toggle');
+            if (isZipActive) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
         }
+
+        function openInfoModal() { document.getElementById('info-modal').style.display = 'flex'; }
+        function closeInfoModal() { document.getElementById('info-modal').style.display = 'none'; }
 
         function switchTab(tab) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -933,12 +1014,12 @@
         }
 
         // ==========================================
-        // 🔊 SINTETIZADOR DE SONIDOS (Web Audio API)
+        // 🔊 SINTETIZADOR DE SONIDOS (Solo Éxito)
         // ==========================================
         function playDoneSound() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const notes = [523.25, 659.25, 783.99]; // Acorde C5, E5, G5
+                const notes = [523.25, 659.25, 783.99]; // Acorde mayor C5, E5, G5
                 notes.forEach((freq, i) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
@@ -954,50 +1035,37 @@
             } catch(e) {}
         }
 
-        function playErrorSound() {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(180, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(90, ctx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.2, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.3);
-            } catch(e) {}
-        }
-
         // ==========================================
         // 📌 PINTEREST ACTIONS
         // ==========================================
-        async function downloadPinterest(forceZip = false) {
+        async function downloadPinterest() {
             const input = document.getElementById('pin-input');
             const query = input.value.trim();
             const format = document.getElementById('pin-format').value;
             const type = document.getElementById('pin-type').value;
-            const count = document.getElementById('pin-count').value || 20;
+            const count = document.getElementById('pin-count').value || 1;
 
             const container = document.getElementById('pin-status-container');
             const bar = document.getElementById('pin-status-bar');
             const text = document.getElementById('pin-status-text');
+            const note = document.getElementById('pin-status-note');
             const progress = document.getElementById('pin-progress');
+
+            note.style.display = 'none';
 
             if (!query) {
                 container.style.display = 'block';
                 bar.className = 'status-bar error';
                 text.innerText = 'Por favor ingresa un enlace o temática.';
-                playErrorSound();
+                note.style.display = 'block';
+                note.innerText = 'Nota: Para descargar necesitas pegar una URL válida de Pinterest o escribir el término que deseas buscar.';
                 return;
             }
 
             container.style.display = 'block';
             bar.className = 'status-bar loading';
             progress.style.width = '35%';
-            text.innerText = 'Buscando y procesando calidad original...';
+            text.innerText = 'Buscando y extrayendo calidad original...';
 
             try {
                 const res = await fetch('/api/download_pinterest', {
@@ -1018,7 +1086,7 @@
                     text.innerText = data.message;
                     playDoneSound();
 
-                    if (forceZip && data.zip_url) {
+                    if (isZipActive && data.zip_url) {
                         window.location.href = data.zip_url;
                     } else if (data.files && data.files.length > 0) {
                         data.files.forEach((fileUrl, index) => {
@@ -1036,13 +1104,17 @@
                     progress.style.width = '0%';
                     bar.className = 'status-bar error';
                     text.innerText = data.message;
-                    playErrorSound();
+                    if (data.note) {
+                        note.style.display = 'block';
+                        note.innerText = 'Nota: ' + data.note;
+                    }
                 }
             } catch (err) {
                 progress.style.width = '0%';
                 bar.className = 'status-bar error';
                 text.innerText = 'Error de conexión con el servidor.';
-                playErrorSound();
+                note.style.display = 'block';
+                note.innerText = 'Nota: Verifica tu conexión a internet o intenta recargar la página.';
             }
         }
 
@@ -1059,13 +1131,17 @@
             const container = document.getElementById('audio-status-container');
             const bar = document.getElementById('audio-status-bar');
             const text = document.getElementById('audio-status-text');
+            const note = document.getElementById('audio-status-note');
             const progress = document.getElementById('audio-progress');
+
+            note.style.display = 'none';
 
             if (!query) {
                 container.style.display = 'block';
                 bar.className = 'status-bar error';
                 text.innerText = 'Por favor ingresa un nombre o enlace de audio.';
-                playErrorSound();
+                note.style.display = 'block';
+                note.innerText = 'Nota: Puedes pegar un link directo de YouTube o escribir el nombre de la canción.';
                 return;
             }
 
@@ -1091,13 +1167,15 @@
                     progress.style.width = '0%';
                     bar.className = 'status-bar error';
                     text.innerText = data.message;
-                    playErrorSound();
+                    if (data.note) {
+                        note.style.display = 'block';
+                        note.innerText = 'Nota: ' + data.note;
+                    }
                 }
             } catch (err) {
                 progress.style.width = '0%';
                 bar.className = 'status-bar error';
                 text.innerText = 'Error al procesar el audio.';
-                playErrorSound();
             }
         }
 
@@ -1127,24 +1205,22 @@
                 } else {
                     bar.className = 'status-bar error';
                     text.innerText = data.message;
-                    playErrorSound();
                 }
             } catch (err) {
                 bar.className = 'status-bar error';
                 text.innerText = 'Error al subir archivo Excel.';
-                playErrorSound();
             }
         }
 
         // ==========================================
-        // 🤖 ASISTENTE DE VOZ & ÓRDENES IA
+        // 🤖 ASISTENTE DE ÓRDENES IA (Líneas Editables)
         // ==========================================
         function toggleMic() {
             const micBtn = document.getElementById('mic-btn');
             const promptInput = document.getElementById('order-prompt');
 
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('Tu navegador no soporta reconocimiento de voz. Puedes escribir la orden directamente en el campo de texto.');
+                alert('Tu navegador no soporta reconocimiento de voz. Puedes escribir la orden directamente.');
                 return;
             }
 
@@ -1169,7 +1245,7 @@
             recognition.onresult = (e) => {
                 const transcript = e.results[0][0].transcript;
                 promptInput.value = transcript;
-                consultAIOrder();
+                generateAIOrderLines();
             };
 
             recognition.onerror = () => {
@@ -1185,75 +1261,116 @@
             recognition.start();
         }
 
-        async function consultAIOrder() {
+        async function generateAIOrderLines() {
             const prompt = document.getElementById('order-prompt').value.trim();
-            const speed = localStorage.getItem('capcut_pref_speed') || '1.0';
-            const format = localStorage.getItem('capcut_pref_format') || 'any';
-
-            const confirmCard = document.getElementById('order-confirm-card');
-            const confirmBody = document.getElementById('order-confirm-body');
-
             if (!prompt) return;
 
-            confirmCard.style.display = 'block';
-            confirmBody.innerHTML = '<em>Analizando orden y buscando recursos recomendados...</em>';
+            const builder = document.getElementById('order-builder-wrap');
+            builder.style.display = 'block';
+            document.getElementById('order-lines-list').innerHTML = '<div style="font-size:12px;color:var(--text-muted);">Analizando solicitud...</div>';
 
             try {
                 const res = await fetch('/api/ai_order_assistant', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({prompt, speed, format})
+                    body: JSON.stringify({prompt})
                 });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    currentPlanData = data;
-                    confirmBody.innerHTML = `
-                        <strong>Proyecto:</strong> ${data.project_name}<br>
-                        <strong>Recursos a procesar:</strong> ${data.plan.num_photos} fotos/videos de Pinterest ("${data.plan.pin_term}") + ${data.plan.num_audios} audio(s) a ${data.plan.speed}x ("${data.plan.audio_term}")
-                    `;
-                } else {
-                    confirmBody.innerHTML = `<span style="color: var(--error);">${data.message}</span>`;
+                    currentOrderItems = data.items;
+                    renderOrderLines();
                 }
             } catch (err) {
-                confirmBody.innerHTML = '<span style="color: var(--error);">Error conectando con el asistente de IA.</span>';
+                document.getElementById('order-lines-list').innerHTML = '<div style="font-size:12px;color:var(--error);">Error generando orden.</div>';
             }
         }
 
-        function editOrderPrompt() {
-            document.getElementById('order-prompt').focus();
+        function renderOrderLines() {
+            const list = document.getElementById('order-lines-list');
+            list.innerHTML = '';
+
+            currentOrderItems.forEach((itm, idx) => {
+                const row = document.createElement('div');
+                row.className = 'order-line-item';
+                
+                // Encode code option
+                let selectedCode = `${itm.type}_${itm.format}`;
+                if (itm.type === 'audio') selectedCode = `audio_${itm.speed}`;
+
+                row.innerHTML = `
+                    <input type="text" class="order-line-input" value="${itm.term}" placeholder="Término de búsqueda..." onchange="updateLineTerm(${idx}, this.value)">
+                    <input type="number" class="order-line-count" value="${itm.count}" min="1" max="100" onchange="updateLineCount(${idx}, this.value)" title="Cantidad">
+                    <select class="order-tag-select" onchange="updateLineTag(${idx}, this.value)">
+                        <option value="photo_1:1" ${selectedCode === 'photo_1:1' ? 'selected' : ''}>📸 Foto (1:1)</option>
+                        <option value="photo_9:16" ${selectedCode === 'photo_9:16' ? 'selected' : ''}>📸 Foto (9:16)</option>
+                        <option value="photo_16:9" ${selectedCode === 'photo_16:9' ? 'selected' : ''}>📸 Foto (16:9)</option>
+                        <option value="photo_any" ${selectedCode === 'photo_any' ? 'selected' : ''}>📸 Foto (Cualquiera)</option>
+                        <option value="video_9:16" ${selectedCode === 'video_9:16' ? 'selected' : ''}>🎬 Video (9:16)</option>
+                        <option value="video_16:9" ${selectedCode === 'video_16:9' ? 'selected' : ''}>🎬 Video (16:9)</option>
+                        <option value="audio_1.0" ${selectedCode === 'audio_1.0' ? 'selected' : ''}>🎵 Audio (1.0x)</option>
+                        <option value="audio_1.06" ${selectedCode === 'audio_1.06' ? 'selected' : ''}>🎵 Audio (1.06x Anticopyright)</option>
+                        <option value="audio_1.25" ${selectedCode === 'audio_1.25' ? 'selected' : ''}>🎵 Audio (1.25x)</option>
+                    </select>
+                    <button class="order-line-del" onclick="deleteOrderLine(${idx})" title="Eliminar línea">&times;</button>
+                `;
+                list.appendChild(row);
+            });
         }
 
-        function cancelOrder() {
-            document.getElementById('order-confirm-card').style.display = 'none';
-            currentPlanData = null;
+        function updateLineTerm(idx, val) { if(currentOrderItems[idx]) currentOrderItems[idx].term = val; }
+        function updateLineCount(idx, val) { if(currentOrderItems[idx]) currentOrderItems[idx].count = parseInt(val) || 1; }
+        function updateLineTag(idx, code) {
+            if(!currentOrderItems[idx]) return;
+            const [t, opt] = code.split('_');
+            currentOrderItems[idx].type = t;
+            if (t === 'audio') {
+                currentOrderItems[idx].speed = opt;
+                currentOrderItems[idx].format = 'mp3';
+            } else {
+                currentOrderItems[idx].format = opt;
+                currentOrderItems[idx].speed = '1.0';
+            }
+        }
+        function deleteOrderLine(idx) {
+            currentOrderItems.splice(idx, 1);
+            renderOrderLines();
+        }
+        function addNewOrderLine() {
+            currentOrderItems.push({
+                id: currentOrderItems.length + 1,
+                term: '',
+                type: 'photo',
+                format: 'any',
+                speed: '1.0',
+                count: 1
+            });
+            renderOrderLines();
+        }
+        function closeOrderBuilder() {
+            document.getElementById('order-builder-wrap').style.display = 'none';
         }
 
-        async function executeApprovedOrder() {
-            if (!currentPlanData) return;
+        async function executeCustomOrderProject() {
+            if (!currentOrderItems || currentOrderItems.length === 0) return;
 
-            const card = document.getElementById('order-confirm-card');
             const container = document.getElementById('orders-status-container');
             const bar = document.getElementById('orders-status-bar');
             const text = document.getElementById('orders-status-text');
             const progress = document.getElementById('orders-progress');
 
-            card.style.display = 'none';
+            closeOrderBuilder();
             container.style.display = 'block';
             bar.className = 'status-bar loading';
             progress.style.width = '30%';
-            text.innerText = 'Descargando y empaquetando proyecto en una sola carpeta...';
+            text.innerText = 'Procesando y empaquetando recursos en una sola carpeta...';
 
             try {
-                const res = await fetch('/api/execute_project_order', {
+                const res = await fetch('/api/execute_custom_order', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        project_name: currentPlanData.project_name,
-                        pin_term: currentPlanData.plan.pin_term,
-                        num_photos: currentPlanData.plan.num_photos,
-                        audio_term: currentPlanData.plan.audio_term,
-                        speed: currentPlanData.plan.speed,
-                        format: currentPlanData.plan.format
+                        project_name: 'proyecto_' + Date.now(),
+                        items: currentOrderItems
                     })
                 });
                 const data = await res.json();
@@ -1267,13 +1384,11 @@
                     progress.style.width = '0%';
                     bar.className = 'status-bar error';
                     text.innerText = data.message;
-                    playErrorSound();
                 }
             } catch (err) {
                 progress.style.width = '0%';
                 bar.className = 'status-bar error';
-                text.innerText = 'Error al ejecutar la orden del proyecto.';
-                playErrorSound();
+                text.innerText = 'Error al ejecutar orden.';
             }
         }
     </script>
