@@ -353,7 +353,7 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
         return [], None
 
 # ==========================================
-# 🧠 CEREBRO DE INTERPRETACIÓN INTELIGENTE DE ÓRDENES IA
+# 🧠 CEREBRO DE INTERPRETACIÓN INTELIGENTE DE ÓRDENES IA (GEMINI 3.7 FLASH)
 # ==========================================
 SONG_BANKS = {
     "tristeza": [
@@ -400,6 +400,116 @@ def clean_term_string(s):
     s = re.sub(r'[:;.,_()\[\]\\0-9]', ' ', s)
     s = re.sub(r'\s+', ' ', s).strip()
     return s
+
+def normalize_llm_items(items):
+    normalized = []
+    for itm in items:
+        itype = itm.get('type', 'photo').lower()
+        if 'audio' in itype or 'music' in itype or 'sound' in itype:
+            itype = 'audio'
+        elif 'video' in itype or 'clip' in itype:
+            itype = 'video'
+        else:
+            itype = 'photo'
+
+        term = itm.get('term', '')
+        if not term:
+            if itm.get('artist') and itm.get('title'):
+                term = f"{itm['artist']} - {itm['title']}"
+            elif itm.get('title'):
+                term = itm['title']
+            elif itm.get('description'):
+                term = itm['description']
+            elif itm.get('query'):
+                term = itm['query']
+            elif itm.get('name'):
+                term = itm['name']
+                
+        term = str(term).strip()
+        if not term: continue
+
+        fmt = str(itm.get('format', 'any')).lower()
+        if '9:16' in fmt or 'vertical' in fmt:
+            fmt = '9:16'
+        elif '16:9' in fmt or 'horizontal' in fmt:
+            fmt = '16:9'
+        elif '1:1' in fmt or 'cuadrad' in fmt:
+            fmt = '1:1'
+        elif itype == 'audio':
+            fmt = 'mp3'
+        else:
+            fmt = 'any'
+
+        speed = str(itm.get('speed', '1.0')).replace('x', '')
+        if speed not in ('1.0', '1.06', '1.25', '1.5', '2.0'):
+            speed = '1.06' if ('1.06' in str(itm.get('speed', '')) or 'anticopyright' in str(itm).lower()) else '1.0'
+
+        count = int(itm.get('count', 1))
+        if itype == 'audio': count = 1
+        elif count <= 0: count = 5
+
+        normalized.append({
+            "term": term,
+            "type": itype,
+            "format": fmt,
+            "speed": speed,
+            "count": count
+        })
+    return normalized
+
+def interpret_ai_order_with_gemini_37(prompt_text):
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if api_key and genai:
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-3.7-flash')
+            system_instruction = """
+Eres el Director Creativo de Edición Audiovisual y Productor Musical para creadores de contenido (TikTok, Reels, Shorts).
+Tu misión es interpretar la solicitud del usuario con inteligencia profunda y desglosarla en recursos de máxima calidad para descargar.
+
+REGLAS DE ORO:
+1. AUDIOS: Si el usuario pide un número de canciones de cierta temática (ej: "3 músicas de tristeza", "2 canciones de fiesta", "canción romántica"):
+   - DEBES generar EXACTAMENTE esa cantidad de líneas individuales de audio.
+   - Cada línea DEBE ser una canción real, famosa y de alto impacto con su Artista y Título exacto (ej. "Maná - Te Lloré Un Río", "Adele - Someone Like You", "Lewis Capaldi - Someone You Loved").
+   - NUNCA pongas nombres genéricos como "tres tristezas". Siempre canciones reales con artista.
+   - Cantidad siempre es 1 por cada canción individual.
+   - Si el usuario mencionó 1.06x o anticopyright, pon speed: "1.06", de lo contrario "1.0".
+2. VIDEOS: Extrae los términos de búsqueda visual más potentes para B-Rolls y clips (ej: "cumpleaños fiesta globos confeti", "aesthetic retro vintage"). Asigna cantidad y formato ("9:16", "16:9").
+3. FOTOS: Extrae el término estético limpio, cantidad y formato ("1:1", "9:16", "16:9", "any").
+4. RECOMENDACIÓN: Explica brevemente en 1 frase por qué seleccionaste esas canciones y cómo enriquecen la emoción de la edición.
+
+Devuelve ÚNICAMENTE un JSON válido con esta estructura:
+{
+  "recommendation": "Explicación breve de por qué se eligieron esas canciones específicas y el estilo visual",
+  "project_name": "nombre_corto_del_proyecto",
+  "items": [
+    {
+      "term": "Nombre exacto de canción con artista O término de búsqueda limpio",
+      "type": "photo" | "video" | "audio",
+      "format": "1:1" | "9:16" | "16:9" | "any" | "mp3",
+      "speed": "1.0" | "1.06" | "1.25",
+      "count": 1
+    }
+  ]
+}
+"""
+            res = model.generate_content(system_instruction + "\n\nSolicitud del usuario:\n" + prompt_text)
+            clean_res = res.text.strip().replace('```json', '').replace('```', '').strip()
+            parsed = json.loads(clean_res)
+            raw_items = parsed.get("items", [])
+            if raw_items:
+                norm_items = normalize_llm_items(raw_items)
+                if norm_items:
+                    print(f"[Gemini 3.7 Flash] Orden interpretada con éxito ({len(norm_items)} items).")
+                    return {
+                        "recommendation": parsed.get("recommendation", "Orden estructurada con inteligencia creativa."),
+                        "project_name": sanitize_filename(parsed.get("project_name", "proyecto_edicion")),
+                        "items": norm_items
+                    }
+        except Exception as e:
+            print("[Gemini 3.7 Flash] Fallback a motor semántico local:", e)
+            
+    return parse_order_with_deep_context(prompt_text)
 
 def parse_order_with_deep_context(prompt_text):
     prompt_clean = prompt_text.strip()
@@ -620,10 +730,10 @@ def ai_order_assistant():
     if not prompt:
         return jsonify({"status": "error", "message": "Por favor ingresa o dicta una orden."}), 400
         
-    res = parse_order_with_deep_context(prompt)
+    res = interpret_ai_order_with_gemini_37(prompt)
     return jsonify({
         "status": "success",
-        "recommendation": res.get("recommendation", "Orden analizada y optimizada con contexto musical y visual."),
+        "recommendation": res.get("recommendation", "Orden analizada y optimizada con Gemini 3.7 Flash."),
         "project_name": res.get("project_name", "proyecto_edicion"),
         "items": res.get("items", [])
     })
