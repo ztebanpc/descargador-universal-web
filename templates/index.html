@@ -46,7 +46,7 @@
                     <p>Tableros o Búsqueda Temática</p>
                 </div>
                 <div class="card-body">
-                    <input type="text" id="pinterest-input" placeholder="URL del tablero o palabra clave (ej. aesthetic neon)..." />
+                    <input type="text" id="pinterest-input" placeholder="URL del tablero o palabra clave (ej. perro chihuahua)..." />
                     
                     <div class="filters">
                         <div class="filter-group">
@@ -74,54 +74,6 @@
                     <div id="pinterest-status" class="status-box"></div>
                 </div>
             </section>
-
-            <!-- Modulo de Videos & B-Rolls -->
-            <section class="card video-card" style="grid-column: 1 / -1;">
-                <div class="card-header">
-                    <h2>Módulo de Video & B-Rolls</h2>
-                    <p>Descarga videos limpios de YouTube Shorts, TikTok y Reels sin marcas de agua</p>
-                </div>
-                <div class="card-body">
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <input type="text" id="video-input" placeholder="Pega el enlace del video (Shorts, TikTok, Reels)..." style="flex: 1;" />
-                        <button onclick="downloadVideo()" class="btn btn-primary" style="min-width: 200px;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                            Descargar Video MP4
-                        </button>
-                    </div>
-                    <div id="video-status" class="status-box"></div>
-                </div>
-            </section>
-
-            <!-- Modulo de Archivos Listos -->
-            <section class="card files-card" style="grid-column: 1 / -1;">
-                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div>
-                        <h2>Archivos Descargados</h2>
-                        <p>Descarga directa a la memoria de tu teléfono o PC</p>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button onclick="loadFiles()" class="btn btn-outline" style="padding: 6px 14px; font-size: 13px;">🔄 Refrescar</button>
-                        <a href="/api/download_zip" class="btn btn-primary" style="padding: 6px 14px; font-size: 13px;">📦 Descargar ZIP</a>
-                    </div>
-                </div>
-                <div class="card-body" style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid var(--border); text-align: left; color: var(--text-muted);">
-                                <th style="padding: 10px;">Archivo</th>
-                                <th style="padding: 10px;">Tipo</th>
-                                <th style="padding: 10px;">Tamaño</th>
-                                <th style="padding: 10px;">Fecha</th>
-                                <th style="padding: 10px; text-align: right;">Guardar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="files-tbody">
-                            <tr><td colspan="5" style="text-align:center; padding: 15px; color: var(--text-muted);">Cargando archivos...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
         </main>
     </div>
 
@@ -131,7 +83,7 @@
             const statusBox = document.getElementById('audio-status');
             if(!query) return;
 
-            statusBox.innerHTML = "⏳ Descargando y convirtiendo a MP3... Por favor espera.";
+            statusBox.innerHTML = "⏳ Descargando con motor de alta potencia... Por favor espera.";
             statusBox.className = "status-box loading";
 
             try {
@@ -142,9 +94,10 @@
                 });
                 const result = await response.json();
                 if (result.status === 'success') {
-                    statusBox.innerHTML = `✅ <strong>${result.title}</strong> listo.<br><a href="${result.download_url}" class="btn btn-primary" style="margin-top:10px; display:inline-flex;">📥 Guardar MP3 en mi teléfono</a>`;
+                    statusBox.innerHTML = `✅ <strong>${result.title}</strong> completado.<br><a href="${result.download_url}" class="btn btn-primary" style="margin-top:10px; display:inline-flex;">📥 Guardar Archivo en mi Dispositivo</a>`;
                     statusBox.className = "status-box success";
-                    loadFiles();
+                    // Iniciar descarga automáticamente
+                    window.location.href = result.download_url;
                 } else {
                     statusBox.innerHTML = `❌ Error: ${result.message}`;
                     statusBox.className = "status-box error";
@@ -165,7 +118,7 @@
             }
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
-            statusBox.innerHTML = '⏳ Procesando lista de enlaces en la nube...';
+            statusBox.innerHTML = '⏳ Procesando lista masiva en la nube...';
             statusBox.className = 'status-box loading';
             try {
                 const response = await fetch('/api/download_excel', {
@@ -174,9 +127,8 @@
                 });
                 const result = await response.json();
                 if (result.status === 'success') {
-                    statusBox.innerHTML = `✅ ${result.message} (Revisa la tabla abajo para descargarlos).`;
+                    statusBox.innerHTML = `✅ ${result.message}<br><a href="/api/download_zip" class="btn btn-outline" style="margin-top:10px; display:inline-flex;">📦 Descargar Todos en ZIP</a>`;
                     statusBox.className = 'status-box success';
-                    loadFiles();
                 } else {
                     statusBox.innerHTML = `❌ ${result.message}`;
                     statusBox.className = 'status-box error';
@@ -192,7 +144,7 @@
             const statusBox = document.getElementById('pinterest-status');
             if(!query) return;
 
-            statusBox.innerHTML = "⏳ Buscando fotos en Pinterest...";
+            statusBox.innerHTML = "⏳ Buscando fotos en máxima resolución en Pinterest...";
             statusBox.className = "status-box loading";
 
             try {
@@ -203,7 +155,7 @@
                 });
                 const result = await response.json();
                 if (result.status === 'success' && result.images.length > 0) {
-                    statusBox.innerHTML = `✅ Se encontraron ${result.images.length} fotos en alta resolución. Descargando lote a tu biblioteca...`;
+                    statusBox.innerHTML = `✅ Se encontraron ${result.images.length} fotos originales.<br><a href="/api/download_zip" class="btn btn-secondary" style="margin-top:10px; display:inline-flex;">📥 Guardar Fotos en mi Dispositivo</a>`;
                     statusBox.className = "status-box success";
                     for (const img of result.images.slice(0, 5)) {
                         await fetch('/api/save_pinterest_image', {
@@ -212,7 +164,6 @@
                             body: JSON.stringify({url: img.url})
                         });
                     }
-                    loadFiles();
                 } else {
                     statusBox.innerHTML = "❌ No se encontraron fotos.";
                     statusBox.className = "status-box error";
@@ -222,64 +173,6 @@
                 statusBox.className = "status-box error";
             }
         }
-
-        async function downloadVideo() {
-            const url = document.getElementById('video-input').value.trim();
-            const statusBox = document.getElementById('video-status');
-            if(!url) return;
-
-            statusBox.innerHTML = "⏳ Descargando video en máxima calidad... Por favor espera.";
-            statusBox.className = "status-box loading";
-
-            try {
-                const response = await fetch('/api/download_video', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({url})
-                });
-                const result = await response.json();
-                if (result.status === 'success') {
-                    statusBox.innerHTML = `✅ <strong>${result.title}</strong> listo.<br><a href="${result.download_url}" class="btn btn-primary" style="margin-top:10px; display:inline-flex;">📥 Guardar Video en mi teléfono</a>`;
-                    statusBox.className = "status-box success";
-                    loadFiles();
-                } else {
-                    statusBox.innerHTML = `❌ Error: ${result.message}`;
-                    statusBox.className = "status-box error";
-                }
-            } catch (error) {
-                statusBox.innerHTML = "❌ Error de conexión";
-                statusBox.className = "status-box error";
-            }
-        }
-
-        async function loadFiles() {
-            const tbody = document.getElementById('files-tbody');
-            try {
-                const res = await fetch('/api/list_files');
-                const data = await res.json();
-                if (data.status === 'success' && data.files.length > 0) {
-                    tbody.innerHTML = '';
-                    data.files.forEach(f => {
-                        const tr = document.createElement('tr');
-                        tr.style.borderBottom = '1px solid var(--border)';
-                        tr.innerHTML = `
-                            <td style="padding: 10px; font-weight: 500;">${f.name}</td>
-                            <td style="padding: 10px;"><span style="background:#262a36; padding: 2px 8px; border-radius: 4px; font-size:11px;">${f.category.toUpperCase()}</span></td>
-                            <td style="padding: 10px; color: var(--text-muted);">${f.size_mb} MB</td>
-                            <td style="padding: 10px; color: var(--text-muted);">${f.date}</td>
-                            <td style="padding: 10px; text-align: right;"><a href="${f.download_url}" class="btn btn-outline" style="padding: 4px 10px; font-size:12px; display:inline-flex;">📥 Bajar</a></td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 15px; color: var(--text-muted);">No hay archivos descargados aún.</td></tr>';
-                }
-            } catch (e) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 15px; color: var(--error);">Error listando archivos.</td></tr>';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', loadFiles);
     </script>
 </body>
 </html>
