@@ -321,6 +321,7 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 10px;
+            width: 100%;
         }
 
         .btn-action {
@@ -363,28 +364,29 @@
 
         .btn-action svg { width: 16px; height: 16px; }
 
-        /* Passive ZIP Switch Button (Disponible en las 3 pestañas) */
+        /* 🔥 Passive ZIP Switch Button (Sólido Oscuro por defecto en todas las pestañas) */
         .zip-toggle-btn {
             display: flex;
             align-items: center;
             gap: 6px;
             padding: 12px 14px;
-            background: var(--input-bg);
-            border: 1.5px solid #e7e5e4;
+            background: #1c1917 !important;
+            color: #ffffff !important;
+            border: 1.5px solid #1c1917 !important;
             border-radius: 12px;
-            color: var(--text-muted);
             font-size: 12.5px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
             user-select: none;
             flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
-        .zip-toggle-btn.active {
-            background: #292524;
-            color: #ffffff;
-            border-color: #292524;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        .zip-toggle-btn.inactive {
+            background: var(--input-bg) !important;
+            color: var(--text-muted) !important;
+            border-color: #e7e5e4 !important;
+            box-shadow: none !important;
         }
         .zip-toggle-btn svg { width: 15px; height: 15px; }
 
@@ -899,7 +901,7 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         Descargar de Pinterest
                     </button>
-                    <button class="zip-toggle-btn active" onclick="toggleZipSwitch()" title="Compresión ZIP automática (solo si son 2 o más archivos)">
+                    <button class="zip-toggle-btn" onclick="toggleZipSwitch(this)" title="Compresión ZIP automática (solo si son 2 o más archivos)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                         ZIP
                     </button>
@@ -978,7 +980,7 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         Descargar Audio
                     </button>
-                    <button class="zip-toggle-btn active" onclick="toggleZipSwitch()" title="Compresión ZIP automática (solo si son 2 o más archivos)">
+                    <button class="zip-toggle-btn" onclick="toggleZipSwitch(this)" title="Compresión ZIP automática (solo si son 2 o más archivos)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                         ZIP
                     </button>
@@ -1042,6 +1044,10 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         Generar Orden con IA (Gemini 3.7)
                     </button>
+                    <button class="zip-toggle-btn" onclick="toggleZipSwitch(this)" title="Compresión ZIP automática (solo si son 2 o más archivos)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        ZIP
+                    </button>
                 </div>
 
                 <!-- ✨ AI Thinking Process Animation Container -->
@@ -1094,7 +1100,7 @@
                         <button class="btn-builder-exec" onclick="executeCustomOrderProject()">
                             Iniciar Descarga del Proyecto Completo
                         </button>
-                        <button class="zip-toggle-btn active" onclick="toggleZipSwitch()" title="Compresión ZIP automática (solo si son 2 o más archivos)">
+                        <button class="zip-toggle-btn" onclick="toggleZipSwitch(this)" title="Compresión ZIP automática (solo si son 2 o más archivos)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                             ZIP
                         </button>
@@ -1147,13 +1153,13 @@
         let recognition = null;
         let currentOrderItems = [];
 
-        function toggleZipSwitch() {
+        function toggleZipSwitch(btn) {
             isZipActive = !isZipActive;
-            document.querySelectorAll('.zip-toggle-btn').forEach(btn => {
+            document.querySelectorAll('.zip-toggle-btn').forEach(b => {
                 if (isZipActive) {
-                    btn.classList.add('active');
+                    b.classList.remove('inactive');
                 } else {
-                    btn.classList.remove('active');
+                    b.classList.add('inactive');
                 }
             });
         }
@@ -1526,7 +1532,6 @@
                 const isVideoItem = itm.type === 'video';
                 const isPhotoItem = itm.type === 'photo';
 
-                // Generar opciones contextuales y limpias según el tipo de archivo
                 let selectorOptionsHtml = '';
                 if (isAudioItem) {
                     selectorOptionsHtml = `
