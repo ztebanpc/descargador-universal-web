@@ -217,7 +217,7 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
         # Tablero o Temática
         limit = req_count
         if pin_tab == 'tablero' and req_count == 1 and len(images) > 1:
-            limit = len(images) # Si es tablero y no especificó número pequeño, descarga todo el tablero
+            limit = len(images)
             
         items_to_download = []
         if media_type in ('both', 'videos'):
@@ -296,6 +296,101 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
         return [], None
 
 # ==========================================
+# 🤖 ASISTENTE DE ÓRDENES IA (Inteligente por Línea)
+# ==========================================
+def clean_term_string(s):
+    s = re.sub(r'(\b\d+\b|\b(vertical(?:es)?|horizontal(?:es)?|cuadrad[ao]s?|formato|velocidad|calidad|mp3|wav|flac|de|fotos?|im[aá]genes|videos?|vídeos?|audios?|cancion(?:es)?|m[uú]sicas?|anticopyright|anti copyright|quiero|necesito|me gustaría|me gustaria|unos|unas|un|una|para|que tengan que ver con|que tengan|relacionados? con|tem[aá]ticas?)\b)', '', s, flags=re.IGNORECASE)
+    s = re.sub(r'[:;.,_()\[\]\\0-9]', ' ', s)
+    s = re.sub(r'\s+', ' ', s).strip()
+    return s
+
+def parse_nlp_order_smart(prompt_text):
+    prompt_clean = prompt_text.strip()
+    slug = re.sub(r'[^\w\-_]', '_', prompt_clean[:25]).strip('_') or "proyecto_edicion"
+    
+    # 1. Proteger números decimales
+    normalized = re.sub(r'(\d+)\.(\d+)', r'\1_DOT_\2', prompt_clean)
+    normalized = re.sub(r'1\)\.?96|9\.16|9:15|9:16', '9:16', normalized)
+    
+    # 2. Separar por conectores
+    segments = re.split(r'[,;\n]|\by\b|\be\b|\bcon\b', normalized, flags=re.IGNORECASE)
+    global_speed = "1.06" if any(w in prompt_clean.lower() for w in ["1.06", "1.6", "anti copyright", "anticopyright"]) else "1.0"
+    
+    items = []
+    
+    for seg in segments:
+        seg = seg.replace('_DOT_', '.').strip()
+        if not seg or len(seg) < 2: continue
+        
+        seg_lower = seg.lower()
+        count_match = re.search(r'\b(\d+)\b', seg)
+        count = int(count_match.group(1)) if count_match else 0
+        
+        is_audio = any(w in seg_lower for w in ['audio', 'cancion', 'canción', 'musica', 'música', 'mp3', 'sound', 'tema', 'track', 'odio'])
+        is_video = any(w in seg_lower for w in ['video', 'vídeo', 'clip', 'reels', 'shorts', 'broll', 'b-roll', 'aestetik', 'aesthetic']) and not is_audio
+        is_photo = any(w in seg_lower for w in ['foto', 'imagen', 'imágenes', 'portada', 'wallpaper', 'pic']) and not is_audio and not is_video
+        
+        if any(w in seg_lower for w in ['harry style', 'harry styles', 'bad bunny', 'duki', 'feid', 'taylor swift', 'morat', 'queen', 'beatles', 'pop', 'rock', 'trap']):
+            is_audio = True
+            is_video = False
+            is_photo = False
+            
+        if '9:16' in seg_lower or 'vertical' in seg_lower:
+            fmt = '9:16'
+        elif '16:9' in seg_lower or 'horizontal' in seg_lower:
+            fmt = '16:9'
+        elif '1:1' in seg_lower or '1;1' in seg_lower or 'cuadrad' in seg_lower:
+            fmt = '1:1'
+        else:
+            fmt = 'any' if not is_audio else 'mp3'
+            
+        speed = "1.06" if any(w in seg_lower for w in ["1.06", "1.6", "anticopyright", "anti copyright"]) else global_speed
+        
+        clean = clean_term_string(seg)
+        if not clean or len(clean) < 2:
+            clean = seg.strip()
+            
+        if is_audio:
+            if clean.lower() in ['cumpleaños', 'fiesta infantil', 'fiesta']:
+                clean = f"Cancion {clean} infantil"
+            items.append({
+                "term": clean,
+                "type": "audio",
+                "format": "mp3",
+                "speed": speed,
+                "count": 1
+            })
+        elif is_video:
+            v_count = count if count > 0 else 10
+            items.append({
+                "term": clean,
+                "type": "video",
+                "format": fmt if fmt != 'any' else '9:16',
+                "speed": "1.0",
+                "count": v_count
+            })
+        else:
+            p_count = count if count > 0 else 10
+            items.append({
+                "term": clean,
+                "type": "photo",
+                "format": fmt,
+                "speed": "1.0",
+                "count": p_count
+            })
+            
+    if not items:
+        items.append({
+            "term": prompt_clean,
+            "type": "photo",
+            "format": "any",
+            "speed": "1.0",
+            "count": 5
+        })
+        
+    return {"project_name": slug, "items": items}
+
+# ==========================================
 # 🌐 RUTAS FLASK
 # ==========================================
 @app.route('/')
@@ -325,7 +420,7 @@ def download_audio():
             "filename": filename,
             "download_url": f"/api/files/audio/{filename}"
         })
-    return jsonify({"status": "error", "message": "No se pudo extraer el audio.", "note": "Comprueba que el video de YouTube esté disponible públicamente y no tenga restricciones de edad o región."}), 500
+    return jsonify({"status": "error", "message": "No se pudo extraer el audio.", "note": "Comprueba que el video de YouTube esté disponible públicamente y no tenga restricciones."}), 500
 
 @app.route('/api/download_excel', methods=['POST'])
 def download_excel():
@@ -397,9 +492,6 @@ def download_pinterest():
         "note": "Si seleccionaste un formato específico (ej. 9:16 o 16:9), es posible que los pines encontrados no coincidan con esa proporción. Prueba cambiando a 'Cualquiera' o ajusta el término de búsqueda."
     }), 404
 
-# ==========================================
-# 🤖 ASISTENTE DE ÓRDENES IA (Línea por Línea Inteligente)
-# ==========================================
 @app.route('/api/ai_order_assistant', methods=['POST'])
 def ai_order_assistant():
     data = request.get_json(silent=True) or request.form
@@ -408,81 +500,11 @@ def ai_order_assistant():
     if not prompt:
         return jsonify({"status": "error", "message": "Por favor ingresa o dicta una orden."}), 400
         
-    slug = re.sub(r'[^\w\-_]', '_', prompt[:25]).strip('_') or "proyecto_capcut"
-    
-    # Parser inteligente de líneas
-    # Divide por comas, " y ", saltos de línea o conjunciones
-    raw_segments = re.split(r'[,;\n]|\by\b', prompt, flags=re.IGNORECASE)
-    items = []
-    item_id = 1
-    
-    for seg in raw_segments:
-        seg = seg.strip()
-        if not seg: continue
-        
-        # Detectar cantidad
-        count_match = re.search(r'(\d+)', seg)
-        count = int(count_match.group(1)) if count_match else 1
-        
-        # Detectar tipo
-        is_audio = any(w in seg.lower() for w in ['audio', 'cancion', 'canción', 'musica', 'música', 'mp3', 'sound', 'tema'])
-        is_video = any(w in seg.lower() for w in ['video', 'vídeo', 'clip', 'reels', 'shorts', 'broll', 'b-roll'])
-        is_photo = any(w in seg.lower() for w in ['foto', 'imagen', 'imágenes', 'portada', 'wallpaper', 'pic'])
-        
-        if is_audio:
-            item_type = 'audio'
-        elif is_video:
-            item_type = 'video'
-        else:
-            item_type = 'photo'
-            
-        # Detectar formato / ratio
-        if '9:16' in seg or 'vertical' in seg.lower():
-            fmt = '9:16'
-        elif '16:9' in seg or 'horizontal' in seg.lower():
-            fmt = '16:9'
-        elif '1:1' in seg or 'cuadrad' in seg.lower():
-            fmt = '1:1'
-        else:
-            fmt = 'any' if item_type != 'audio' else 'mp3'
-            
-        # Detectar velocidad para audios
-        speed = "1.0"
-        if '1.06' in seg or 'anticopyright' in seg.lower() or 'anti copyright' in seg.lower():
-            speed = "1.06"
-        elif '1.25' in seg:
-            speed = "1.25"
-        elif '1.5' in seg:
-            speed = "1.5"
-            
-        # Limpiar término
-        clean = re.sub(r'(\d+|\b(de|fotos?|im[aá]genes|videos?|audios?|cancion(?:es)?|m[uú]sicas?|mp3|vertical|horizontal|cuadrada|1:1|9:16|16:9|1\.06x?|anticopyright|quiero|necesito|para|un|una|unos|unas)\b)', '', seg, flags=re.IGNORECASE).strip()
-        if not clean: clean = seg.strip()
-        
-        items.append({
-            "id": item_id,
-            "term": clean,
-            "type": item_type,
-            "format": fmt,
-            "speed": speed,
-            "count": count
-        })
-        item_id += 1
-        
-    if not items:
-        items.append({
-            "id": 1,
-            "term": prompt,
-            "type": "photo",
-            "format": "any",
-            "speed": "1.0",
-            "count": 5
-        })
-
+    res = parse_nlp_order_smart(prompt)
     return jsonify({
         "status": "success",
-        "project_name": slug,
-        "items": items
+        "project_name": res["project_name"],
+        "items": res["items"]
     })
 
 @app.route('/api/execute_custom_order', methods=['POST'])
