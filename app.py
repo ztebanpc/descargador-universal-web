@@ -1,5 +1,14 @@
-from flask import Flask, render_template, request, jsonify
+import sys
 import os
+import shutil
+if sys.platform == 'win32':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
+from flask import Flask, render_template, request, jsonify
 import threading
 import yt_dlp
 import time
@@ -150,6 +159,17 @@ def process_pinterest_download(query, cantidad, media_type, bot_event=None, img_
     try:
         # Si cantidad viene vacía o no es número positivo, se asume Sin Límite (9999)
         limit = int(cantidad) if (str(cantidad).isdigit() and int(cantidad) > 0) else 9999
+        
+        # Normalizar media_type para aceptar 'Solo Fotos', 'Solo Videos', 'Ambos', 'fotos', 'videos', 'both'
+        m_lower = str(media_type).lower()
+        if 'foto' in m_lower or 'photo' in m_lower or 'image' in m_lower:
+            media_type = 'fotos'
+        elif 'video' in m_lower:
+            media_type = 'videos'
+        else:
+            media_type = 'both'
+            
+        print(f"[Pinterest] 🚀 Iniciando: {query} | Tipo: {media_type} | Formato: {img_format} | Límite: {limit}")
         
         if bot_event:
             safe_event = bot_event.replace(' ', '_').replace('#', '')
@@ -444,9 +464,17 @@ def process_pinterest_download(query, cantidad, media_type, bot_event=None, img_
                     break
                 intentos += 1
                 
-                temp_path = os.path.join(target_dir, f"temp_{random.randint(1000,9999)}.{u.split('.')[-1]}")
+                clean_ext = u.split('?')[0].split('.')[-1].lower()
+                if clean_ext not in ('jpg', 'jpeg', 'png', 'webp'):
+                    clean_ext = 'jpg'
+                temp_path = os.path.join(target_dir, f"temp_{random.randint(10000,99999)}.{clean_ext}")
                 try:
-                    urllib.request.urlretrieve(u, temp_path)
+                    r_img = requests.get(u, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}, timeout=12)
+                    if r_img.status_code != 200:
+                        descartados_fotos += 1
+                        continue
+                    with open(temp_path, 'wb') as f:
+                        f.write(r_img.content)
                     from PIL import Image
                     with Image.open(temp_path) as img:
                         w, h = img.size
@@ -463,11 +491,13 @@ def process_pinterest_download(query, cantidad, media_type, bot_event=None, img_
                     elif "horizontal" in fmt and w <= h:
                         os.remove(temp_path); descartados_fotos += 1; continue
                         
-                    final_path = os.path.join(target_dir, f"[FOTO] {count_fotos + 1:03d}_pinterest_{random.randint(100000,999999)}.jpg")
+                    final_path = os.path.join(target_dir, f"[FOTO] {count_fotos + 1:03d}_pinterest_{int(time.time())}_{random.randint(10000,99999)}.jpg")
                     if os.path.exists(temp_path):
-                        os.rename(temp_path, final_path)
+                        shutil.move(temp_path, final_path)
                         count_fotos += 1
-                except:
+                        print(f"[Pinterest] [OK] Guardada foto #{count_fotos}: {os.path.basename(final_path)}")
+                except Exception as e:
+                    print(f"[Pinterest] [WARN] Omitida imagen por: {e}")
                     if os.path.exists(temp_path):
                         try: os.remove(temp_path)
                         except: pass
