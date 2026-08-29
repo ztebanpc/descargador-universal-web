@@ -8,7 +8,8 @@ import json
 import zipfile
 import threading
 import subprocess
-from concurrent.futures import ThreadPoolExecutor
+import random
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 if sys.platform == 'win32':
     try:
@@ -94,6 +95,7 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
             'quiet': True,
             'no_warnings': True,
             'max_downloads': cnt,
+            'socket_timeout': 15,
         }
         if postprocessor_args:
             ydl_opts['postprocessor_args'] = {'ffmpeg': postprocessor_args}
@@ -105,6 +107,8 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
                 ydl.download([search_query])
             except yt_dlp.utils.MaxDownloadsReached:
                 pass
+            except Exception as e:
+                print(f"[Audio] Aviso en yt-dlp: {e}")
                 
         saved_files = []
         for f in os.listdir(target_folder):
@@ -134,7 +138,7 @@ def process_video_download(term, count=1, format_type='9:16', target_folder=ORDE
         hashtag = "#shorts " if format_type in ('9:16', 'vertical', 'any') else ""
         query = term if term.startswith('http') else f"ytsearch{cnt}:{hashtag}{term}"
         
-        filename_base = f"video_{int(time.time())}"
+        filename_base = f"video_{int(time.time())}_{sanitize_filename(term[:12])}"
         out_template = os.path.join(target_folder, f"{filename_base}_%(id)s.%(ext)s")
         
         ydl_opts = {
@@ -149,6 +153,7 @@ def process_video_download(term, count=1, format_type='9:16', target_folder=ORDE
             'quiet': True,
             'no_warnings': True,
             'max_downloads': cnt,
+            'socket_timeout': 15,
         }
         
         saved_files = []
@@ -157,6 +162,8 @@ def process_video_download(term, count=1, format_type='9:16', target_folder=ORDE
                 ydl.download([query])
             except yt_dlp.utils.MaxDownloadsReached:
                 pass
+            except Exception as e:
+                print(f"[Video] Aviso en yt-dlp: {e}")
                 
         for f in os.listdir(target_folder):
             if f.startswith(filename_base) and f.endswith(('.mp4', '.mov', '.webm', '.mkv')):
@@ -172,11 +179,11 @@ def process_bulk_audio(links, speed="1.0"):
     print(f"[Excel] Procesando {len(links)} enlaces en lote...")
     for link in links:
         process_audio_download(link, speed=speed, count=1, target_folder=EXCEL_DIR)
-        time.sleep(1.5)
+        time.sleep(1.0)
     print(f"[Excel] [OK] Todos los enlaces de Excel fueron procesados.")
 
 # ==========================================
-# 📌 PINTEREST SCRAPER & EXTRACTOR LIMPIO
+# 📌 PINTEREST SCRAPER & EXTRACTOR PARALELO
 # ==========================================
 def extract_pinterest_raw_links(query, count=20):
     headers = {
@@ -192,7 +199,7 @@ def extract_pinterest_raw_links(query, count=20):
     if clean_q.startswith('http') or 'pin.it' in clean_q or 'pinterest.com' in clean_q:
         url = clean_q if clean_q.startswith('http') else 'https://' + clean_q
         try:
-            res = requests.get(url, headers=headers, allow_redirects=True, timeout=12)
+            res = requests.get(url, headers=headers, allow_redirects=True, timeout=10)
             if res.status_code == 200:
                 html = res.text
                 v_matches = re.findall(r'https://[^"\'\s<>]+?\.pinimg\.com/[^"\'\s<>]+\.mp4', html)
@@ -209,9 +216,9 @@ def extract_pinterest_raw_links(query, count=20):
             print("[Pinterest] Error al resolver enlace:", e)
     else:
         try:
-            range_req = max(40, count * 3)
+            range_req = max(30, count * 2)
             cmd = [sys.executable, "-m", "gallery_dl", "--get-urls", "--range", f"1-{range_req}", f"https://www.pinterest.com/search/pins/?q={clean_q.replace(' ', '+')}"]
-            out = subprocess.check_output(cmd, text=True, errors="ignore")
+            out = subprocess.check_output(cmd, text=True, errors="ignore", timeout=20)
             for line in out.splitlines():
                 u = line.strip().replace('| ', '').strip()
                 if u.startswith('ytdl:'):
@@ -228,6 +235,42 @@ def extract_pinterest_raw_links(query, count=20):
             print("[Pinterest] Error en búsqueda temática con gallery-dl:", e)
 
     return {"videos": videos, "images": images}
+
+def download_single_image(u, batch_folder, idx, format_type):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+    try:
+        r = requests.get(u, headers=headers, timeout=8)
+        if r.status_code == 200:
+            ext = u.split('?')[0].split('.')[-1].lower()
+            if ext not in ('jpg', 'jpeg', 'png', 'webp'): ext = 'jpg'
+            temp_name = f"temp_{idx}.{ext}"
+            temp_fp = os.path.join(batch_folder, temp_name)
+            with open(temp_fp, 'wb') as f:
+                f.write(r.content)
+                
+            if Image and format_type in ('9:16', 'vertical', '16:9', 'horizontal', '1:1', 'cuadrado'):
+                try:
+                    with Image.open(temp_fp) as img_pil:
+                        w, h = img_pil.size
+                    fmt = format_type.lower()
+                    if fmt in ('9:16', 'vertical') and h < w * 1.15:
+                        os.remove(temp_fp); return None
+                    elif fmt in ('16:9', 'horizontal') and w < h * 1.15:
+                        os.remove(temp_fp); return None
+                    elif fmt in ('1:1', 'cuadrado') and not (0.85 <= w/h <= 1.15):
+                        os.remove(temp_fp); return None
+                except Exception:
+                    pass
+                    
+            final_fname = f"pin_foto_{idx+1}.{ext}"
+            final_fp = os.path.join(batch_folder, final_fname)
+            shutil.move(temp_fp, final_fp)
+            return final_fname
+    except Exception:
+        pass
+    return None
 
 def process_pinterest_download(query, format_type='any', media_type='both', pin_tab='individual', count=1, target_folder=PINTEREST_DIR, create_zip=True):
     try:
@@ -250,7 +293,7 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
             if videos:
                 v_url = videos[0]
                 try:
-                    r = requests.get(v_url, headers=headers, stream=True, timeout=15)
+                    r = requests.get(v_url, headers=headers, stream=True, timeout=12)
                     if r.status_code == 200:
                         fname = f"pin_video_{batch_id}.mp4"
                         fp = os.path.join(batch_folder, fname)
@@ -263,7 +306,7 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
             elif images:
                 i_url = images[0]
                 try:
-                    r = requests.get(i_url, headers=headers, timeout=12)
+                    r = requests.get(i_url, headers=headers, timeout=10)
                     if r.status_code == 200:
                         ext = i_url.split('?')[0].split('.')[-1].lower()
                         if ext not in ('jpg', 'jpeg', 'png', 'webp'): ext = 'jpg'
@@ -292,56 +335,30 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
             for img in images:
                 items_to_download.append({'type': 'image', 'url': img})
                 
-        count_saved = 0
-        for item in items_to_download:
-            if count_saved >= limit:
-                break
-                
-            u = item['url']
-            is_vid = item['type'] == 'video'
-            
+        # Descargar imágenes en paralelo para máxima velocidad
+        image_urls = [it['url'] for it in items_to_download if it['type'] == 'image'][:limit]
+        video_urls = [it['url'] for it in items_to_download if it['type'] == 'video'][:limit]
+        
+        with ThreadPoolExecutor(max_workers=6) as executor:
+            future_to_idx = {executor.submit(download_single_image, u, batch_folder, i, format_type): i for i, u in enumerate(image_urls)}
+            for future in as_completed(future_to_idx):
+                res_fname = future.result()
+                if res_fname:
+                    saved_files.append(res_fname)
+                    
+        for idx, v_url in enumerate(video_urls):
+            if len(saved_files) >= limit: break
             try:
-                if is_vid:
-                    r = requests.get(u, headers=headers, stream=True, timeout=15)
-                    if r.status_code == 200:
-                        fname = f"pin_video_{batch_id}_{count_saved+1}.mp4"
-                        fp = os.path.join(batch_folder, fname)
-                        with open(fp, 'wb') as f:
-                            for chunk in r.iter_content(chunk_size=8192):
-                                f.write(chunk)
-                        saved_files.append(fname)
-                        count_saved += 1
-                else:
-                    r = requests.get(u, headers=headers, timeout=12)
-                    if r.status_code == 200:
-                        ext = u.split('?')[0].split('.')[-1].lower()
-                        if ext not in ('jpg', 'jpeg', 'png', 'webp'): ext = 'jpg'
-                        temp_name = f"temp_{count_saved}.{ext}"
-                        temp_fp = os.path.join(batch_folder, temp_name)
-                        with open(temp_fp, 'wb') as f:
-                            f.write(r.content)
-                            
-                        if Image and format_type in ('9:16', 'vertical', '16:9', 'horizontal', '1:1', 'cuadrado'):
-                            try:
-                                with Image.open(temp_fp) as img_pil:
-                                    w, h = img_pil.size
-                                fmt = format_type.lower()
-                                if fmt in ('9:16', 'vertical') and h < w * 1.15:
-                                    os.remove(temp_fp); continue
-                                elif fmt in ('16:9', 'horizontal') and w < h * 1.15:
-                                    os.remove(temp_fp); continue
-                                elif fmt in ('1:1', 'cuadrado') and not (0.85 <= w/h <= 1.15):
-                                    os.remove(temp_fp); continue
-                            except Exception:
-                                pass
-                                
-                        final_fname = f"pin_foto_{batch_id}_{count_saved+1}.{ext}"
-                        final_fp = os.path.join(batch_folder, final_fname)
-                        shutil.move(temp_fp, final_fp)
-                        saved_files.append(final_fname)
-                        count_saved += 1
+                r = requests.get(v_url, headers=headers, stream=True, timeout=12)
+                if r.status_code == 200:
+                    fname = f"pin_video_{batch_id}_{idx+1}.mp4"
+                    fp = os.path.join(batch_folder, fname)
+                    with open(fp, 'wb') as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                    saved_files.append(fname)
             except Exception:
-                continue
+                pass
 
         for f in saved_files:
             shutil.copy(os.path.join(batch_folder, f), os.path.join(target_folder, f))
@@ -362,45 +379,39 @@ def process_pinterest_download(query, format_type='any', media_type='both', pin_
         return [], None
 
 # ==========================================
-# 🧠 CEREBRO DE INTERPRETACIÓN INTELIGENTE DE ÓRDENES IA (GEMINI 3.7 FLASH)
+# 🧠 CEREBRO DE INTERPRETACIÓN INTELIGENTE CON ALTA DIVERSIDAD CREATIVA
 # ==========================================
 SONG_BANKS = {
     "tristeza": [
-        "Maná - Te Lloré Un Río",
-        "Adele - Someone Like You",
-        "Lewis Capaldi - Someone You Loved",
-        "Sam Smith - Stay With Me",
-        "Billie Eilish - Lovely"
+        "Maná - Te Lloré Un Río", "Adele - Someone Like You", "Lewis Capaldi - Someone You Loved",
+        "Sam Smith - Stay With Me", "Billie Eilish - Lovely", "Gary Jules - Mad World",
+        "Coldplay - Fix You", "Evanescence - My Immortal", "Olivia Rodrigo - Drivers License",
+        "Ed Sheeran - Happier", "Sia - Chandelier Piano Version", "Kodaline - All I Want",
+        "Duncan Laurence - Arcade", "Lord Huron - The Night We Met", "Tom Odell - Another Love"
     ],
     "triste": [
-        "Maná - Te Lloré Un Río",
-        "Adele - Someone Like You",
-        "Lewis Capaldi - Someone You Loved",
-        "Sam Smith - Stay With Me"
+        "Maná - Te Lloré Un Río", "Adele - Someone Like You", "Lewis Capaldi - Someone You Loved",
+        "Sam Smith - Stay With Me", "Billie Eilish - Lovely", "Gary Jules - Mad World",
+        "Tom Odell - Another Love", "Coldplay - The Scientist", "Passenger - Let Her Go"
     ],
     "cumpleaños": [
-        "Cepillín - Las Mañanitas",
-        "Parchis - Cumpleaños Feliz",
-        "Stevie Wonder - Happy Birthday",
-        "Canción Infantil - Feliz en tu Día"
+        "Cepillín - Las Mañanitas", "Parchis - Cumpleaños Feliz", "Stevie Wonder - Happy Birthday",
+        "Canción Infantil - Feliz en tu Día", "The Beatles - Birthday", "Katy Perry - Birthday",
+        "Vicente Fernández - Las Mañanitas", "Raffaella Carrà - Hay Que Venir Al Sur"
     ],
     "fiesta": [
-        "Bad Bunny - Tití Me Preguntó",
-        "Feid - Feliz Cumpleaños Ferxxo",
-        "Don Omar - Danza Kuduro",
-        "Daddy Yankee - Gasolina"
+        "Bad Bunny - Tití Me Preguntó", "Feid - Feliz Cumpleaños Ferxxo", "Don Omar - Danza Kuduro",
+        "Daddy Yankee - Gasolina", "Rauw Alejandro - Todo De Ti", "J Balvin - Mi Gente",
+        "Bizarrap & Quevedo - Bzrp Music Sessions", "Farruko - Pepas", "Pitbull - Fireball"
     ],
     "aesthetic": [
-        "Harry Styles - As It Was",
-        "The Weeknd - Blinding Lights",
-        "Glass Animals - Heat Waves",
-        "Dua Lipa - Levitating"
+        "Harry Styles - As It Was", "The Weeknd - Blinding Lights", "Glass Animals - Heat Waves",
+        "Dua Lipa - Levitating", "Steve Lacy - Bad Habit", "The Neighbourhood - Sweater Weather",
+        "Arctic Monkeys - I Wanna Be Yours", "Beach House - Space Song", "Mac DeMarco - Chamber of Reflection"
     ],
     "desamor": [
-        "Shakira - Monotonía",
-        "Rauw Alejandro - Todo De Ti",
-        "Bizarrap & Quevedo - Bzrp Music Sessions",
-        "Morat - No Se Va"
+        "Shakira - Monotonía", "Morat - No Se Va", "Rauw Alejandro - 2/Catorce",
+        "Camilo - Ropa Cara", "Sebastian Yatra - Devuélveme El Corazón", "Reik - Ya Me Enteré"
     ]
 }
 
@@ -471,21 +482,25 @@ def interpret_ai_order_with_gemini_37(prompt_text):
     if api_key and genai:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-3.7-flash')
+            model = genai.GenerativeModel(
+                'gemini-3.7-flash',
+                generation_config={"temperature": 0.88, "top_p": 0.95}
+            )
             system_instruction = """
 Eres el Director Creativo de Edición Audiovisual y Productor Musical para creadores de contenido (TikTok, Reels, Shorts).
-Tu misión es interpretar la solicitud del usuario con inteligencia profunda y desglosarla en recursos de máxima calidad para descargar.
+Tu misión es interpretar la solicitud del usuario con inteligencia profunda, VARIEDAD CREATIVA CONSTANTE y desglosarla en recursos de máxima calidad.
 
 REGLAS DE ORO:
-1. AUDIOS: Si el usuario pide un número de canciones de cierta temática (ej: "3 músicas de tristeza", "2 canciones de fiesta", "canción romántica"):
+1. DIVERSIDAD: VARÍA SIEMPRE las recomendaciones y canciones. No repitas siempre las mismas canciones estándar. Elige temas famosos, virales, himnos dramáticos o hits modernos según el matiz exacto del pedido.
+2. AUDIOS: Si el usuario pide un número de canciones de cierta temática (ej: "3 músicas de tristeza", "2 canciones de fiesta", "canción romántica"):
    - DEBES generar EXACTAMENTE esa cantidad de líneas individuales de audio.
-   - Cada línea DEBE ser una canción real, famosa y de alto impacto con su Artista y Título exacto (ej. "Maná - Te Lloré Un Río", "Adele - Someone Like You", "Lewis Capaldi - Someone You Loved").
-   - NUNCA pongas nombres genéricos como "tres tristezas". Siempre canciones reales con artista.
+   - Cada línea DEBE ser una canción real, famosa con su "Artista - Título".
+   - NUNCA pongas nombres genéricos como "tres tristezas". Siempre canciones reales.
    - Cantidad siempre es 1 por cada canción individual.
    - Si el usuario mencionó 1.06x o anticopyright, pon speed: "1.06", de lo contrario "1.0".
-2. VIDEOS: Extrae los términos de búsqueda visual más potentes para B-Rolls y clips (ej: "cumpleaños fiesta globos confeti", "aesthetic retro vintage"). Asigna cantidad y formato ("9:16", "16:9").
-3. FOTOS: Extrae el término estético limpio, cantidad y formato ("1:1", "9:16", "16:9", "any").
-4. RECOMENDACIÓN: Explica brevemente en 1 frase por qué seleccionaste esas canciones y cómo enriquecen la emoción de la edición.
+3. VIDEOS: Extrae los términos de búsqueda visual más potentes para B-Rolls y clips. Asigna cantidad y formato ("9:16", "16:9").
+4. FOTOS: Extrae el término estético limpio, cantidad y formato ("1:1", "9:16", "16:9", "any").
+5. RECOMENDACIÓN: Explica brevemente en 1 frase por qué seleccionaste esas canciones y cómo potencian el ritmo y la emoción de la edición.
 
 Devuelve ÚNICAMENTE un JSON válido con esta estructura:
 {
@@ -493,7 +508,7 @@ Devuelve ÚNICAMENTE un JSON válido con esta estructura:
   "project_name": "nombre_corto_del_proyecto",
   "items": [
     {
-      "term": "Nombre exacto de canción con artista O término de búsqueda limpio",
+      "term": "Artista - Título exacto O término de búsqueda visual",
       "type": "photo" | "video" | "audio",
       "format": "1:1" | "9:16" | "16:9" | "any" | "mp3",
       "speed": "1.0" | "1.06" | "1.25",
@@ -573,8 +588,9 @@ def parse_order_with_deep_context(prompt_text):
                     
             if matched_theme:
                 bank = SONG_BANKS[matched_theme]
-                for i in range(min(audio_count, len(bank))):
-                    song_name = bank[i]
+                sample_k = min(audio_count, len(bank))
+                selected_samples = random.sample(bank, sample_k)
+                for song_name in selected_samples:
                     recommended_songs.append(song_name)
                     items.append({
                         "term": song_name,
@@ -619,7 +635,7 @@ def parse_order_with_deep_context(prompt_text):
             
     recommendation = f"Se estructuraron {len(items)} recursos creativos. "
     if recommended_songs:
-        recommendation += f"Se eligieron las canciones ({', '.join(recommended_songs[:3])}) para darle la vibra musical exacta a la edición."
+        recommendation += f"Se seleccionaron las canciones ({', '.join(recommended_songs[:3])}) para darle la vibra musical exacta a la edición."
     else:
         recommendation += "Recursos listos con formato y velocidad balanceados para tu proyecto."
         
@@ -764,6 +780,27 @@ def ai_order_assistant():
         "items": res.get("items", [])
     })
 
+def execute_single_item(itm, project_folder):
+    term = itm.get('term', '').strip()
+    itype = itm.get('type', 'photo')
+    fmt = itm.get('format', 'any')
+    speed = itm.get('speed', '1.0')
+    cnt = int(itm.get('count', 1))
+    
+    if not term: return []
+    
+    try:
+        if itype == 'audio':
+            return process_audio_download(term, speed=speed, count=cnt, target_folder=project_folder)
+        elif itype == 'video':
+            return process_video_download(term, count=cnt, format_type=fmt, target_folder=project_folder)
+        else: # photo
+            pins, _ = process_pinterest_download(term, format_type=fmt, media_type='photos', pin_tab='tematica', count=cnt, target_folder=project_folder, create_zip=False)
+            return pins or []
+    except Exception as e:
+        print(f"[Item Execution Error] {term}: {e}")
+        return []
+
 @app.route('/api/execute_custom_order', methods=['POST'])
 def execute_custom_order():
     data = request.get_json(silent=True) or request.form
@@ -779,25 +816,17 @@ def execute_custom_order():
     os.makedirs(project_folder, exist_ok=True)
     downloaded_files = []
     
-    for itm in items:
-        term = itm.get('term', '').strip()
-        itype = itm.get('type', 'photo')
-        fmt = itm.get('format', 'any')
-        speed = itm.get('speed', '1.0')
-        cnt = int(itm.get('count', 1))
-        
-        if not term: continue
-        
-        if itype == 'audio':
-            auds = process_audio_download(term, speed=speed, count=cnt, target_folder=project_folder)
-            if auds: downloaded_files.extend(auds)
-        elif itype == 'video':
-            vids = process_video_download(term, count=cnt, format_type=fmt, target_folder=project_folder)
-            if vids: downloaded_files.extend(vids)
-        else: # photo
-            pins, _ = process_pinterest_download(term, format_type=fmt, media_type='photos', pin_tab='tematica', count=cnt, target_folder=project_folder, create_zip=False)
-            if pins: downloaded_files.extend(pins)
-            
+    # 🚀 Ejecutar todas las descargas EN PARALELO para máxima velocidad (evita timeouts)
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        future_to_item = {executor.submit(execute_single_item, itm, project_folder): itm for itm in items}
+        for future in as_completed(future_to_item):
+            try:
+                res_files = future.result()
+                if res_files:
+                    downloaded_files.extend(res_files)
+            except Exception as e:
+                print("[Task Exception]:", e)
+                
     master_zip_name = f"Ordenes_IA_{project_slug}.zip"
     master_zip_path = os.path.join(ORDENES_DIR, master_zip_name)
     
