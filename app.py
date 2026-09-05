@@ -88,7 +88,7 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
             'postprocessors': postprocessors,
             'extractor_args': {
                 'youtube': {
-                    'player_client': ['ios', 'android', 'web'],
+                    'player_client': ['android'],
                 }
             },
             'outtmpl': out_template,
@@ -154,7 +154,7 @@ def process_video_download(term, count=1, format_type='9:16', target_folder=ORDE
             'format': '18/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
             'extractor_args': {
                 'youtube': {
-                    'player_client': ['ios', 'android', 'web'],
+                    'player_client': ['android'],
                 }
             },
             'outtmpl': out_template,
