@@ -890,9 +890,32 @@ def serve_file(category, filename):
     return send_from_directory(target_dir, filename, as_attachment=True)
 
 # ==========================================
-# 🤖 BOT TELEGRAM AUTOMÁTICO - MP3 ANTICOPYRIGHT (1.06x)
+# 🤖 BOT TELEGRAM AUTOMÁTICO - MP3 ANTICOPYRIGHT (1.06x) CON ACCESO PRIVADO
 # ==========================================
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8998942466:AAE9Ff2C3lx--_iJQIGek6yIAdyqAV6_JU0")
+AUTH_USERS_FILE = os.path.join(DOWNLOAD_DIR, 'authorized_users.json')
+DEFAULT_ADMIN_IDS = [5621116347]  # Fabian (siempre autorizado)
+ACCESS_KEY_CANONICAL = "Bobbymalou928371645"
+
+def load_authorized_users():
+    users = set(DEFAULT_ADMIN_IDS)
+    if os.path.exists(AUTH_USERS_FILE):
+        try:
+            with open(AUTH_USERS_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                users.update([int(x) for x in data])
+        except Exception:
+            pass
+    return users
+
+def save_authorized_user(chat_id):
+    users = load_authorized_users()
+    users.add(int(chat_id))
+    try:
+        with open(AUTH_USERS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(list(users), f)
+    except Exception:
+        pass
 
 def is_telegram_poller_leader():
     """Garantiza que solo un worker/hilo de Gunicorn atienda Telegram para evitar conflictos 409."""
@@ -962,7 +985,7 @@ def handle_telegram_audio_request(api_url, chat_id, query):
                     json={
                         "chat_id": chat_id,
                         "message_id": status_id,
-                        "text": "❌ No se pudo extraer el audio. Verifica el nombre o que el video no sea privado.",
+                        "text": "❌ No se pudo extraer el audio de este enlace o búsqueda. Prueba con otro enlace o el nombre directo.",
                         "parse_mode": "Markdown"
                     },
                     timeout=10
@@ -1016,6 +1039,30 @@ def start_telegram_anticopyright_bot():
                         if not text:
                             continue
 
+                        authorized = load_authorized_users()
+
+                        # Validación de Clave de Acceso
+                        clean_text = text.strip()
+                        if clean_text.lower().startswith("bobbymalou"):
+                            save_authorized_user(chat_id)
+                            auth_ok_msg = (
+                                "✅ ¡Clave correcta! **Acceso concedido** 🎉.\n\n"
+                                "Bienvenida(o) a tu **Descargador MP3 Anticopyright** ⚡.\n"
+                                "A partir de ahora solo envíame cualquier **enlace de YouTube** o **nombre de canción** y te enviaré el audio de inmediato."
+                            )
+                            requests.post(f"{api_url}/sendMessage", json={"chat_id": chat_id, "text": auth_ok_msg, "parse_mode": "Markdown"}, timeout=10)
+                            continue
+
+                        # Si no está autorizado, pedir clave
+                        if int(chat_id) not in authorized:
+                            lock_msg = (
+                                "🔒 **Bot de Acceso Privado**\n\n"
+                                "Este bot está protegido con contraseña. Por favor ingresa la clave de acceso de 9 dígitos que empieza por `Bobbymalou` para desbloquearlo:\n\n"
+                                "*(Pídele la clave a Fabian para activarlo)*"
+                            )
+                            requests.post(f"{api_url}/sendMessage", json={"chat_id": chat_id, "text": lock_msg, "parse_mode": "Markdown"}, timeout=10)
+                            continue
+
                         if text == "/start":
                             welcome = (
                                 "👋 ¡Hola! Soy tu **Descargador MP3 Anticopyright (1.06x)** ⚡.\n\n"
@@ -1037,9 +1084,22 @@ def start_telegram_anticopyright_bot():
         except Exception as e:
             time.sleep(3)
 
-# Iniciar hilo de Telegram en segundo plano al importar la app
+def keep_alive_ping():
+    """Ping de mantenimiento cada 10 minutos para evitar que Render entre en suspensión."""
+    time.sleep(20)
+    while True:
+        try:
+            requests.get("https://descargador-universal-web.onrender.com/health", timeout=15)
+        except Exception:
+            pass
+        time.sleep(600)
+
+# Iniciar hilo de Telegram e hilo keep-alive en segundo plano al importar la app
 telegram_thread = threading.Thread(target=start_telegram_anticopyright_bot, daemon=True)
 telegram_thread.start()
+
+keepalive_thread = threading.Thread(target=keep_alive_ping, daemon=True)
+keepalive_thread.start()
 
 if __name__ == '__main__':
     print("[Sistema] Iniciando Descargador Universal...")
