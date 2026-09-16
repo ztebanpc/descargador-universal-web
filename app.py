@@ -59,9 +59,17 @@ def sanitize_filename(name):
 # 🎵 AUDIO DOWNLOADER BLINDADO (BYPASS 403 & SABR)
 # ==========================================
 def process_audio_download(query, quality="192", format_type="mp3", speed="1.0", count=1, target_folder=AUDIO_DIR):
+    last_error = "Desconocido"
     try:
         cnt = int(count) if (str(count).isdigit() and int(count) > 0) else 1
-        print(f"[Audio] Buscando {cnt} audios para: {query} | Calidad: {quality}kbps | Formato: {format_type} | Velocidad: {speed}x")
+        clean_q = query.strip()
+        if clean_q.startswith('http'):
+            clean_q = re.sub(r'[?&]si=[^&]+', '', clean_q).rstrip('?&')
+            search_query = clean_q
+        else:
+            search_query = f"ytsearch{cnt}:{clean_q}"
+
+        print(f"[Audio] Buscando {cnt} audios para: {clean_q} | Calidad: {quality}kbps | Formato: {format_type} | Velocidad: {speed}x")
         
         postprocessors = [{
             'key': 'FFmpegExtractAudio',
@@ -83,9 +91,9 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
         filename_base = f"audio_{batch_id}_{random.randint(1000,9999)}"
         out_template = os.path.join(target_folder, f"{filename_base}_%(id)s.%(ext)s") if cnt > 1 else os.path.join(target_folder, f"{filename_base}.%(ext)s")
         
-        # Formatos 140 / m4a / 18 evitan al 100% los bloqueos 403 de YouTube
+        # Formato 18/b/ba/best es 100% compatible con cliente android y extrae MP3 con FFmpeg
         ydl_opts = {
-            'format': '140/ba[ext=m4a]/18/bestaudio/best',
+            'format': '18/b/ba/best',
             'postprocessors': postprocessors,
             'extractor_args': {
                 'youtube': {
@@ -97,40 +105,32 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
             'quiet': True,
             'no_warnings': True,
             'max_downloads': cnt,
-            'socket_timeout': 15,
+            'socket_timeout': 30,
         }
         if postprocessor_args:
             ydl_opts['postprocessor_args'] = {'ffmpeg': postprocessor_args}
             
-        search_query = query if query.startswith('http') else f"ytsearch{cnt}:{query}"
-            
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            try:
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([search_query])
-            except yt_dlp.utils.MaxDownloadsReached:
-                pass
-            except Exception as e:
-                print(f"[Audio] Reintentando con cliente alternativo: {e}")
-                # Fallback alternativo si el primer intento dio error
-                ydl_opts['format'] = 'bestaudio/best'
-                ydl_opts['extractor_args'] = {'youtube': {'player_client': ['mweb', 'tv', 'android']}}
-                try:
-                    with yt_dlp.YoutubeDL(ydl_opts) as ydl2:
-                        ydl2.download([search_query])
-                except Exception:
-                    pass
+        except yt_dlp.utils.MaxDownloadsReached:
+            pass
+        except Exception as e:
+            last_error = str(e)
+            print(f"[Audio] Reintento con cliente android_creator: {e}")
+            ydl_opts['extractor_args'] = {'youtube': {'player_client': ['android_creator', 'android']}}
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl2:
+                    ydl2.download([search_query])
+            except Exception as e2:
+                last_error = str(e2)
+                print(f"[Audio] Segundo intento falló: {e2}")
                 
         saved_files = []
         for f in os.listdir(target_folder):
-            if f.startswith(filename_base) and f.endswith(('.mp3', '.m4a', '.wav', '.flac')):
+            if f.endswith(('.mp3', '.m4a', '.wav', '.flac')):
                 saved_files.append(f)
                 
-        if not saved_files:
-            files = [f for f in os.listdir(target_folder) if f.endswith(('.mp3', '.m4a', '.wav', '.flac'))]
-            if files:
-                latest = max([os.path.join(target_folder, f) for f in files], key=os.path.getctime)
-                saved_files.append(os.path.basename(latest))
-
         print(f"[Audio] [OK] Completados {len(saved_files)} audios.")
         return saved_files
     except Exception as e:
@@ -1027,7 +1027,11 @@ def start_telegram_anticopyright_bot():
                             requests.post(f"{api_url}/sendMessage", json={"chat_id": chat_id, "text": welcome, "parse_mode": "Markdown"}, timeout=10)
                             continue
 
-                        clean_query = text[7:].strip() if text.startswith("/audio") else text
+                        clean_query = re.sub(r'^/audio\s*', '', text, flags=re.IGNORECASE).strip()
+                        if not clean_query:
+                            requests.post(f"{api_url}/sendMessage", json={"chat_id": chat_id, "text": "🎵 Escribe el nombre de la canción o pega el enlace de YouTube:\nEjemplo: `Bad Bunny Monaco`", "parse_mode": "Markdown"}, timeout=10)
+                            continue
+
                         threading.Thread(target=handle_telegram_audio_request, args=(api_url, chat_id, clean_query), daemon=True).start()
             elif res.status_code == 409:
                 time.sleep(5)
