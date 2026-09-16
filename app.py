@@ -58,18 +58,20 @@ def sanitize_filename(name):
 # ==========================================
 # 🎵 AUDIO DOWNLOADER BLINDADO (BYPASS 403 & SABR)
 # ==========================================
-def process_audio_download(query, quality="192", format_type="mp3", speed="1.0", count=1, target_folder=AUDIO_DIR):
+def process_audio_download(query, quality="192", format_type="mp3", speed="1.0", count=1, target_folder=AUDIO_DIR, is_playlist=False):
     last_error = "Desconocido"
     try:
         cnt = int(count) if (str(count).isdigit() and int(count) > 0) else 1
         clean_q = query.strip()
+        detected_playlist = is_playlist or ("list=" in clean_q) or ("/playlist" in clean_q.lower())
+
         if clean_q.startswith('http'):
             clean_q = re.sub(r'[?&]si=[^&]+', '', clean_q).rstrip('?&')
             search_query = clean_q
         else:
             search_query = f"ytsearch{cnt}:{clean_q}"
 
-        print(f"[Audio] Buscando {cnt} audios para: {clean_q} | Calidad: {quality}kbps | Formato: {format_type} | Velocidad: {speed}x")
+        print(f"[Audio] {'[PLAYLIST]' if detected_playlist else '[SOLO]'} Buscando hasta {cnt} audios para: {clean_q} | Calidad: {quality}kbps | Formato: {format_type} | Velocidad: {speed}x")
         
         postprocessors = [{
             'key': 'FFmpegExtractAudio',
@@ -99,10 +101,12 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
                 }
             },
             'outtmpl': out_template,
-            'noplaylist': True,
+            'noplaylist': not detected_playlist,
+            'playlistend': cnt if detected_playlist else None,
+            'max_downloads': cnt,
+            'ignoreerrors': True,
             'quiet': True,
             'no_warnings': True,
-            'max_downloads': cnt,
             'socket_timeout': 30,
         }
         if postprocessor_args:
@@ -928,12 +932,28 @@ def is_telegram_poller_leader():
 
 def handle_telegram_audio_request(api_url, chat_id, query):
     status_id = None
+    is_playlist = ("list=" in query or "playlist" in query.lower())
+    
+    # Extraer cantidad si el usuario especificó un número (ej: 20, 15, 10)
+    numbers = [int(n) for n in re.findall(r'\b\d+\b', query) if 1 <= int(n) <= 35]
+    target_count = numbers[-1] if (numbers and is_playlist) else (10 if is_playlist else 1)
+    
+    # Limpiar query extrayendo URL o texto
+    url_match = re.search(r'https?://[^\s]+', query)
+    clean_target = url_match.group(0) if url_match else query.strip()
+    
+    status_text = (
+        f"⏳ **Descargando Playlist ({target_count} canciones)** a **1.06x Anticopyright**...\n*(Empaquetando en ZIP automático)*"
+        if is_playlist else
+        f"⏳ **Descargando y aplicando anticopyright (1.06x)**:\n`{clean_target[:60]}`..."
+    )
+    
     try:
         r_stat = requests.post(
             f"{api_url}/sendMessage",
             json={
                 "chat_id": chat_id,
-                "text": f"⏳ **Descargando y aplicando anticopyright (1.06x)**:\n`{query[:60]}`...",
+                "text": status_text,
                 "parse_mode": "Markdown"
             },
             timeout=10
@@ -947,31 +967,69 @@ def handle_telegram_audio_request(api_url, chat_id, query):
     os.makedirs(temp_batch_dir, exist_ok=True)
     try:
         saved_files = process_audio_download(
-            query=query,
+            query=clean_target,
             quality="192",
             format_type="mp3",
             speed="1.06",
-            count=1,
-            target_folder=temp_batch_dir
+            count=target_count,
+            target_folder=temp_batch_dir,
+            is_playlist=is_playlist
         )
 
         if saved_files:
-            file_path = os.path.join(temp_batch_dir, saved_files[0])
-            title_clean = os.path.splitext(saved_files[0])[0]
+            # 1 ÚNICO ARCHIVO -> Envío directo como Audio Nativo (Sin ZIP)
+            if len(saved_files) == 1:
+                file_path = os.path.join(temp_batch_dir, saved_files[0])
+                title_clean = os.path.splitext(saved_files[0])[0]
 
-            with open(file_path, "rb") as audio_fp:
-                requests.post(
-                    f"{api_url}/sendAudio",
-                    data={
-                        "chat_id": chat_id,
-                        "title": title_clean[:80],
-                        "performer": "Anticopyright 1.06x",
-                        "caption": f"🎵 **{title_clean}**\n⚡ Velocidad: **1.06x (Anticopyright)**\n📲 Listo para reproducir o enviar a CapCut",
-                        "parse_mode": "Markdown"
-                    },
-                    files={"audio": (saved_files[0], audio_fp, "audio/mpeg")},
-                    timeout=120
-                )
+                with open(file_path, "rb") as audio_fp:
+                    requests.post(
+                        f"{api_url}/sendAudio",
+                        data={
+                            "chat_id": chat_id,
+                            "title": title_clean[:80],
+                            "performer": "Anticopyright 1.06x",
+                            "caption": f"🎵 **{title_clean}**\n⚡ Velocidad: **1.06x (Anticopyright)**\n📲 Listo para reproducir o enviar a CapCut",
+                            "parse_mode": "Markdown"
+                        },
+                        files={"audio": (saved_files[0], audio_fp, "audio/mpeg")},
+                        timeout=120
+                    )
+            # 2 O MÁS ARCHIVOS -> Inteligencia Smart ZIP Automática
+            else:
+                zip_filename = f"Playlist_{int(time.time())}.zip"
+                zip_path = os.path.join(temp_batch_dir, zip_filename)
+                with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    for f in saved_files:
+                        if f.endswith('.mp3'):
+                            zipf.write(os.path.join(temp_batch_dir, f), f)
+                            
+                zip_size = os.path.getsize(zip_path)
+                if zip_size <= 48 * 1024 * 1024:
+                    with open(zip_path, "rb") as zip_fp:
+                        requests.post(
+                            f"{api_url}/sendDocument",
+                            data={
+                                "chat_id": chat_id,
+                                "caption": f"📦 **Playlist Descargada ({len(saved_files)} canciones)**\n⚡ Velocidad: **1.06x (Anticopyright)**\n📁 Formato: Archivo ZIP listo para descomprimir o CapCut",
+                                "parse_mode": "Markdown"
+                            },
+                            files={"document": (zip_filename, zip_fp, "application/zip")},
+                            timeout=180
+                        )
+                else:
+                    dest_path = os.path.join(ORDENES_DIR, zip_filename)
+                    shutil.copy2(zip_path, dest_path)
+                    dl_url = f"https://descargador-universal-web.onrender.com/api/files/ordenes/{zip_filename}"
+                    requests.post(
+                        f"{api_url}/sendMessage",
+                        json={
+                            "chat_id": chat_id,
+                            "text": f"📦 **Playlist Descargada ({len(saved_files)} canciones a 1.06x)**.\n\n⚠️ El archivo ZIP pesa más de 50MB (límite de Telegram). Descárgalo directo aquí:\n👉 {dl_url}",
+                            "parse_mode": "Markdown"
+                        },
+                        timeout=15
+                    )
 
             if status_id:
                 try:
@@ -985,7 +1043,7 @@ def handle_telegram_audio_request(api_url, chat_id, query):
                     json={
                         "chat_id": chat_id,
                         "message_id": status_id,
-                        "text": "❌ No se pudo extraer el audio de este enlace o búsqueda. Prueba con otro enlace o el nombre directo.",
+                        "text": "❌ No se pudo descargar la playlist o audio. Verifica que el enlace sea público.",
                         "parse_mode": "Markdown"
                     },
                     timeout=10
@@ -999,7 +1057,7 @@ def handle_telegram_audio_request(api_url, chat_id, query):
                     json={
                         "chat_id": chat_id,
                         "message_id": status_id,
-                        "text": f"❌ Error al procesar audio: {str(e)[:100]}"
+                        "text": f"❌ Error al procesar: {str(e)[:100]}"
                     },
                     timeout=10
                 )
