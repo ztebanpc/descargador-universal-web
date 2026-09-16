@@ -87,9 +87,7 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
             except ValueError:
                 pass
                 
-        batch_id = int(time.time())
-        filename_base = f"audio_{batch_id}_{random.randint(1000,9999)}"
-        out_template = os.path.join(target_folder, f"{filename_base}_%(id)s.%(ext)s") if cnt > 1 else os.path.join(target_folder, f"{filename_base}.%(ext)s")
+        out_template = os.path.join(target_folder, "%(title).80s.%(ext)s")
         
         # Formato 18/b/ba/best es 100% compatible con cliente android y extrae MP3 con FFmpeg
         ydl_opts = {
@@ -936,20 +934,19 @@ def handle_telegram_audio_request(api_url, chat_id, query):
 
         if saved_files:
             file_path = os.path.join(temp_batch_dir, saved_files[0])
-            title = os.path.splitext(saved_files[0])[0].replace('_', ' ')
-            title_clean = re.sub(r'^audio_\d+_\d+[\s_-]*', '', title) or title
+            title_clean = os.path.splitext(saved_files[0])[0]
 
             with open(file_path, "rb") as audio_fp:
                 requests.post(
                     f"{api_url}/sendAudio",
                     data={
                         "chat_id": chat_id,
-                        "title": title_clean[:60],
+                        "title": title_clean[:80],
                         "performer": "Anticopyright 1.06x",
-                        "caption": f"🎵 **{title_clean[:60]}**\n⚡ Velocidad: **1.06x (Anticopyright)**\n📲 Listo para reproducir o enviar a CapCut",
+                        "caption": f"🎵 **{title_clean}**\n⚡ Velocidad: **1.06x (Anticopyright)**\n📲 Listo para reproducir o enviar a CapCut",
                         "parse_mode": "Markdown"
                     },
-                    files={"audio": audio_fp},
+                    files={"audio": (saved_files[0], audio_fp, "audio/mpeg")},
                     timeout=120
                 )
 
