@@ -9,6 +9,7 @@ import zipfile
 import threading
 import subprocess
 import random
+import socket
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 if sys.platform == 'win32':
@@ -889,6 +890,155 @@ def serve_file(category, filename):
     }
     target_dir = folder_map.get(category, DOWNLOAD_DIR)
     return send_from_directory(target_dir, filename, as_attachment=True)
+
+# ==========================================
+# 🤖 BOT TELEGRAM AUTOMÁTICO - MP3 ANTICOPYRIGHT (1.06x)
+# ==========================================
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8998942466:AAE9Ff2C3lx--_iJQIGek6yIAdyqAV6_JU0")
+
+def is_telegram_poller_leader():
+    """Garantiza que solo un worker/hilo de Gunicorn atienda Telegram para evitar conflictos 409."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.bind(('127.0.0.1', 10005))
+        return s
+    except OSError:
+        return None
+
+def handle_telegram_audio_request(api_url, chat_id, query):
+    status_id = None
+    try:
+        r_stat = requests.post(
+            f"{api_url}/sendMessage",
+            json={
+                "chat_id": chat_id,
+                "text": f"⏳ **Descargando y aplicando anticopyright (1.06x)**:\n`{query[:60]}`...",
+                "parse_mode": "Markdown"
+            },
+            timeout=10
+        ).json()
+        if r_stat.get("ok"):
+            status_id = r_stat["result"]["message_id"]
+    except Exception:
+        pass
+
+    temp_batch_dir = os.path.join(AUDIO_DIR, f"tg_{int(time.time())}_{random.randint(100,999)}")
+    os.makedirs(temp_batch_dir, exist_ok=True)
+    try:
+        saved_files = process_audio_download(
+            query=query,
+            quality="192",
+            format_type="mp3",
+            speed="1.06",
+            count=1,
+            target_folder=temp_batch_dir
+        )
+
+        if saved_files:
+            file_path = os.path.join(temp_batch_dir, saved_files[0])
+            title = os.path.splitext(saved_files[0])[0].replace('_', ' ')
+            title_clean = re.sub(r'^audio_\d+_\d+[\s_-]*', '', title) or title
+
+            with open(file_path, "rb") as audio_fp:
+                requests.post(
+                    f"{api_url}/sendAudio",
+                    data={
+                        "chat_id": chat_id,
+                        "title": title_clean[:60],
+                        "performer": "Anticopyright 1.06x",
+                        "caption": f"🎵 **{title_clean[:60]}**\n⚡ Velocidad: **1.06x (Anticopyright)**\n📲 Listo para reproducir o enviar a CapCut",
+                        "parse_mode": "Markdown"
+                    },
+                    files={"audio": audio_fp},
+                    timeout=120
+                )
+
+            if status_id:
+                try:
+                    requests.post(f"{api_url}/deleteMessage", json={"chat_id": chat_id, "message_id": status_id}, timeout=5)
+                except Exception:
+                    pass
+        else:
+            if status_id:
+                requests.post(
+                    f"{api_url}/editMessageText",
+                    json={
+                        "chat_id": chat_id,
+                        "message_id": status_id,
+                        "text": "❌ No se pudo extraer el audio. Verifica el nombre o que el video no sea privado.",
+                        "parse_mode": "Markdown"
+                    },
+                    timeout=10
+                )
+    except Exception as e:
+        print(f"[Telegram Bot Error] {e}")
+        if status_id:
+            try:
+                requests.post(
+                    f"{api_url}/editMessageText",
+                    json={
+                        "chat_id": chat_id,
+                        "message_id": status_id,
+                        "text": f"❌ Error al procesar audio: {str(e)[:100]}"
+                    },
+                    timeout=10
+                )
+            except Exception:
+                pass
+    finally:
+        shutil.rmtree(temp_batch_dir, ignore_errors=True)
+
+def start_telegram_anticopyright_bot():
+    leader_socket = is_telegram_poller_leader()
+    if not leader_socket:
+        print("[Telegram Bot] Proceso secundario; el líder ya está atendiendo Telegram.")
+        return
+
+    print("[Telegram Bot] ✅ Worker líder activo. Escuchando Telegram en segundo plano...")
+    api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
+    offset = 0
+
+    try:
+        requests.get(f"{api_url}/deleteWebhook?drop_pending_updates=False", timeout=10)
+    except Exception:
+        pass
+
+    while True:
+        try:
+            res = requests.get(f"{api_url}/getUpdates?offset={offset}&timeout=15", timeout=20)
+            if res.status_code == 200:
+                data = res.json()
+                if data.get("ok"):
+                    for update in data.get("result", []):
+                        offset = update["update_id"] + 1
+                        msg = update.get("message")
+                        if not msg:
+                            continue
+                        chat_id = msg["chat"]["id"]
+                        text = msg.get("text", "").strip()
+                        if not text:
+                            continue
+
+                        if text == "/start":
+                            welcome = (
+                                "👋 ¡Hola! Soy tu **Descargador MP3 Anticopyright (1.06x)** ⚡.\n\n"
+                                "Envíame cualquier **enlace de YouTube** o **nombre de canción** y te la enviaré directamente en MP3 con tono anticopyright lista para CapCut."
+                            )
+                            requests.post(f"{api_url}/sendMessage", json={"chat_id": chat_id, "text": welcome, "parse_mode": "Markdown"}, timeout=10)
+                            continue
+
+                        clean_query = text[7:].strip() if text.startswith("/audio") else text
+                        threading.Thread(target=handle_telegram_audio_request, args=(api_url, chat_id, clean_query), daemon=True).start()
+            elif res.status_code == 409:
+                time.sleep(5)
+            else:
+                time.sleep(2)
+        except Exception as e:
+            time.sleep(3)
+
+# Iniciar hilo de Telegram en segundo plano al importar la app
+telegram_thread = threading.Thread(target=start_telegram_anticopyright_bot, daemon=True)
+telegram_thread.start()
 
 if __name__ == '__main__':
     print("[Sistema] Iniciando Descargador Universal...")
