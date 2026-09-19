@@ -107,13 +107,16 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
         cookie_file = os.path.join(BASE_DIR, 'cookies.txt')
         has_cookies = os.path.exists(cookie_file)
         
-        # Formato 140/ba/18 con clientes multi-dispositivo y cookies para bypass 403 y antirobot
+        # Formato 140/ba/18 con generador local de PO Token (bgutil-pot) y clientes multi-dispositivo
         ydl_opts = {
             'format': '140/ba[ext=m4a]/18/b/bestaudio/best',
             'postprocessors': postprocessors,
             'extractor_args': {
                 'youtube': {
                     'player_client': ['android_vr', 'ios', 'mweb', 'android', 'web'],
+                },
+                'youtubepot-bgutilhttp': {
+                    'base_url': 'http://127.0.0.1:4416'
                 }
             },
             'js_runtimes': {'node': {}},
@@ -139,7 +142,7 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
         except Exception as e:
             last_error = str(e)
             print(f"[Audio] Reintento con cliente alternativo: {e}")
-            ydl_opts['extractor_args'] = {'youtube': {'player_client': ['tv_embedded', 'mweb', 'tv']}}
+            ydl_opts['extractor_args']['youtube'] = {'player_client': ['tv_embedded', 'mweb', 'tv', 'android']}
             try:
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl2:
                     ydl2.download([search_query])
@@ -153,6 +156,23 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
         for f in os.listdir(target_folder):
             if f.endswith(('.mp3', '.m4a', '.wav', '.flac')):
                 saved_files.append(f)
+
+        # Respaldo inteligente si falló en YouTube para búsquedas de canciones por nombre
+        if not saved_files and not detected_playlist and not clean_q.startswith('http'):
+            print(f"[Audio] Respaldo: buscando audio alternativo para: {clean_q}")
+            try:
+                sc_opts = dict(ydl_opts)
+                sc_opts.pop('extractor_args', None)
+                with yt_dlp.YoutubeDL(sc_opts) as ydl_sc:
+                    ydl_sc.download([f"scsearch{cnt}:{clean_q}"])
+            except yt_dlp.utils.MaxDownloadsReached:
+                pass
+            except Exception as sc_err:
+                print(f"[Audio] Intento respaldo SoundCloud: {sc_err}")
+                
+            for f in os.listdir(target_folder):
+                if f.endswith(('.mp3', '.m4a', '.wav', '.flac')) and f not in saved_files:
+                    saved_files.append(f)
                 
         print(f"[Audio] [OK] Completados {len(saved_files)} audios.")
         if return_error:
@@ -734,7 +754,10 @@ def debug_ytdl():
     ydl_opts = {
         'format': fmt,
         'logger': MyLogger(),
-        'extractor_args': {'youtube': {'player_client': client_list}},
+        'extractor_args': {
+            'youtube': {'player_client': client_list},
+            'youtubepot-bgutilhttp': {'base_url': 'http://127.0.0.1:4416'}
+        },
         'js_runtimes': {'node': {}},
         'socket_timeout': 15,
         'noplaylist': True,
@@ -748,8 +771,17 @@ def debug_ytdl():
             ydl.download([q])
     except Exception as e:
         err = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
+
+    pot_info = "desconocido"
+    try:
+        r_pot = requests.get("http://127.0.0.1:4416/ping", timeout=2)
+        pot_info = r_pot.json() if r_pot.status_code == 200 else f"HTTP {r_pot.status_code}"
+    except Exception as pe:
+        pot_info = f"offline ({pe})"
+
     return jsonify({
         "yt_dlp_version": getattr(yt_dlp, '__version__', 'unknown'),
+        "pot_provider": pot_info,
         "error": err,
         "logs": logs[-30:],
         "files_in_audio": os.listdir(AUDIO_DIR)[:10]
@@ -1188,6 +1220,9 @@ def keep_alive_ping():
         except Exception:
             pass
         time.sleep(600)
+
+telegram_thread = threading.Thread(target=start_telegram_anticopyright_bot, daemon=True)
+telegram_thread.start()
 
 keepalive_thread = threading.Thread(target=keep_alive_ping, daemon=True)
 keepalive_thread.start()
