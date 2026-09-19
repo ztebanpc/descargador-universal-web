@@ -10,6 +10,7 @@ import threading
 import subprocess
 import random
 import socket
+import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 if sys.platform == 'win32':
@@ -55,6 +56,18 @@ def sanitize_filename(name):
     clean = re.sub(r'[^\w\-_.]', '_', name)
     return clean[:40].strip('_') or f"proyecto_{int(time.time())}"
 
+def clean_youtube_url(url):
+    """Limpia parámetros de tracking (si, feature, fbclid, etc.) preservando la estructura real de la URL."""
+    try:
+        parsed = urllib.parse.urlparse(url.strip())
+        qs = urllib.parse.parse_qs(parsed.query)
+        for p in ['si', 'feature', 'fbclid', 'utm_source', 'utm_medium', 'utm_campaign', 'pp', 'embeds_referring_euri']:
+            qs.pop(p, None)
+        new_query = urllib.parse.urlencode(qs, doseq=True)
+        return urllib.parse.urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, ''))
+    except Exception:
+        return url.strip()
+
 # ==========================================
 # 🎵 AUDIO DOWNLOADER BLINDADO (BYPASS 403 & SABR)
 # ==========================================
@@ -66,10 +79,10 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
         detected_playlist = is_playlist or ("list=" in clean_q) or ("/playlist" in clean_q.lower())
 
         if clean_q.startswith('http'):
-            clean_q = re.sub(r'[?&]si=[^&]+', '', clean_q).rstrip('?&')
-            search_query = clean_q
+            search_query = clean_youtube_url(clean_q)
         else:
-            search_query = f"ytsearch{cnt}:{clean_q}"
+            # Añadimos 'official audio' para evitar canciones/publicidades rusas o spam aleatorio
+            search_query = f"ytsearch{cnt}:{clean_q} official audio"
 
         print(f"[Audio] {'[PLAYLIST]' if detected_playlist else '[SOLO]'} Buscando hasta {cnt} audios para: {clean_q} | Calidad: {quality}kbps | Formato: {format_type} | Velocidad: {speed}x")
         
@@ -124,6 +137,8 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
             try:
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl2:
                     ydl2.download([search_query])
+            except yt_dlp.utils.MaxDownloadsReached:
+                pass
             except Exception as e2:
                 last_error = str(e2)
                 print(f"[Audio] Segundo intento falló: {e2}")
@@ -894,32 +909,9 @@ def serve_file(category, filename):
     return send_from_directory(target_dir, filename, as_attachment=True)
 
 # ==========================================
-# 🤖 BOT TELEGRAM AUTOMÁTICO - MP3 ANTICOPYRIGHT (1.06x) CON ACCESO PRIVADO
+# 🤖 BOT TELEGRAM PÚBLICO - MP3 ANTICOPYRIGHT (1.06x) & SMART PLAYLIST ZIP
 # ==========================================
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8998942466:AAE9Ff2C3lx--_iJQIGek6yIAdyqAV6_JU0")
-AUTH_USERS_FILE = os.path.join(DOWNLOAD_DIR, 'authorized_users.json')
-DEFAULT_ADMIN_IDS = [5621116347]  # Fabian (siempre autorizado)
-ACCESS_KEY_CANONICAL = "Bobbymalou928371645"
-
-def load_authorized_users():
-    users = set(DEFAULT_ADMIN_IDS)
-    if os.path.exists(AUTH_USERS_FILE):
-        try:
-            with open(AUTH_USERS_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                users.update([int(x) for x in data])
-        except Exception:
-            pass
-    return users
-
-def save_authorized_user(chat_id):
-    users = load_authorized_users()
-    users.add(int(chat_id))
-    try:
-        with open(AUTH_USERS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(list(users), f)
-    except Exception:
-        pass
 
 def is_telegram_poller_leader():
     """Garantiza que solo un worker/hilo de Gunicorn atienda Telegram para evitar conflictos 409."""
@@ -940,7 +932,12 @@ def handle_telegram_audio_request(api_url, chat_id, query):
     
     # Limpiar query extrayendo URL o texto
     url_match = re.search(r'https?://[^\s]+', query)
-    clean_target = url_match.group(0) if url_match else query.strip()
+    if url_match:
+        clean_target = clean_youtube_url(url_match.group(0))
+    else:
+        clean_target = query.strip()
+        if numbers and is_playlist:
+            clean_target = re.sub(rf'\b{target_count}\b', '', clean_target).strip()
     
     status_text = (
         f"⏳ **Descargando Playlist ({target_count} canciones)** a **1.06x Anticopyright**...\n*(Empaquetando en ZIP automático)*"
@@ -1075,6 +1072,7 @@ def start_telegram_anticopyright_bot():
     print("[Telegram Bot] ✅ Worker líder activo. Escuchando Telegram en segundo plano...")
     api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
     offset = 0
+    seen_update_ids = set()
 
     try:
         requests.get(f"{api_url}/deleteWebhook?drop_pending_updates=False", timeout=10)
@@ -1088,7 +1086,15 @@ def start_telegram_anticopyright_bot():
                 data = res.json()
                 if data.get("ok"):
                     for update in data.get("result", []):
-                        offset = update["update_id"] + 1
+                        u_id = update["update_id"]
+                        offset = max(offset, u_id + 1)
+                        if u_id in seen_update_ids:
+                            continue
+                        seen_update_ids.add(u_id)
+                        if len(seen_update_ids) > 1000:
+                            seen_update_ids.clear()
+                            seen_update_ids.add(u_id)
+
                         msg = update.get("message")
                         if not msg:
                             continue
@@ -1097,41 +1103,21 @@ def start_telegram_anticopyright_bot():
                         if not text:
                             continue
 
-                        authorized = load_authorized_users()
-
-                        # Validación de Clave de Acceso
-                        clean_text = text.strip()
-                        if clean_text.lower().startswith("bobbymalou"):
-                            save_authorized_user(chat_id)
-                            auth_ok_msg = (
-                                "✅ ¡Clave correcta! **Acceso concedido** 🎉.\n\n"
-                                "Bienvenida(o) a tu **Descargador MP3 Anticopyright** ⚡.\n"
-                                "A partir de ahora solo envíame cualquier **enlace de YouTube** o **nombre de canción** y te enviaré el audio de inmediato."
-                            )
-                            requests.post(f"{api_url}/sendMessage", json={"chat_id": chat_id, "text": auth_ok_msg, "parse_mode": "Markdown"}, timeout=10)
-                            continue
-
-                        # Si no está autorizado, pedir clave
-                        if int(chat_id) not in authorized:
-                            lock_msg = (
-                                "🔒 **Bot de Acceso Privado**\n\n"
-                                "Este bot está protegido con contraseña. Por favor ingresa la clave de acceso de 9 dígitos que empieza por `Bobbymalou` para desbloquearlo:\n\n"
-                                "*(Pídele la clave a Fabian para activarlo)*"
-                            )
-                            requests.post(f"{api_url}/sendMessage", json={"chat_id": chat_id, "text": lock_msg, "parse_mode": "Markdown"}, timeout=10)
-                            continue
-
                         if text == "/start":
                             welcome = (
                                 "👋 ¡Hola! Soy tu **Descargador MP3 Anticopyright (1.06x)** ⚡.\n\n"
-                                "Envíame cualquier **enlace de YouTube** o **nombre de canción** y te la enviaré directamente en MP3 con tono anticopyright lista para CapCut."
+                                "🎶 **¿Cómo funciona?**\n"
+                                "1️⃣ Envíame el **nombre de una canción** (ej: `Monaco Bad Bunny`) o un **enlace de YouTube**.\n"
+                                "2️⃣ Si envías una **Playlist** de YouTube, te descargaré las canciones y te las enviaré en un archivo **ZIP** listo.\n"
+                                "3️⃣ Puedes indicar la cantidad para tu playlist, ej: `enlace 20` para 20 canciones.\n\n"
+                                "✨ ¡Todos los audios vienen con el tono y velocidad 1.06x anticopyright listos para CapCut!"
                             )
                             requests.post(f"{api_url}/sendMessage", json={"chat_id": chat_id, "text": welcome, "parse_mode": "Markdown"}, timeout=10)
                             continue
 
                         clean_query = re.sub(r'^/audio\s*', '', text, flags=re.IGNORECASE).strip()
                         if not clean_query:
-                            requests.post(f"{api_url}/sendMessage", json={"chat_id": chat_id, "text": "🎵 Escribe el nombre de la canción o pega el enlace de YouTube:\nEjemplo: `Bad Bunny Monaco`", "parse_mode": "Markdown"}, timeout=10)
+                            requests.post(f"{api_url}/sendMessage", json={"chat_id": chat_id, "text": "🎵 Escribe el nombre de la canción o pega el enlace de YouTube:\nEjemplo: `Bad Bunny Monaco` o un enlace de Playlist", "parse_mode": "Markdown"}, timeout=10)
                             continue
 
                         threading.Thread(target=handle_telegram_audio_request, args=(api_url, chat_id, clean_query), daemon=True).start()
