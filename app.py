@@ -1183,12 +1183,6 @@ def keep_alive_ping():
             pass
         time.sleep(600)
 
-# Iniciar hilo de Telegram sólo si se define explícitamente ENABLE_TELEGRAM_BOT=true
-# Esto previene que Render (bloqueado por YouTube con captcha de datacenter) atienda Telegram
-if os.environ.get("ENABLE_TELEGRAM_BOT") == "true":
-    telegram_thread = threading.Thread(target=start_telegram_anticopyright_bot, daemon=True)
-    telegram_thread.start()
-
 keepalive_thread = threading.Thread(target=keep_alive_ping, daemon=True)
 keepalive_thread.start()
 
