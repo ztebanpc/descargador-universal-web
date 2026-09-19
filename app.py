@@ -71,7 +71,7 @@ def clean_youtube_url(url):
 # ==========================================
 # 🎵 AUDIO DOWNLOADER BLINDADO (BYPASS 403 & SABR)
 # ==========================================
-def process_audio_download(query, quality="192", format_type="mp3", speed="1.0", count=1, target_folder=AUDIO_DIR, is_playlist=False):
+def process_audio_download(query, quality="192", format_type="mp3", speed="1.0", count=1, target_folder=AUDIO_DIR, is_playlist=False, return_error=False):
     last_error = "Desconocido"
     try:
         cnt = int(count) if (str(count).isdigit() and int(count) > 0) else 1
@@ -155,9 +155,13 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
                 saved_files.append(f)
                 
         print(f"[Audio] [OK] Completados {len(saved_files)} audios.")
+        if return_error:
+            return saved_files, last_error
         return saved_files
     except Exception as e:
         print(f"[Audio] [ERROR] Error en descarga de audio: {e}")
+        if return_error:
+            return [], str(e)
         return []
 
 # ==========================================
@@ -1008,14 +1012,15 @@ def handle_telegram_audio_request(api_url, chat_id, query):
     temp_batch_dir = os.path.join(AUDIO_DIR, f"tg_{int(time.time())}_{random.randint(100,999)}")
     os.makedirs(temp_batch_dir, exist_ok=True)
     try:
-        saved_files = process_audio_download(
+        saved_files, last_error = process_audio_download(
             query=clean_target,
             quality="192",
             format_type="mp3",
             speed="1.06",
             count=target_count,
             target_folder=temp_batch_dir,
-            is_playlist=is_playlist
+            is_playlist=is_playlist,
+            return_error=True
         )
 
         if saved_files:
@@ -1080,12 +1085,13 @@ def handle_telegram_audio_request(api_url, chat_id, query):
                     pass
         else:
             if status_id:
+                err_detail = f"\n\n🔍 *Detalle técnico:* `{last_error[:120]}`" if (last_error and last_error != "Desconocido") else ""
                 requests.post(
                     f"{api_url}/editMessageText",
                     json={
                         "chat_id": chat_id,
                         "message_id": status_id,
-                        "text": "❌ No se pudo descargar la playlist o audio. Verifica que el enlace sea público.",
+                        "text": f"❌ No se pudo descargar la playlist o audio. Verifica que el enlace sea público o intenta buscando por nombre.{err_detail}",
                         "parse_mode": "Markdown"
                     },
                     timeout=10
