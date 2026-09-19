@@ -706,6 +706,39 @@ def index():
 def health():
     return jsonify({"status": "ok", "service": "descargador-universal-web"}), 200
 
+@app.route('/api/debug_ytdl')
+def debug_ytdl():
+    import traceback
+    q = request.args.get('q', 'https://www.youtube.com/watch?v=PacY9EuR-xQ')
+    client = request.args.get('client', 'android')
+    fmt = request.args.get('format', '18/b/ba/best')
+    logs = []
+    class MyLogger:
+        def debug(self, msg): logs.append(f"DEBUG: {msg}")
+        def warning(self, msg): logs.append(f"WARN: {msg}")
+        def error(self, msg): logs.append(f"ERR: {msg}")
+    
+    ydl_opts = {
+        'format': fmt,
+        'logger': MyLogger(),
+        'extractor_args': {'youtube': {'player_client': [client] if client else ['android']}},
+        'socket_timeout': 15,
+        'noplaylist': True,
+        'max_downloads': 1
+    }
+    err = None
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([q])
+    except Exception as e:
+        err = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
+    return jsonify({
+        "yt_dlp_version": getattr(yt_dlp, '__version__', 'unknown'),
+        "error": err,
+        "logs": logs[-30:],
+        "files_in_audio": os.listdir(AUDIO_DIR)[:10]
+    })
+
 @app.route('/api/download_audio', methods=['POST'])
 def download_audio():
     data = request.get_json(silent=True) or request.form
