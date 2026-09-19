@@ -104,15 +104,19 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
                 
         out_template = os.path.join(target_folder, "%(title).80s.%(ext)s")
         
-        # Formato 18/b/ba/best es 100% compatible con cliente android y extrae MP3 con FFmpeg
+        cookie_file = os.path.join(BASE_DIR, 'cookies.txt')
+        has_cookies = os.path.exists(cookie_file)
+        
+        # Formato 140/ba/18 con clientes multi-dispositivo y cookies para bypass 403 y antirobot
         ydl_opts = {
-            'format': '18/b/ba/best',
+            'format': '140/ba[ext=m4a]/18/b/bestaudio/best',
             'postprocessors': postprocessors,
             'extractor_args': {
                 'youtube': {
-                    'player_client': ['android'],
+                    'player_client': ['android_vr', 'ios', 'mweb', 'android', 'web'],
                 }
             },
+            'js_runtimes': {'node': {}},
             'outtmpl': out_template,
             'noplaylist': not detected_playlist,
             'playlistend': cnt if detected_playlist else None,
@@ -122,6 +126,8 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
             'no_warnings': True,
             'socket_timeout': 30,
         }
+        if has_cookies:
+            ydl_opts['cookiefile'] = cookie_file
         if postprocessor_args:
             ydl_opts['postprocessor_args'] = {'ffmpeg': postprocessor_args}
             
@@ -132,8 +138,8 @@ def process_audio_download(query, quality="192", format_type="mp3", speed="1.0",
             pass
         except Exception as e:
             last_error = str(e)
-            print(f"[Audio] Reintento con cliente android_creator: {e}")
-            ydl_opts['extractor_args'] = {'youtube': {'player_client': ['android_creator', 'android']}}
+            print(f"[Audio] Reintento con cliente alternativo: {e}")
+            ydl_opts['extractor_args'] = {'youtube': {'player_client': ['tv_embedded', 'mweb', 'tv']}}
             try:
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl2:
                     ydl2.download([search_query])
@@ -718,14 +724,20 @@ def debug_ytdl():
         def warning(self, msg): logs.append(f"WARN: {msg}")
         def error(self, msg): logs.append(f"ERR: {msg}")
     
+    cookie_file = os.path.join(BASE_DIR, 'cookies.txt')
+    has_cookies = os.path.exists(cookie_file)
+    client_list = [c.strip() for c in client.split(',') if c.strip()] if client else ['android_vr', 'ios', 'mweb']
     ydl_opts = {
         'format': fmt,
         'logger': MyLogger(),
-        'extractor_args': {'youtube': {'player_client': [client] if client else ['android']}},
+        'extractor_args': {'youtube': {'player_client': client_list}},
+        'js_runtimes': {'node': {}},
         'socket_timeout': 15,
         'noplaylist': True,
         'max_downloads': 1
     }
+    if has_cookies:
+        ydl_opts['cookiefile'] = cookie_file
     err = None
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
